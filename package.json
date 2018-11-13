@@ -11,7 +11,7 @@
     "styled-components": "^3.4.9"
   },
   "devDependencies": {
-    "@aragon/cli": "^5.0.0",
+    "@aragon/cli": "^5.2.0",
     "@babel/core": "^7.1.2",
     "@babel/plugin-proposal-class-properties": "^7.1.0",
     "@babel/polyfill": "^7.0.0",
