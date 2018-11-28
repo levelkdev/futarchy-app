@@ -1,3 +1,5 @@
+import '@babel/polyfill'
+
 import React from 'react'
 import ReactDOM from 'react-dom'
 import Aragon, { providers } from '@aragon/client'
@@ -11,10 +13,21 @@ class ConnectedApp extends React.Component {
   }
   componentDidMount() {
     window.addEventListener('message', this.handleWrapperMessage)
+
+    // If using Parcel, reload instead of using HMR.
+    // HMR makes the app disconnect from the wrapper and the state is empty until a reload
+    // See: https://github.com/parcel-bundler/parcel/issues/289
+    if (module.hot) {
+      module.hot.dispose(() => {
+        window.location.reload();
+      })
+    }
   }
   componentWillUnmount() {
     window.removeEventListener('message', this.handleWrapperMessage)
   }
+  // handshake between Aragon Core and the iframe,
+  // since iframes can lose messages that were sent before they were ready
   handleWrapperMessage = ({ data }) => {
     if (data.from !== 'wrapper') {
       return
@@ -39,5 +52,7 @@ class ConnectedApp extends React.Component {
     return <App {...this.state} />
   }
 }
-
-ReactDOM.render(<ConnectedApp />, document.getElementById('root'))
+ReactDOM.render(
+  <ConnectedApp />,
+  document.getElementById('root')
+)

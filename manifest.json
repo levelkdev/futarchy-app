@@ -1,6 +1,6 @@
 {
   "name": "Futarchy",
-  "description": "Create votes that execute actions on behalf of token holders.",
+  "description": "Create futarchy markets to inform DAO decisions.",
   "icons": [{
     "src": "images/icon.svg",
     "sizes": "192x192"
