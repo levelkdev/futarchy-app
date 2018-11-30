@@ -7,7 +7,7 @@ contract StubFutarchyApp is AragonApp {
     using SafeMath for uint256;
     
     /// Events
-    event DecisionCreated(uint256 id, address creator);
+    event DecisionCreated(uint256 id, string metadata, address creator);
 
     /// State
     Decision[] public decisions;
@@ -17,6 +17,7 @@ contract StubFutarchyApp is AragonApp {
     bytes32 constant public CREATE_DECISIONS_ROLE = keccak256("CREATE_DECISIONS_ROLE");
 
     struct Decision {
+        string metadata;
         address creator;
     }
 
@@ -25,19 +26,20 @@ contract StubFutarchyApp is AragonApp {
         public
     {
         initialized();
-        decisions.push(Decision(0x0));
+        decisions.push(Decision("", 0x0));
     }
 
     /**
      * @notice Create a new decision
+     * @param _metadata Metadata for the decision
      */
-    function newDecision()
+    function newDecision(string _metadata)
         auth(CREATE_DECISIONS_ROLE)
         external
     {
         decisionCount = decisionCount.add(1);
-        decisions.push(Decision(msg.sender));
-        emit DecisionCreated(decisionCount, msg.sender);
+        decisions.push(Decision(_metadata, msg.sender));
+        emit DecisionCreated(decisionCount, _metadata, msg.sender);
     }
 
 }

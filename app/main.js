@@ -2,8 +2,14 @@ import '@babel/polyfill'
 
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { createStore } from 'redux'
+import { Provider } from 'react-redux'
 import Aragon, { providers } from '@aragon/client'
+import rootReducer from './reducers'
+import { updateAppEvents } from './actions'
 import App from './App'
+
+const store = createStore(rootReducer)
 
 class ConnectedApp extends React.Component {
   state = {
@@ -34,11 +40,15 @@ class ConnectedApp extends React.Component {
     }
     if (data.name === 'ready') {
       const { app } = this.state
+
       this.sendMessageToWrapper('ready', true)
-      this.setState({
-        observable: app.state(),
+
+      app.state().subscribe(stateData => {
+        store.dispatch(updateAppEvents(stateData.events))
       })
+
       app.accounts().subscribe(accounts => {
+        // TODO: dispatch redux action here instead of setState
         this.setState({
           userAccount: accounts[0],
         })
@@ -49,7 +59,11 @@ class ConnectedApp extends React.Component {
     window.parent.postMessage({ from: 'app', name, value }, '*')
   }
   render() {
-    return <App {...this.state} />
+    return (
+      <Provider store={store}>
+        <App {...this.state} />
+      </Provider>
+    )
   }
 }
 ReactDOM.render(
