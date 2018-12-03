@@ -2,14 +2,18 @@ import '@babel/polyfill'
 
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { createStore } from 'redux'
+import { createStore, applyMiddleware } from 'redux'
+import thunk from 'redux-thunk'
 import { Provider } from 'react-redux'
 import Aragon, { providers } from '@aragon/client'
+import { aragonReduxMiddleware, subscribeToAppState } from './aragonRedux/aragonRedux'
 import rootReducer from './reducers'
-import { updateAppEvents } from './actions'
 import App from './App'
 
-const store = createStore(rootReducer)
+const store = createStore(
+  rootReducer,
+  applyMiddleware(thunk, aragonReduxMiddleware)
+)
 
 class ConnectedApp extends React.Component {
   state = {
@@ -43,9 +47,7 @@ class ConnectedApp extends React.Component {
 
       this.sendMessageToWrapper('ready', true)
 
-      app.state().subscribe(stateData => {
-        store.dispatch(updateAppEvents(stateData.events))
-      })
+      store.dispatch(subscribeToAppState(app))
 
       app.accounts().subscribe(accounts => {
         // TODO: dispatch redux action here instead of setState

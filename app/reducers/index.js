@@ -1,6 +1,8 @@
 import { combineReducers } from 'redux'
+import { appEvents } from '../aragonRedux/aragonRedux'
 import decisionMarkets from './decisionMarkets'
 
 export default combineReducers({
-  decisionMarkets: decisionMarkets
+  appEvents,
+  decisionMarkets
 })
