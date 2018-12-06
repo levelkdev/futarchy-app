@@ -29,7 +29,7 @@ export const updateAppEvents = (events) => ({
   events
 })
 
-export const subscribeToAppState = app => (dispatch, getState) => {
+export const subscribeToAppState = app => dispatch => {
   return new Promise(resolve => {
     app.state().subscribe(stateData => {
       if (stateData && stateData.events) {

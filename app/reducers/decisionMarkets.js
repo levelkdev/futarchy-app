@@ -2,7 +2,7 @@ import _ from 'lodash'
 
 const decisionMarkets = (state = [], action) => {
   switch (action.type) {
-    case 'SEND_CREATE_DECISION_MARKET':
+    case 'CREATE_DECISION':
       return [
         ...state,
         {

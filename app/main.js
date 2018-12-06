@@ -5,19 +5,24 @@ import ReactDOM from 'react-dom'
 import { createStore, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
 import { Provider } from 'react-redux'
-import Aragon, { providers } from '@aragon/client'
+import aragonClient from './aragonClient'
 import { aragonReduxMiddleware, subscribeToAppState } from './aragonRedux/aragonRedux'
 import rootReducer from './reducers'
+import clientTransactions from './middleware/clientTransactions'
 import App from './App'
 
 const store = createStore(
   rootReducer,
-  applyMiddleware(thunk, aragonReduxMiddleware)
+  applyMiddleware(
+    thunk,
+    aragonReduxMiddleware,
+    clientTransactions
+  )
 )
 
 class ConnectedApp extends React.Component {
   state = {
-    app: new Aragon(new providers.WindowMessage(window.parent)),
+    app: aragonClient,
     observable: null,
     userAccount: '',
   }
