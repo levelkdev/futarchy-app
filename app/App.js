@@ -1,32 +1,28 @@
 import React from 'react'
-import {
-  AragonApp,
-  Text,
-  observe
-} from '@aragon/ui'
+import { AragonApp } from '@aragon/ui'
 import styled from 'styled-components'
-import ActiveDecisionMarketList from './containers/ActiveDecisionMarketList'
+import { HashRouter as Router, Route } from 'react-router-dom'
 import SidePanelDisplayContainer from './containers/SidePanelDisplayContainer'
-import EmptyState from './views/EmptyState'
+import AppHeader from './components/AppHeader'
+import Home from './views/Home'
+import DecisionDetail from './views/DecisionDetail'
 
-const AppContainer = styled(AragonApp)`
+const App = () => (
+  <Router>
+    <div>
+      <AppHeader />
+      <AppInner>
+        <Route path="/" exact component={Home} />
+        <Route path="/decision/:decisionId" component={DecisionDetail} />
+        <SidePanelDisplayContainer />
+      </AppInner>
+    </div>
+  </Router>
+)
+
+const AppInner = styled(AragonApp)`
   display: flex;
-  align-items: center;
-  justify-content: center;
+  padding 20px;
 `
 
-export default class App extends React.Component {
-  render () {
-    return (
-      <AppContainer>
-        <div>
-          <ActiveDecisionMarketList />
-          <br /> <br />
-          
-          <EmptyState />
-          <SidePanelDisplayContainer />
-        </div>
-      </AppContainer>
-    )
-  }
-}
+export default App

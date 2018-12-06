@@ -1,7 +1,7 @@
 import React from 'react'
 import ShowPanelButtonContainer from '../containers/ShowPanelButtonContainer'
 
-const EmptyState = () => (
+const DecisionListEmptyState = () => (
   <div>
     Nothing here yet...
     <br /> <br />
@@ -12,4 +12,4 @@ const EmptyState = () => (
   </div>
 )
 
-export default EmptyState
+export default DecisionListEmptyState
