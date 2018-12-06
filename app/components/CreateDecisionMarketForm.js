@@ -4,7 +4,7 @@ import { Button } from '@aragon/ui'
 
 const createReduxForm = reduxForm({ form: 'createDecisionMarket' })
 
-const CreateDecisionMarket = createReduxForm(({ handleSubmit, createDecision }) => (
+const CreateDecisionMarketForm = createReduxForm(({ handleSubmit, createDecision }) => (
   <form onSubmit={handleSubmit(createDecision)}>
     <div>
       <label htmlFor="queston">Question:</label>
@@ -16,4 +16,4 @@ const CreateDecisionMarket = createReduxForm(({ handleSubmit, createDecision }) 
   </form>
 ))
 
-export default CreateDecisionMarket
+export default CreateDecisionMarketForm
