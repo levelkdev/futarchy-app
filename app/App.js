@@ -6,7 +6,8 @@ import {
 } from '@aragon/ui'
 import styled from 'styled-components'
 import ActiveDecisionMarketList from './containers/ActiveDecisionMarketList'
-import CreateDecisionMarket from './containers/CreateDecisionMarket'
+import SidePanelDisplayContainer from './containers/SidePanelDisplayContainer'
+import EmptyState from './views/EmptyState'
 
 const AppContainer = styled(AragonApp)`
   display: flex;
@@ -20,7 +21,10 @@ export default class App extends React.Component {
       <AppContainer>
         <div>
           <ActiveDecisionMarketList />
-          <CreateDecisionMarket app={this.props.app} />
+          <br /> <br />
+          
+          <EmptyState />
+          <SidePanelDisplayContainer />
         </div>
       </AppContainer>
     )
