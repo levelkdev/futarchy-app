@@ -11,12 +11,15 @@ const decisionMarkets = (state = [], action) => {
           question: action.question
         }
       ]
-    case 'UPDATE_APP_EVENTS':
-      return _.filter(action.events, { event: 'DecisionCreated' }).map(event => ({
-        pending: false,
-        id: event.returnValues.id,
-        question: event.returnValues.metadata
-      }))
+    case 'DECISION_CREATED':
+      return [
+        ..._.filter(state, event => !event.pending),
+        {
+          pending: false,
+          id: action.returnValues.id,
+          question: action.returnValues.metadata
+        }
+      ]
     default:
       return state
   }
