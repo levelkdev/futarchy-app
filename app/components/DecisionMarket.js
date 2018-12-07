@@ -7,7 +7,7 @@ const DecisionMarket = ({ pending, id, question }) => (
         <div>Transaction pending...</div> :
         <div>ID: {id}</div>
     }
-    <div>QUESTION: {question}</div>
+    <div>{question}</div>
     <br /><br />
   </div>
 )
