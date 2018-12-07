@@ -3,14 +3,14 @@ import { AragonApp } from '@aragon/ui'
 import styled from 'styled-components'
 import { HashRouter as Router, Route } from 'react-router-dom'
 import SidePanelDisplayContainer from './containers/SidePanelDisplayContainer'
-import AppHeader from './components/AppHeader'
+import AppHeaderContainer from './containers/AppHeaderContainer'
 import Home from './views/Home'
 import DecisionDetail from './views/DecisionDetail'
 
 const App = () => (
   <Router>
     <div>
-      <AppHeader />
+      <AppHeaderContainer />
       <AppInner>
         <Route path="/" exact component={Home} />
         <Route path="/decision/:decisionId" component={DecisionDetail} />
