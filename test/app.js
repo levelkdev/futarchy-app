@@ -1,3 +1,9 @@
+// AragonOS setup contracts
+const DAOFactory = artifacts.require('DAOFactory')
+const EVMScriptRegistryFactory = artifacts.require('EVMScriptRegistryFactory')
+const ACL = artifacts.require('ACL')
+const Kernel = artifacts.require('Kernel')
+
 // gnosis-pm prediction market contracts
 const EventFactory = artifacts.require('EventFactory')
 const CategoricalEvent = artifacts.require('CategoricalEvent')
@@ -18,14 +24,26 @@ const FutarchyOracleFactory = artifacts.require('FutarchyOracleFactory.sol')
 // aragon contracts
 const Futarchy = artifacts.require('Futarchy.sol')
 
+const getContract = name => artifacts.require(name)
 const ANY_ADDR = '0xffffffffffffffffffffffffffffffffffffffff'
 const NULL_ADDRESS = '0x00'
 
 contract('Futarchy', (accounts) => {
+  let APP_MANAGER_ROLE
+  let futarchyBase, daoFact
   let centralizedOracleFactory
   let futarchy, fee, tradingPeriod, token, priceResolutionOracle, futarchyOracleFactory, lmsrMarketMaker
 
+  const root = accounts[0]
+
   before(async () => {
+    const kernelBase = await getContract('Kernel').new(true) // petrify immediately
+    const aclBase = await getContract('ACL').new()
+    const regFact = await EVMScriptRegistryFactory.new()
+    daoFactory = await DAOFactory.new(kernelBase.address, aclBase.address, regFact.address)
+    futarchyBase = await Futarchy.new()
+    APP_MANAGER_ROLE = await kernelBase.APP_MANAGER_ROLE()
+
     const centralizedOracleMaster = await CentralizedOracle.new()
     const fixed192x64Math = await Fixed192x64Math.new()
     await LMSRMarketMaker.link('Fixed192x64Math', fixed192x64Math.address)
@@ -35,10 +53,19 @@ contract('Futarchy', (accounts) => {
     futarchyOracleFactory = await deployFutarchyMasterCopies()
   })
 
+  beforeEach(async () => {
+    const r = await daoFactory.newDAO(root)
+    const dao = await Kernel.at(r.logs.filter(l => l.event == 'DeployDAO')[0].args.dao)
+    const acl = ACL.at(await dao.acl())
+    await acl.createPermission(root, dao.address, APP_MANAGER_ROLE, root, { from: root })
+    const receipt = await dao.newAppInstance('0x1234', futarchyBase.address)
+    futarchy = Futarchy.at(receipt.logs.filter(l => l.event == 'NewAppProxy')[0].args.proxy)
+})
+
+
   describe('testing 123 describe block', async () => {
     beforeEach(async () => {
       token = await MiniMeToken.new(NULL_ADDRESS, NULL_ADDRESS, 0, 'n', 0, 'n', true)
-      futarchy = await Futarchy.new()
       const { logs } = await centralizedOracleFactory.createCentralizedOracle("QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz")
       priceResolutionOracle = await CentralizedOracle.at(logs[0].args.centralizedOracle)
       await futarchy.initialize(
@@ -51,7 +78,7 @@ contract('Futarchy', (accounts) => {
       )
     })
 
-    it('should be tested', async () => {
+    it.only('should be tested', async () => {
       await futarchy.newDecision("QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz", 'give all dogs voting rights')
       expect((await futarchy.decisions(0))[4]).to.equal('give all dogs voting rights')
     })
