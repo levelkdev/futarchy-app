@@ -15,6 +15,8 @@ contract Futarchy is AragonApp {
 
   FutarchyOracleFactory public futarchyOracleFactory;
   MiniMeToken public token;
+  Oracle priceResolutionOracle;
+  LMSRMarketMaker lmsrMarketMaker;
   uint24 fee;
   uint tradingPeriod;
 
@@ -42,7 +44,9 @@ contract Futarchy is AragonApp {
       uint24 _fee,
       uint _tradingPeriod,
       MiniMeToken _token,
-      FutarchyOracleFactory _futarchyOracleFactory
+      FutarchyOracleFactory _futarchyOracleFactory,
+      Oracle _priceResolutionOracle,
+      LMSRMarketMaker _lmsrMarketMaker
     )
       external
     {
@@ -50,12 +54,12 @@ contract Futarchy is AragonApp {
       tradingPeriod = _tradingPeriod;
       token = _token;
       futarchyOracleFactory = _futarchyOracleFactory;
+      priceResolutionOracle = _priceResolutionOracle;
+      lmsrMarketMaker = _lmsrMarketMaker;
     }
 
     function newDecision(
       bytes executionScript,
-      uint8 outcomeCount,
-      Oracle oracle,
       string metadata
     ) external returns (uint decision) {
       int lowerBound;
@@ -69,11 +73,11 @@ contract Futarchy is AragonApp {
 
       decisions[decisionId].futarchyOracle = futarchyOracleFactory.createFutarchyOracle(
         ERC20Gnosis(token),
-        oracle,
-        outcomeCount,
+        priceResolutionOracle,
+        2,
         lowerBound,
         upperBound,
-        new LMSRMarketMaker(),
+        lmsrMarketMaker,
         fee,
         tradingPeriod,
         decisions[decisionId].startDate
@@ -125,4 +129,19 @@ contract Futarchy is AragonApp {
       lowerBound = 0;
       upperBound = 100;
     }
+
+    /* // IForwarder API
+    function isForwarder() external pure returns (bool) {
+      return true;
+    }
+
+    function canForward(address sender, bytes evmCallScript) public returns (bool) {
+      return canPerform(_sender, CREATE_VOTES_ROLE, arr());
+    }
+
+    function forward(bytes evmCallScript) public {
+      require(canForward(msg.sender, evmCallScript);
+      _newDecision()
+    } */
+
 }

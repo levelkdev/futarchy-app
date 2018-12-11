@@ -29,11 +29,11 @@ contract('Futarchy', (accounts) => {
     const token = await MiniMeToken.new(NULL_ADDRESS, NULL_ADDRESS, 0, 'n', 0, 'n', true)
     const centralizedOracleMaster = await CentralizedOracle.new()
     const centralizedOracleFactory = await CentralizedOracleFactory.new(centralizedOracleMaster.address)
+    const fixed192x64Math = await Fixed192x64Math.new()
+    await LMSRMarketMaker.link('Fixed192x64Math', fixed192x64Math.address)
+    const lmsrMarketMaker = await LMSRMarketMaker.new()
     let { logs } = await centralizedOracleFactory.createCentralizedOracle("QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz")
     const futarchyOracleFactory = await deployFutarchyMasterCopies()
-
-    const fixed192x64Math = await Fixed192x64Math.new()
-    await Futarchy.link('Fixed192x64Math', fixed192x64Math.address)
 
     futarchy = await Futarchy.new()
     oracleAddr = logs[0].args.centralizedOracle
@@ -41,13 +41,15 @@ contract('Futarchy', (accounts) => {
     await futarchy.initialize(
       20,
       60 * 60 * 24 * 7,
+      token.address,
       futarchyOracleFactory.address,
-      token.address
+      oracleAddr,
+      lmsrMarketMaker.address
     )
   })
 
   it.only('should be tested', async () => {
-    await futarchy.newDecision("QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz", 2, oracleAddr, 'give all dogs voting rights')
+    await futarchy.newDecision("QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz", 'give all dogs voting rights')
     expect((await futarchy.decisions(0))[4]).to.equal('give all dogs voting rights')
   })
 })
