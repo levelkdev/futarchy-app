@@ -1,11 +1,17 @@
 import React from 'react'
 import styled from 'styled-components'
+import LeftArrow from '../icons/LeftArrow'
+import { Link } from 'react-router-dom'
 import ShowPanelButtonContainer from '../Containers/ShowPanelButtonContainer'
 
-const AppHeader = () => (
+const AppHeader = ({ decision }) => (
   <AppHeaderStyled>
     <AlignLeft>
-      Futarchy
+      {
+        decision ?
+          <DecisionHeader question={decision.question} /> :
+          <span>Futarchy</span>
+      }
     </AlignLeft>
     <AlignRight>
       <ShowPanelButtonContainer panelName="createDecisionMarket">
@@ -13,6 +19,17 @@ const AppHeader = () => (
       </ShowPanelButtonContainer>
     </AlignRight>
   </AppHeaderStyled>
+)
+
+const DecisionHeader = ({ question }) => (
+  <div>
+    <LinkStyled to="/">
+      <BackButton>
+        <LeftArrow />
+      </BackButton>
+    </LinkStyled>
+    {question}
+  </div>
 )
 
 const AppHeaderStyled = styled.div`
@@ -28,6 +45,15 @@ const AlignLeft = styled.div`
 
 const AlignRight = styled.div`
   flex-grow: 0;
+`
+
+const BackButton = styled.span`
+  padding: 17px 10px 10px 10px;
+  cursor: pointer;
+`
+
+const LinkStyled = styled(Link)`
+  text-decoration: none;
 `
 
 export default AppHeader
