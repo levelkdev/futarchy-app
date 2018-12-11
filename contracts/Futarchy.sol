@@ -48,7 +48,7 @@ contract Futarchy is AragonApp {
       Oracle _priceResolutionOracle,
       LMSRMarketMaker _lmsrMarketMaker
     )
-      external
+      public
     {
       fee = _fee;
       tradingPeriod = _tradingPeriod;
