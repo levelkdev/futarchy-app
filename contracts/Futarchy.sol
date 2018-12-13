@@ -10,15 +10,15 @@ import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 
 contract Futarchy is AragonApp {
 
-  event StartDecision(uint indexed decisionId, address indexed creator, string metadata);
+  event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle);
   event ExecuteDecision(uint decisionId);
 
   FutarchyOracleFactory public futarchyOracleFactory;
   MiniMeToken public token;
-  Oracle priceResolutionOracle;
-  LMSRMarketMaker lmsrMarketMaker;
-  uint24 fee;
-  uint tradingPeriod;
+  Oracle public priceResolutionOracle;
+  LMSRMarketMaker public lmsrMarketMaker;
+  uint24 public fee;
+  uint public tradingPeriod;
 
   struct Decision {
     FutarchyOracle futarchyOracle;
@@ -63,10 +63,10 @@ contract Futarchy is AragonApp {
     function newDecision(
       bytes executionScript,
       string metadata
-    ) external returns (uint decision) {
+    ) external returns (uint decisionId) {
       int lowerBound;
       int upperBound;
-      uint decisionId = decisionLength++;
+      decisionId = decisionLength++;
       decisions[decisionId].startDate = getTimestamp64();
       decisions[decisionId].metadata = metadata;
       decisions[decisionId].snapshotBlock = getBlockNumber64() - 1;
@@ -85,7 +85,7 @@ contract Futarchy is AragonApp {
         decisions[decisionId].startDate
       );
 
-      emit StartDecision(decisionId, msg.sender, metadata);
+      emit StartDecision(decisionId, msg.sender, metadata, decisions[decisionId].futarchyOracle);
     }
 
     function getDecision(uint decisionId)
