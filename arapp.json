@@ -10,7 +10,7 @@
   "environments": {
     "default": {
       "network": "devnet",
-      "appName": "futarchy-app.aragonpm.eth"
+      "appName": "stub-futarchy-app.aragonpm.eth"
     }
   }
 }
