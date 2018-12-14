@@ -10,13 +10,15 @@ import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 
 contract Futarchy is AragonApp {
 
-  event StartDecision(uint indexed decisionId, address indexed creator, string metadata);
+  event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle);
   event ExecuteDecision(uint decisionId);
 
   FutarchyOracleFactory public futarchyOracleFactory;
   MiniMeToken public token;
-  uint24 fee;
-  uint tradingPeriod;
+  Oracle public priceResolutionOracle;
+  LMSRMarketMaker public lmsrMarketMaker;
+  uint24 public fee;
+  uint public tradingPeriod;
 
   struct Decision {
     FutarchyOracle futarchyOracle;
@@ -42,25 +44,29 @@ contract Futarchy is AragonApp {
       uint24 _fee,
       uint _tradingPeriod,
       MiniMeToken _token,
-      FutarchyOracleFactory _futarchyOracleFactory
+      FutarchyOracleFactory _futarchyOracleFactory,
+      Oracle _priceResolutionOracle,
+      LMSRMarketMaker _lmsrMarketMaker
     )
-      external
+      onlyInit
+      public
     {
+      initialized();
       fee = _fee;
       tradingPeriod = _tradingPeriod;
       token = _token;
       futarchyOracleFactory = _futarchyOracleFactory;
+      priceResolutionOracle = _priceResolutionOracle;
+      lmsrMarketMaker = _lmsrMarketMaker;
     }
 
     function newDecision(
       bytes executionScript,
-      uint8 outcomeCount,
-      Oracle oracle,
       string metadata
-    ) external returns (uint decision) {
+    ) external returns (uint decisionId) {
       int lowerBound;
       int upperBound;
-      uint decisionId = decisionLength++;
+      decisionId = decisionLength++;
       decisions[decisionId].startDate = getTimestamp64();
       decisions[decisionId].metadata = metadata;
       decisions[decisionId].snapshotBlock = getBlockNumber64() - 1;
@@ -69,17 +75,17 @@ contract Futarchy is AragonApp {
 
       decisions[decisionId].futarchyOracle = futarchyOracleFactory.createFutarchyOracle(
         ERC20Gnosis(token),
-        oracle,
-        outcomeCount,
+        priceResolutionOracle,
+        2,
         lowerBound,
         upperBound,
-        new LMSRMarketMaker(),
+        lmsrMarketMaker,
         fee,
         tradingPeriod,
         decisions[decisionId].startDate
       );
 
-      emit StartDecision(decisionId, msg.sender, metadata);
+      emit StartDecision(decisionId, msg.sender, metadata, decisions[decisionId].futarchyOracle);
     }
 
     function getDecision(uint decisionId)
@@ -125,4 +131,19 @@ contract Futarchy is AragonApp {
       lowerBound = 0;
       upperBound = 100;
     }
+
+    /* // IForwarder API
+    function isForwarder() external pure returns (bool) {
+      return true;
+    }
+
+    function canForward(address sender, bytes evmCallScript) public returns (bool) {
+      return canPerform(_sender, CREATE_VOTES_ROLE, arr());
+    }
+
+    function forward(bytes evmCallScript) public {
+      require(canForward(msg.sender, evmCallScript);
+      _newDecision()
+    } */
+
 }
