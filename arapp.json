@@ -9,7 +9,7 @@
   "path": "contracts/StubFutarchyApp.sol",
   "environments": {
     "default": {
-      "network": "devnet",
+      "network": "rpc",
       "appName": "stub-futarchy-app.aragonpm.eth"
     }
   }

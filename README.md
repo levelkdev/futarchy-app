@@ -16,4 +16,4 @@ App for futarchy
 ## Run Devchain
 
 1. `npm run devchain:reset`
-2. `npm run devchain:deploy`
+2. `npm run start`
