@@ -64,7 +64,7 @@ contract('Futarchy', (accounts) => {
     const dao = await Kernel.at(r.logs.filter(l => l.event == 'DeployDAO')[0].args.dao)
     const acl = ACL.at(await dao.acl())
     await acl.createPermission(root, dao.address, APP_MANAGER_ROLE, root, { from: root })
-    const receipt = await dao.newAppInstance('0x1234', futarchyBase.address)
+    const receipt = await dao.newAppInstance('0x1234', futarchyBase.address, '0x', false, { from: root })
     const { logs } = await centralizedOracleFactory.createCentralizedOracle("QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz")
     token = await MiniMeToken.new(NULL_ADDRESS, NULL_ADDRESS, 0, 'n', 0, 'n', true)
     priceResolutionOracle = await CentralizedOracle.at(logs[0].args.centralizedOracle)
