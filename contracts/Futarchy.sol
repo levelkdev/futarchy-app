@@ -10,6 +10,8 @@ import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 
 contract Futarchy is AragonApp {
 
+  bytes32 public constant CREATE_DECISION_ROLE = keccak256("CREATE_DECISION_ROLE");
+
   event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle);
   event ExecuteDecision(uint decisionId);
 
@@ -37,9 +39,19 @@ contract Futarchy is AragonApp {
       _;
   }
 
-    /* FutarchyOracleFactory comes from Gnosis https://github.com/gnosis/pm-contracts/blob/v1.0.0/contracts/Oracles/FutarchyOracleFactory.sol */
-    /* TODO: BoundsOracle - Calculates the upper and lower bounds for creating a new FutarchyOracle */
-    /* TODO: PriceFeedOracle - Is used to resolve all futarchy decision markets */
+    /**
+    * @notice initialize Futarchy app with state
+    * @param _fee Percent trading fee prediction markets will collect
+    * @param _tradingPeriod trading period before decision can be determined
+    * @param _token token used to participate in prediction markets
+    * @param _futarchyOracleFactory creates FutarchyOracle to begin new decision
+    *         https://github.com/gnosis/pm-contracts/blob/v1.0.0/contracts/Oracles/FutarchyOracleFactory.sol
+    * @param _priceResolutionOracle oracle used to resolve price after all trading is closed
+    * @param _lmsrMarketMaker market maker library that calculates prediction market outomce token prices
+    * FutarchyOracleFactory comes from Gnosis https://github.com/gnosis/pm-contracts/blob/v1.0.0/contracts/Oracles/FutarchyOracleFactory.sol
+    * TODO: BoundsOracle - Calculates the upper and lower bounds for creating a new FutarchyOracle
+    * TODO: PriceFeedOracle - Is used to resolve all futarchy decision markets
+    **/
     function initialize(
       uint24 _fee,
       uint _tradingPeriod,
@@ -60,6 +72,12 @@ contract Futarchy is AragonApp {
       lmsrMarketMaker = _lmsrMarketMaker;
     }
 
+
+    /**
+    * @notice creates a new futarchy decision market related to `metadata`
+    * @param executionScript EVM script to be executed on approval
+    * @param metadata Decision metadata
+    **/
     function newDecision(
       bytes executionScript,
       string metadata
@@ -88,6 +106,10 @@ contract Futarchy is AragonApp {
       emit StartDecision(decisionId, msg.sender, metadata, decisions[decisionId].futarchyOracle);
     }
 
+    /**
+    * @notice returns Decision struct data
+    * @param decisionId decision unique identifier
+    **/
     function getDecision(uint decisionId)
       public
       view
@@ -127,23 +149,23 @@ contract Futarchy is AragonApp {
       return decision.futarchyOracle.isOutcomeSet();
     }
 
+    /* TODO: actually get real bounds */
     function _calculateBounds() internal returns(int lowerBound, int upperBound) {
       lowerBound = 0;
       upperBound = 100;
     }
 
-    /* // IForwarder API
+    /* IForwarder API */
     function isForwarder() external pure returns (bool) {
       return true;
-    }
-
-    function canForward(address sender, bytes evmCallScript) public returns (bool) {
-      return canPerform(_sender, CREATE_VOTES_ROLE, arr());
     }
 
     function forward(bytes evmCallScript) public {
       require(canForward(msg.sender, evmCallScript);
       _newDecision()
-    } */
+    }
 
+    function canForward(address sender, bytes evmCallScript) public returns (bool) {
+      return canPerform(_sender, CREATE_DECISION_ROLE, arr());
+    }
 }
