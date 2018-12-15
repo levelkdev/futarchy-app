@@ -161,11 +161,11 @@ contract Futarchy is AragonApp {
     }
 
     function forward(bytes evmCallScript) public {
-      require(canForward(msg.sender, evmCallScript);
-      _newDecision()
+      // require(canForward(msg.sender, evmCallScript));
+      // _newDecision();
     }
 
-    function canForward(address sender, bytes evmCallScript) public returns (bool) {
-      return canPerform(_sender, CREATE_DECISION_ROLE, arr());
+    function canForward(address _sender, bytes evmCallScript) public returns (bool) {
+      // return canPerform(_sender, CREATE_DECISION_ROLE, arr());
     }
 }
