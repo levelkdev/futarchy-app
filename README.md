@@ -12,7 +12,7 @@ App for futarchy
 
 1. `npm run start:app`: builds the frontend to `dist/`
 
-2. `npm run devchain:reset`: starts a local aragon [devchain](https://hack.aragon.org/docs/cli-usage.html#aragon-devchain)
+2. `npm run devchain`: starts a local aragon [devchain](https://hack.aragon.org/docs/cli-usage.html#aragon-devchain)
 
 3. `npm run start:aragon`:
   * deploys contract dependencies
