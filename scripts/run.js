@@ -19,7 +19,7 @@ module.exports = async () => {
     console.log('execute `aragon run`')
     console.log('')
 
-    const run = execa('aragon', ['run', '--http', 'localhost:8001', '--http-served-from', './dist'])
+    const run = execa('npm', ['run', 'start:aragon:http'])
     run.stdout.pipe(process.stdout)
   } catch (err) {
     console.log('Error in scripts/run.js: ', err)
