@@ -10,10 +10,11 @@ import "@aragon/kits-base/contracts/KitBase.sol";
 
 contract FutarchyKit is KitBase, APMNamehash, IsContract {
 
-    bytes32 constant public futarchyAppId = apmNamehash("stub-futarchy-app");
+    bytes32 public futarchyAppId;
 
     constructor(DAOFactory _fac, ENS _ens) KitBase(_fac, _ens) public {
         require(isContract(address(_fac.regFactory())));
+        futarchyAppId = apmNamehash("stub-futarchy-app");
     }
 
     function newInstance(address authorizedAddress) external returns (Kernel) {
