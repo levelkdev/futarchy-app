@@ -11,12 +11,12 @@ const decisionMarkets = (state = [], action) => {
           question: action.question
         }
       ]
-    case 'DECISION_CREATED':
+    case 'START_DECISION':
       return [
         ..._.filter(state, event => !event.pending),
         {
           pending: false,
-          id: action.returnValues.id,
+          id: action.returnValues.decisionId,
           question: action.returnValues.metadata
         }
       ]
