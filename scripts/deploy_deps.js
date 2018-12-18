@@ -36,11 +36,11 @@ module.exports = async (
     )
     console.log(`MiniMeToken instance: ${miniMeToken.address}`)
 
-    const centralizedOracle = await CentralizedOracle.new()
-    console.log(`CentralizedOracle master: ${centralizedOracle.address}`)
+    const centralizedOracleMaster = await CentralizedOracle.new()
+    console.log(`CentralizedOracle master: ${centralizedOracleMaster.address}`)
 
     const centralizedOracleFactory = await CentralizedOracleFactory.new(
-      centralizedOracle.address
+      centralizedOracleMaster.address
     )
     console.log(`CentralizedOracleFactory instance: ${centralizedOracleFactory.address}`)
 
@@ -51,37 +51,37 @@ module.exports = async (
     const lmsrMarketMaker = await LMSRMarketMaker.new()
     console.log(`LMSRMarketMaker instance: ${lmsrMarketMaker.address}`)
     
-    const categoricalEvent = await CategoricalEvent.new()
-    console.log(`CategoricalEvent master: ${categoricalEvent.address}`)
+    const categoricalEventMaster = await CategoricalEvent.new()
+    console.log(`CategoricalEvent master: ${categoricalEventMaster.address}`)
 
-    const scalarEvent = await ScalarEvent.new()
-    console.log(`ScalarEvent master: ${scalarEvent.address}`)
+    const scalarEventMaster = await ScalarEvent.new()
+    console.log(`ScalarEvent master: ${scalarEventMaster.address}`)
 
-    const outcomeToken = await OutcomeToken.new()
-    console.log(`OutcomeToken master: ${outcomeToken.address}`)
+    const outcomeTokenMaster = await OutcomeToken.new()
+    console.log(`OutcomeToken master: ${outcomeTokenMaster.address}`)
 
-    const futarchyOracle = await FutarchyOracle.new()
-    console.log(`FutarchyOracle master: ${futarchyOracle.address}`)
+    const futarchyOracleMaster = await FutarchyOracle.new()
+    console.log(`FutarchyOracle master: ${futarchyOracleMaster.address}`)
 
-    const standardMarketWithPriceLogger = await StandardMarketWithPriceLogger.new()
-    console.log(`StandardMarketWithPriceLogger master: ${standardMarketWithPriceLogger.address}`)
+    const standardMarketWithPriceLoggerMaster = await StandardMarketWithPriceLogger.new()
+    console.log(`StandardMarketWithPriceLogger master: ${standardMarketWithPriceLoggerMaster.address}`)
 
     const eventFactory = await EventFactory.new(
-      categoricalEvent.address,
-      scalarEvent.address,
-      outcomeToken.address
+      categoricalEventMaster.address,
+      scalarEventMaster.address,
+      outcomeTokenMaster.address
     )
     console.log(`EventFactory instance: ${eventFactory.address}`)
 
     const standardMarketWithPriceLoggerFactory = await StandardMarketWithPriceLoggerFactory.new(
-      standardMarketWithPriceLogger.address
+      standardMarketWithPriceLoggerMaster.address
     )
     console.log(
       `StandardMarketWithPriceLoggerFactory instance: ${standardMarketWithPriceLoggerFactory.address}`
     )
 
     const futarchyOracleFactory = await FutarchyOracleFactory.new(
-      futarchyOracle.address,
+      futarchyOracleMaster.address,
       eventFactory.address,
       standardMarketWithPriceLoggerFactory.address
     )
