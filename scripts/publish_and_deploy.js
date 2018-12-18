@@ -2,15 +2,6 @@
  * This script isn't used right now, but might come in handy when we have to deploy to testnet/mainnet
  */
 
-// // ℹ This is the configuration for your development deployment:
-// // Ethereum Node: ws://localhost:8535
-// // ENS registry: 0x5f6f7e8cc7346a11ca2def8f827b7a0b612c56a1
-// // APM registry: aragonpm.eth
-// // DAO address: 0xD0eDd2D67f9bB1fBb26dA732CFAAd37A5ab55c3E
-
-// // Opening http://localhost:3000/#/0xD0eDd2D67f9bB1fBb26dA732CFAAd37A5ab55c3E to view your DAO
-
-
 const namehash = require('eth-ens-namehash').hash
 
 const getAccounts = require('@aragon/os/scripts/helpers/get-accounts')
