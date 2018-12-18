@@ -35,8 +35,7 @@ const NULL_ADDRESS = '0x00'
 contract('Futarchy', (accounts) => {
   let APP_MANAGER_ROLE
   let futarchyBase, daoFact
-  let centralizedOracleFactory
-  let futarchy, fee, tradingPeriod, token, priceResolutionOracle, futarchyOracleFactory, lmsrMarketMaker
+  let futarchy, fee, tradingPeriod, token, priceOracleFactory, futarchyOracleFactory, lmsrMarketMaker
 
   const root = accounts[0]
 
@@ -54,7 +53,7 @@ contract('Futarchy', (accounts) => {
 
     fee = 20
     tradingPeriod = 60 * 60 * 24 * 7
-    centralizedOracleFactory = await CentralizedOracleFactory.new(centralizedOracleMaster.address)
+    priceOracleFactory = await CentralizedOracleFactory.new(centralizedOracleMaster.address)
     lmsrMarketMaker = await LMSRMarketMaker.new()
     futarchyOracleFactory = await deployFutarchyMasterCopies()
   })
@@ -65,10 +64,10 @@ contract('Futarchy', (accounts) => {
     const acl = ACL.at(await dao.acl())
     await acl.createPermission(root, dao.address, APP_MANAGER_ROLE, root, { from: root })
     const receipt = await dao.newAppInstance('0x1234', futarchyBase.address, '0x', false, { from: root })
-    const { logs } = await centralizedOracleFactory.createCentralizedOracle("QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz")
     token = await MiniMeToken.new(NULL_ADDRESS, NULL_ADDRESS, 0, 'n', 0, 'n', true)
-    priceResolutionOracle = await CentralizedOracle.at(logs[0].args.centralizedOracle)
     futarchy = Futarchy.at(receipt.logs.filter(l => l.event == 'NewAppProxy')[0].args.proxy)
+    const CREATE_DECISION_ROLE = await futarchy.CREATE_DECISION_ROLE()
+    await acl.createPermission(root, futarchy.address, CREATE_DECISION_ROLE, root);
 })
 
   describe('initialize()', async () => {
@@ -78,7 +77,7 @@ contract('Futarchy', (accounts) => {
         tradingPeriod,
         token.address,
         futarchyOracleFactory.address,
-        priceResolutionOracle.address,
+        priceOracleFactory.address,
         lmsrMarketMaker.address
       )
     })
@@ -90,7 +89,7 @@ contract('Futarchy', (accounts) => {
           tradingPeriod,
           token.address,
           futarchyOracleFactory.address,
-          priceResolutionOracle.address,
+          priceOracleFactory.address,
           lmsrMarketMaker.address
         )
       })
@@ -112,8 +111,8 @@ contract('Futarchy', (accounts) => {
       expect(await futarchy.futarchyOracleFactory()).to.equal(futarchyOracleFactory.address)
     })
 
-    it('sets priceResolutionOracle', async () => {
-      expect(await futarchy.priceResolutionOracle()).to.equal(priceResolutionOracle.address)
+    it('sets priceOracleFactory', async () => {
+      expect(await futarchy.priceOracleFactory()).to.equal(priceOracleFactory.address)
     })
 
     it('sets lmsrMarketMaker', async () => {
@@ -132,7 +131,7 @@ contract('Futarchy', (accounts) => {
         tradingPeriod,
         token.address,
         futarchyOracleFactory.address,
-        priceResolutionOracle.address,
+        priceOracleFactory.address,
         lmsrMarketMaker.address
       )
     })
@@ -198,7 +197,7 @@ contract('Futarchy', (accounts) => {
         tradingPeriod,
         token.address,
         futarchyOracleFactory.address,
-        priceResolutionOracle.address,
+        priceOracleFactory.address,
         lmsrMarketMaker.address
       )
 

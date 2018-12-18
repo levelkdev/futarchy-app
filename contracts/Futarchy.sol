@@ -4,20 +4,20 @@ import "@aragon/os/contracts/apps/AragonApp.sol";
 import "@aragon/os/contracts/common/IForwarder.sol";
 import '@gnosis.pm/pm-contracts/contracts/Oracles/FutarchyOracleFactory.sol';
 import '@gnosis.pm/pm-contracts/contracts/MarketMakers/LMSRMarketMaker.sol';
-import '@gnosis.pm/pm-contracts/contracts/Oracles/Oracle.sol';
+import '@gnosis.pm/pm-contracts/contracts/Oracles/CentralizedOracleFactory.sol';
 import "@aragon/apps-shared-minime/contracts/MiniMeToken.sol";
 import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 
 contract Futarchy is AragonApp {
 
-  bytes32 public constant CREATE_DECISION_ROLE = keccak256("CREATE_DECISION_ROLE");
-
   event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle);
   event ExecuteDecision(uint decisionId);
 
+  bytes32 public constant CREATE_DECISION_ROLE = keccak256("CREATE_DECISION_ROLE");
+
   FutarchyOracleFactory public futarchyOracleFactory;
   MiniMeToken public token;
-  Oracle public priceResolutionOracle;
+  CentralizedOracleFactory public priceOracleFactory;
   LMSRMarketMaker public lmsrMarketMaker;
   uint24 public fee;
   uint public tradingPeriod;
@@ -46,7 +46,7 @@ contract Futarchy is AragonApp {
     * @param _token token used to participate in prediction markets
     * @param _futarchyOracleFactory creates FutarchyOracle to begin new decision
     *         https://github.com/gnosis/pm-contracts/blob/v1.0.0/contracts/Oracles/FutarchyOracleFactory.sol
-    * @param _priceResolutionOracle oracle used to resolve price after all trading is closed
+    * @param _priceOracleFactory oracle factory used to create oracles that resolve price after all trading is closed
     * @param _lmsrMarketMaker market maker library that calculates prediction market outomce token prices
     * FutarchyOracleFactory comes from Gnosis https://github.com/gnosis/pm-contracts/blob/v1.0.0/contracts/Oracles/FutarchyOracleFactory.sol
     * TODO: BoundsOracle - Calculates the upper and lower bounds for creating a new FutarchyOracle
@@ -57,7 +57,7 @@ contract Futarchy is AragonApp {
       uint _tradingPeriod,
       MiniMeToken _token,
       FutarchyOracleFactory _futarchyOracleFactory,
-      Oracle _priceResolutionOracle,
+      CentralizedOracleFactory _priceOracleFactory,
       LMSRMarketMaker _lmsrMarketMaker
     )
       onlyInit
@@ -68,7 +68,7 @@ contract Futarchy is AragonApp {
       tradingPeriod = _tradingPeriod;
       token = _token;
       futarchyOracleFactory = _futarchyOracleFactory;
-      priceResolutionOracle = _priceResolutionOracle;
+      priceOracleFactory = _priceOracleFactory;
       lmsrMarketMaker = _lmsrMarketMaker;
     }
 
@@ -81,7 +81,11 @@ contract Futarchy is AragonApp {
     function newDecision(
       bytes executionScript,
       string metadata
-    ) external returns (uint decisionId) {
+    )
+      external
+      auth(CREATE_DECISION_ROLE)
+      returns (uint decisionId)
+    {
       int lowerBound;
       int upperBound;
       decisionId = decisionLength++;
@@ -93,7 +97,7 @@ contract Futarchy is AragonApp {
 
       decisions[decisionId].futarchyOracle = futarchyOracleFactory.createFutarchyOracle(
         ERC20Gnosis(token),
-        priceResolutionOracle,
+        priceOracleFactory.createCentralizedOracle("QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz"),
         2,
         lowerBound,
         upperBound,
@@ -161,11 +165,11 @@ contract Futarchy is AragonApp {
     }
 
     function forward(bytes evmCallScript) public {
-      require(canForward(msg.sender, evmCallScript);
-      _newDecision()
+      // require(canForward(msg.sender, evmCallScript));
+      // _newDecision();
     }
 
-    function canForward(address sender, bytes evmCallScript) public returns (bool) {
-      return canPerform(_sender, CREATE_DECISION_ROLE, arr());
+    function canForward(address _sender, bytes evmCallScript) public returns (bool) {
+      // return canPerform(_sender, CREATE_DECISION_ROLE, arr());
     }
 }

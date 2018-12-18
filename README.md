@@ -4,10 +4,26 @@ App for futarchy
 
 ## Setup
 
-`npm install`
+1. `npm install`
+
+2. `npm run compile`
 
 ## Run
 
-1. Run `npm run start:app` to build the frontend and listen for changes. Re-run if there are changes to `app/script.js`.
+1. `npm run start:app`: builds the frontend to `dist/`
 
-2. Run `npm run start:aragon:http` to deploy smart contracts and run the aragon client locally. Re-run if there are any smart contract changes.
+2. `npm run devchain`: starts a local aragon [devchain](https://hack.aragon.org/docs/cli-usage.html#aragon-devchain)
+
+3. `npm run start:aragon`:
+  * deploys contract dependencies
+  * publishes the futarchy app
+  * creates a new futarchy DAO instance
+  * starts the aragon app
+
+## Scripts
+
+### `npm run devchain:reset`
+
+Starts the devchain with `--reset`, which deletes existing ganache snapshots
+
+**NOTE: aragon caches event data using indexdb. You need to clear your browser cache after the devchain is reset

@@ -1,16 +1,16 @@
 {
   "roles": [
     {
-      "name": "Create a decision",
-      "id": "CREATE_DECISIONS_ROLE",
+      "name": "Can create decisions",
+      "id": "CREATE_DECISION_ROLE",
       "params": []
     }
   ],
-  "path": "contracts/StubFutarchyApp.sol",
+  "path": "contracts/Futarchy.sol",
   "environments": {
     "default": {
-      "network": "development",
-      "appName": "futarchy-app.aragonpm.eth"
+      "network": "rpc",
+      "appName": "futarchy.aragonpm.eth"
     }
   }
 }

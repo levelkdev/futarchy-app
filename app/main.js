@@ -11,6 +11,14 @@ import rootReducer from './reducers'
 import clientTransactions from './middleware/clientTransactions'
 import App from './App'
 
+// log all messages from the client, throw if message contains an error
+aragonClient.rpc.provider.messages().subscribe(payload => {
+  console.log('Aragon client message: ', payload)
+  if (payload && payload.error) {
+    throw new Error(`Aragon client error: ${payload.error}`)
+  }
+})
+
 const store = createStore(
   rootReducer,
   applyMiddleware(
