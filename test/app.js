@@ -3,32 +3,29 @@ const DAOFactory = artifacts.require('DAOFactory')
 const EVMScriptRegistryFactory = artifacts.require('EVMScriptRegistryFactory')
 const ACL = artifacts.require('ACL')
 const Kernel = artifacts.require('Kernel')
-
-// gnosis-pm prediction market contracts
-const EventFactory = artifacts.require('EventFactory')
-const CategoricalEvent = artifacts.require('CategoricalEvent')
-const ScalarEvent = artifacts.require('ScalarEvent')
-const OutcomeToken = artifacts.require('OutcomeToken')
-const StandardMarketWithPriceLogger = artifacts.require('StandardMarketWithPriceLogger')
-const LMSRMarketMaker = artifacts.require('LMSRMarketMaker')
-const StandardMarketWithPriceLoggerFactory = artifacts.require('StandardMarketWithPriceLoggerFactory')
 const MiniMeToken = artifacts.require('MiniMeToken')
-const CentralizedOracle = artifacts.require('CentralizedOracle')
-const CentralizedOracleFactory = artifacts.require('CentralizedOracleFactory')
-const Fixed192x64Math = artifacts.require('Fixed192x64Math')
 
 // gnosis-pm futarchy contracts
-const FutarchyOracle = artifacts.require('FutarchyOracle.sol')
-const FutarchyOracleFactory = artifacts.require('FutarchyOracleFactory.sol')
+const LMSRMarketMaker = artifacts.require('LMSRMarketMaker')
+const CentralizedOracle = artifacts.require('CentralizedOracle')
+const CentralizedOracleFactory = artifacts.require('CentralizedOracleFactory')
+const FutarchyOracle = artifacts.require('FutarchyOracleMock.sol')
+const FutarchyOracleFactory = artifacts.require('FutarchyOracleFactoryMock.sol')
+const Fixed192x64Math = artifacts.require('Fixed192x64Math')
 
-// aragon contracts
+// local contracts
 const Futarchy = artifacts.require('Futarchy.sol')
+const ExecutionTarget = artifacts.require('ExecutionTarget')
+
 
 const getContract = name => artifacts.require(name)
 const unixTime = () => Math.round(new Date().getTime() / 1000)
 const stringToHex = string => '0x' + Buffer.from(string, 'utf8').toString('hex')
 const { assertRevert } = require('@aragon/test-helpers/assertThrow')
 const getBlockNumber = require('@aragon/test-helpers/blockNumber')(web3)
+const timeTravel = require('@aragon/test-helpers/timeTravel')(web3)
+const { encodeCallScript } = require('@aragon/test-helpers/evmScript')
+
 const ANY_ADDR = '0xffffffffffffffffffffffffffffffffffffffff'
 const NULL_ADDRESS = '0x00'
 
@@ -36,6 +33,7 @@ contract('Futarchy', (accounts) => {
   let APP_MANAGER_ROLE
   let futarchyBase, daoFact
   let futarchy, fee, tradingPeriod, token, priceOracleFactory, futarchyOracleFactory, lmsrMarketMaker
+  let metadata, script, executionTarget
 
   const root = accounts[0]
 
@@ -47,9 +45,9 @@ contract('Futarchy', (accounts) => {
     futarchyBase = await Futarchy.new()
     APP_MANAGER_ROLE = await kernelBase.APP_MANAGER_ROLE()
 
-    const centralizedOracleMaster = await CentralizedOracle.new()
     const fixed192x64Math = await Fixed192x64Math.new()
     await LMSRMarketMaker.link('Fixed192x64Math', fixed192x64Math.address)
+    const centralizedOracleMaster = await CentralizedOracle.new()
 
     fee = 20
     tradingPeriod = 60 * 60 * 24 * 7
@@ -68,20 +66,18 @@ contract('Futarchy', (accounts) => {
     futarchy = Futarchy.at(receipt.logs.filter(l => l.event == 'NewAppProxy')[0].args.proxy)
     const CREATE_DECISION_ROLE = await futarchy.CREATE_DECISION_ROLE()
     await acl.createPermission(root, futarchy.address, CREATE_DECISION_ROLE, root);
+
+    await futarchy.initialize(
+      fee,
+      tradingPeriod,
+      token.address,
+      futarchyOracleFactory.address,
+      priceOracleFactory.address,
+      lmsrMarketMaker.address
+    )
 })
 
   describe('initialize()', async () => {
-    beforeEach(async () => {
-      await futarchy.initialize(
-        fee,
-        tradingPeriod,
-        token.address,
-        futarchyOracleFactory.address,
-        priceOracleFactory.address,
-        lmsrMarketMaker.address
-      )
-    })
-
     it('can only be called once on an instance of Futarchy', async () => {
       return assertRevert(async () => {
         await futarchy.initialize(
@@ -126,14 +122,6 @@ contract('Futarchy', (accounts) => {
     beforeEach(async () => {
       script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
       metadata = 'Give voting rights to all kitties in the world'
-      await futarchy.initialize(
-        fee,
-        tradingPeriod,
-        token.address,
-        futarchyOracleFactory.address,
-        priceOracleFactory.address,
-        lmsrMarketMaker.address
-      )
     })
 
     describe('the newly created Decision struct', async () => {
@@ -151,20 +139,24 @@ contract('Futarchy', (accounts) => {
         expect((await futarchy.decisions(0))[1].toNumber()).to.be.closeTo(unixTime(), unixTime() + 5)
       })
 
+      it('sets the correct tradingPeriod', async () => {
+        expect((await futarchy.decisions(0))[2].toNumber()).to.equal((await futarchy.tradingPeriod()).toNumber())
+      })
+
       it('sets the correct snapshotBlock', async () => {
-        expect((await futarchy.decisions(0))[2].toNumber()).to.equal(currentBlockNumber)
+        expect((await futarchy.decisions(0))[3].toNumber()).to.equal(currentBlockNumber)
       })
 
       it('sets executed to false', async () => {
-        expect((await futarchy.decisions(0))[3]).to.equal(false)
+        expect((await futarchy.decisions(0))[4]).to.equal(false)
       })
 
       it('sets the correct metadata', async () => {
-        expect((await futarchy.decisions(0))[4]).to.equal(metadata)
+        expect((await futarchy.decisions(0))[5]).to.equal(metadata)
       })
 
       it('sets the correct executionScript', async () => {
-        expect((await futarchy.decisions(0))[5]).to.equal(stringToHex(script))
+        expect((await futarchy.decisions(0))[6]).to.equal(stringToHex(script))
       })
     })
 
@@ -192,15 +184,6 @@ contract('Futarchy', (accounts) => {
     beforeEach(async () => {
       script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
       metadata = 'Give voting rights to all kitties in the world'
-      await futarchy.initialize(
-        fee,
-        tradingPeriod,
-        token.address,
-        futarchyOracleFactory.address,
-        priceOracleFactory.address,
-        lmsrMarketMaker.address
-      )
-
       currentBlockNumber = await getBlockNumber()
       await futarchy.newDecision(script, metadata)
       returnValue = await futarchy.getDecision(0)
@@ -230,16 +213,92 @@ contract('Futarchy', (accounts) => {
       expect(returnValue[5]).to.equal(stringToHex(script))
     })
   })
+
+  describe('executeDecision()', async () => {
+    let script, metadata, decisionId, currentBlockNumber, futarchyOracle, exeutionTarget
+
+    beforeEach(async () => {
+      executionTarget = await ExecutionTarget.new()
+      script = await encodeExecutionScript(executionTarget)
+      metadata = 'Give voting rights to all kitties in the world'
+
+      await futarchy.newDecision(script, metadata)
+      decisionId = 0
+      futarchyOracle = await FutarchyOracle.at((await futarchy.decisions(0))[0])
+    })
+
+    describe('when decision is not in ready state', async () => {
+      it('reverts if the decision has been executed already', async () => {
+        await timeTravel(tradingPeriod + 1)
+        await futarchy.executeDecision(decisionId)
+        return assertRevert(async () => {
+          await futarchy.executeDecision(decisionId)
+        })
+      })
+
+      it('reverts if the tradingPeriod has not ended yet', async () => {
+        return assertRevert(async () => {
+          await futarchy.executeDecision(decisionId)
+        })
+      })
+    })
+
+    describe('when decision is in a ready state', async () => {
+      it('sets the outcome on FutarchyOracle if it is not yet set', async () => {
+        await timeTravel(tradingPeriod + 1)
+        expect(await futarchyOracle.isOutcomeSet()).to.equal(false)
+        await futarchy.executeDecision(decisionId)
+        expect(await futarchyOracle.isOutcomeSet()).to.equal(true)
+      })
+
+      describe('if decision outcome is NO', async () => {
+        it('reverts', async () => {
+          await timeTravel(tradingPeriod + 1)
+          await futarchyOracle.mock_setWinningMarketIndex(1)
+          return assertRevert(async () => {
+            await futarchy.executeDecision(decisionId)
+          })
+        })
+      })
+
+      describe('if decision outcome is YES', async () => {
+        beforeEach(async () => {
+          await futarchyOracle.mock_setWinningMarketIndex(0)
+        })
+
+        it('runs the decision.executionScript', async () => {
+          await timeTravel(tradingPeriod + 1)
+          expect((await executionTarget.counter()).toNumber()).to.equal(0)
+          await futarchy.executeDecision(decisionId)
+          expect((await executionTarget.counter()).toNumber()).to.equal(1)
+        })
+
+        it('sets decision.executed to true', async () => {
+          await timeTravel(tradingPeriod + 1)
+          expect((await futarchy.decisions(0))[4]).to.equal(false)
+          await futarchy.executeDecision(decisionId)
+          expect((await futarchy.decisions(0))[4]).to.equal(true)
+        })
+
+        it('emits an ExecuteDecision event', async () => {
+          await timeTravel(tradingPeriod + 1)
+          const { logs } = await futarchy.executeDecision(decisionId)
+          expect(logs[1].event).to.equal('ExecuteDecision')
+          expect(logs[1].args.decisionId.toNumber()).to.equal(0)
+        })
+      })
+    })
+  })
 })
 
 async function deployFutarchyMasterCopies() {
-  const categoricalEvent = await CategoricalEvent.new()
-  const scalarEvent = await ScalarEvent.new()
-  const outcomeToken = await OutcomeToken.new()
-  const futarchyOracle = await FutarchyOracle.new()
-  const standardMarketWithPriceLogger = await StandardMarketWithPriceLogger.new()
-  const eventFactory = await EventFactory.new(categoricalEvent.address, scalarEvent.address, outcomeToken.address)
-  const standardMarketWithPriceLoggerFactory = await StandardMarketWithPriceLoggerFactory.new(standardMarketWithPriceLogger.address)
-  const futarchyOracleFactory = await FutarchyOracleFactory.new(futarchyOracle.address, eventFactory.address, standardMarketWithPriceLoggerFactory.address)
+   let futarchyOracleFactory = await FutarchyOracleFactory.new()
   return futarchyOracleFactory
+
+}
+
+async function encodeExecutionScript(executionTargetParam) {
+  executionTarget = executionTargetParam || await ExecutionTarget.new()
+  const action = { to: executionTarget.address, calldata: executionTarget.contract.execute.getData() }
+  return encodeCallScript([action])
 }

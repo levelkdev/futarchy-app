@@ -1,3 +1,4 @@
+pragma solidity ^0.4.24;
 // this is just a stub for getting the UI working .. don't deploy it :D
 
 import "@aragon/os/contracts/apps/AragonApp.sol";
@@ -5,7 +6,7 @@ import "@aragon/os/contracts/lib/math/SafeMath.sol";
 
 contract StubFutarchyApp is AragonApp {
     using SafeMath for uint256;
-    
+
     /// Events
     event DecisionCreated(uint256 id, string metadata, address creator);
 
