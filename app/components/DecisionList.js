@@ -16,7 +16,7 @@ const DecisionList = ({ decisions }) => (
   </div>
 )
 
-const DecisionTiles = ({ decisions }) => decisions.map(decision => (
+const DecisionTiles = ({ decisions }) => decisions.map(decision => { console.log('KEY: ', decision.id); return (
   <LinkStyled
     to={`/decision/${decision.id}`}
     key={decision.id}
@@ -25,7 +25,7 @@ const DecisionTiles = ({ decisions }) => decisions.map(decision => (
       <DecisionMarket {...decision} />
     </Tile>
   </LinkStyled>
-))
+)})
 
 const TileGroup = styled.div`
   display: flex;

@@ -2,22 +2,29 @@ import _ from 'lodash'
 
 const decisionMarkets = (state = [], action) => {
   switch (action.type) {
-    case 'CREATE_DECISION':
+    case 'NEW_DECISION_TX_PENDING':
       return [
         ...state,
-        {
-          pending: true,
-          id: null,
-          question: action.question
-        }
+        ...(
+          _.find(state, { question: action.question }) ?
+            [] : [{
+              pending: true,
+              id: action.txHash,
+              question: action.question
+            }]
+        )
       ]
-    case 'START_DECISION':
+    case 'START_DECISION_EVENT':
+      const { returnValues } = action
       return [
-        ..._.filter(state, event => !event.pending),
+        ..._.filter(
+          state,
+          decision => !(decision.pending && decision.question == returnValues.metadata)
+        ),
         {
           pending: false,
-          id: action.returnValues.decisionId,
-          question: action.returnValues.metadata
+          id: returnValues.decisionId,
+          question: returnValues.metadata
         }
       ]
     default:
