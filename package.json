@@ -47,6 +47,7 @@
     "test": "npm run test:contracts && npm run test:app",
     "test:contracts": "aragon contracts test",
     "test:app": "mocha --require app/test/testHelper.js app/**/*.test.js",
+    "seed:trades": "truffle exec scripts/seed_data/trades.js --network rpc",
     "compile": "rm -rf build/ && aragon contracts compile",
     "sync-assets": "copy-aragon-ui-assets -n aragon-ui ./dist",
     "build:app": "parcel build app/index.html -d dist/ --public-url '.' --no-cache",
