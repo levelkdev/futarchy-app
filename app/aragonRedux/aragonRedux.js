@@ -17,7 +17,7 @@ export const aragonReduxMiddleware = store => next => action => {
     newEvents.forEach(event => {
       store.dispatch({
         ...event,
-        ...{ type: pascalToUpperSnake(event.event) }
+        ...{ type: `${pascalToUpperSnake(event.event)}_EVENT` }
       })
     })
   }

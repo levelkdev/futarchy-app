@@ -5,14 +5,15 @@ import ReactDOM from 'react-dom'
 import { createStore, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
 import { Provider } from 'react-redux'
-import aragonClient from './aragonClient'
+import Aragon, { providers } from '@aragon/client'
 import { aragonReduxMiddleware, subscribeToAppState } from './aragonRedux/aragonRedux'
 import rootReducer from './reducers'
-import clientTransactions from './middleware/clientTransactions'
 import App from './App'
 
+window.aragonClient = new Aragon(new providers.WindowMessage(window.parent))
+
 // log all messages from the client, throw if message contains an error
-aragonClient.rpc.provider.messages().subscribe(payload => {
+window.aragonClient.rpc.provider.messages().subscribe(payload => {
   console.log('Aragon client message: ', payload)
   if (payload && payload.error) {
     throw new Error(`Aragon client error: ${payload.error}`)
@@ -23,14 +24,13 @@ const store = createStore(
   rootReducer,
   applyMiddleware(
     thunk,
-    aragonReduxMiddleware,
-    clientTransactions
+    aragonReduxMiddleware
   )
 )
 
 class ConnectedApp extends React.Component {
   state = {
-    app: aragonClient,
+    app: window.aragonClient,
     observable: null,
     userAccount: '',
   }
