@@ -32,7 +32,7 @@ const NULL_ADDRESS = '0x00'
 contract('Futarchy', (accounts) => {
   let APP_MANAGER_ROLE
   let futarchyBase, daoFact
-  let futarchy, fee, tradingPeriod, token, priceOracleFactory, futarchyOracleFactory, lmsrMarketMaker
+  let futarchy, fee, tradingPeriod, marketFundAmount, token, priceOracleFactory, futarchyOracleFactory, lmsrMarketMaker
   let metadata, script, executionTarget
 
   const root = accounts[0]
@@ -49,8 +49,9 @@ contract('Futarchy', (accounts) => {
     await LMSRMarketMaker.link('Fixed192x64Math', fixed192x64Math.address)
     const centralizedOracleMaster = await CentralizedOracle.new()
 
-    fee = 20
+    fee = 2000
     tradingPeriod = 60 * 60 * 24 * 7
+    marketFundAmount = 10 * 10 ** 18
     priceOracleFactory = await CentralizedOracleFactory.new(centralizedOracleMaster.address)
     lmsrMarketMaker = await LMSRMarketMaker.new()
     futarchyOracleFactory = await deployFutarchyMasterCopies()
@@ -70,6 +71,7 @@ contract('Futarchy', (accounts) => {
     await futarchy.initialize(
       fee,
       tradingPeriod,
+      marketFundAmount,
       token.address,
       futarchyOracleFactory.address,
       priceOracleFactory.address,
@@ -83,6 +85,7 @@ contract('Futarchy', (accounts) => {
         await futarchy.initialize(
           fee,
           tradingPeriod,
+          marketFundAmount,
           token.address,
           futarchyOracleFactory.address,
           priceOracleFactory.address,
@@ -97,6 +100,10 @@ contract('Futarchy', (accounts) => {
 
     it('sets tradingPeriod', async () => {
       expect((await futarchy.tradingPeriod()).toNumber()).to.equal(tradingPeriod)
+    })
+
+    it('sets marketFundAmount', async () => {
+      expect((await futarchy.marketFundAmount()).toNumber()).to.equal(marketFundAmount)
     })
 
     it('sets token', async () => {
@@ -123,6 +130,8 @@ contract('Futarchy', (accounts) => {
       script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
       metadata = 'Give voting rights to all kitties in the world'
     })
+
+    // TODO: test that it properly funds the markets.
 
     describe('the newly created Decision struct', async () => {
       beforeEach(async () => {
