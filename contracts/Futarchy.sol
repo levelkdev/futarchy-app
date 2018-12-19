@@ -23,6 +23,7 @@ contract Futarchy is AragonApp {
   LMSRMarketMaker public lmsrMarketMaker;
   uint24 public fee;
   uint public tradingPeriod;
+  uint public marketFundAmount;
 
   struct Decision {
     FutarchyOracle futarchyOracle;
@@ -58,6 +59,7 @@ contract Futarchy is AragonApp {
     function initialize(
       uint24 _fee,
       uint _tradingPeriod,
+      uint _marketFundAmount,
       MiniMeToken _token,
       FutarchyOracleFactory _futarchyOracleFactory,
       CentralizedOracleFactory _priceOracleFactory,
@@ -69,6 +71,7 @@ contract Futarchy is AragonApp {
       initialized();
       fee = _fee;
       tradingPeriod = _tradingPeriod;
+      marketFundAmount = _marketFundAmount;
       token = _token;
       futarchyOracleFactory = _futarchyOracleFactory;
       priceOracleFactory = _priceOracleFactory;
@@ -110,6 +113,8 @@ contract Futarchy is AragonApp {
         tradingPeriod,
         decisions[decisionId].startDate
       );
+
+      decisions[decisionId].futarchyOracle.fund(marketFundAmount);
 
       emit StartDecision(decisionId, msg.sender, metadata, decisions[decisionId].futarchyOracle);
     }
