@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import sendTransaction from '../client/sendTransaction'
+import fetchAccounts from '../client/fetchAccounts'
 
 export const newDecisionTxPending = ({ question, txHash }) => ({
   type: 'NEW_DECISION_TX_PENDING',
@@ -31,5 +32,14 @@ export const newDecision = (bytes32Script, question) => dispatch => {
     dispatch(newDecisionTxPending({ question, txHash }))
   }, err => {
     // TODO: dispatch error action, to show something to the user
+  })
+}
+
+export const fetchInitData = () => dispatch => {
+  return fetchAccounts().then(accounts => {
+    dispatch(accountsLoaded({ accounts }))
+  }, errorMessage => {
+    console.error(errorMessage)
+    dispatch(accountsLoadingError({ errorMessage }))
   })
 }

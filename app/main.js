@@ -7,6 +7,7 @@ import thunk from 'redux-thunk'
 import { Provider } from 'react-redux'
 import Aragon, { providers } from '@aragon/client'
 import { aragonReduxMiddleware, subscribeToAppState } from './aragonRedux/aragonRedux'
+import { fetchInitData } from './actions'
 import rootReducer from './reducers'
 import App from './App'
 
@@ -61,13 +62,7 @@ class ConnectedApp extends React.Component {
       this.sendMessageToWrapper('ready', true)
 
       store.dispatch(subscribeToAppState(app))
-
-      app.accounts().subscribe(accounts => {
-        // TODO: dispatch redux action here instead of setState
-        this.setState({
-          userAccount: accounts[0],
-        })
-      })
+      store.dispatch(fetchInitData())
     }
   }
   sendMessageToWrapper = (name, value) => {

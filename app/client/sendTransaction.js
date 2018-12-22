@@ -1,5 +1,5 @@
-export default async (functionName, params) => {
-  return new Promise((resolve, reject) => { 
+export default async (functionName, params = []) => {
+  return new Promise((resolve, reject) => {
     window.aragonClient[functionName].apply(this, params).subscribe(
       (txHash) => {
         console.log(`sendClientTx: ${functionName}: tx: ${txHash}`)
