@@ -16,6 +16,16 @@ export const hidePanel = () => ({
   type: 'HIDE_PANEL'
 })
 
+export const accountsLoaded = ({ accounts }) => ({
+  type: 'ACCOUNTS_LOADED',
+  accounts
+})
+
+export const accountsLoadingError = ({ errorMessage }) => ({
+  type: 'ACCOUNTS_LOADING_ERROR',
+  errorMessage
+})
+
 export const newDecision = (bytes32Script, question) => dispatch => {
   return sendTransaction('newDecision', [bytes32Script, question]).then(txHash => {
     dispatch(newDecisionTxPending({ question, txHash }))
