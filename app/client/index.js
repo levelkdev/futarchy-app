@@ -21,9 +21,6 @@ export const tokenBalance = async (account) => {
   const tokenAddress = await call('token')
   const token = MiniMeToken(window.aragonClient, tokenAddress)
   const balance = await token.balanceOf(account)
-  // console.log('TOKEN: ', token)
-  // const balance = await contractFn(token, 'miniMeToken', 'balanceOf', account)
-  console.log('BALANCE: ', balance)
   return balance
 }
 
