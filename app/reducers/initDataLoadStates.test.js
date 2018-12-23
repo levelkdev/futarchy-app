@@ -1,5 +1,10 @@
 import assert from 'assert'
-import { accountsLoaded, accountsLoadingError } from '../actions'
+import {
+  accountsLoaded,
+  accountsLoadingError,
+  tokenBalanceLoaded,
+  tokenBalanceLoadingError
+} from '../actions'
 import initDataLoadStates from './initDataLoadStates'
 
 describe('initDataLoadStates', () => {
@@ -48,6 +53,31 @@ describe('initDataLoadStates', () => {
     })
   })
 
+  describe('tokenBalanceLoaded', () => {
+    [
+      {
+        when: 'when given undefined state',
+        should: 'should set tokenBalance.loaded = true',
+        state: undefined,
+        action: tokenBalanceLoaded({ balance: 'mock_balance' }),
+        expected: { errorMessage: null, loaded: true }
+      },
+      {
+        when: 'when given state with an errorMessage',
+        should: 'should clear the errorMessage',
+        state:  { loaded: false, errorMessage: 'mock_error' },
+        action: tokenBalanceLoaded({ balance: 'mock_balance' }),
+        expected: { errorMessage: null, loaded: true }
+      }
+    ].forEach(({ when, should, state, action, expected }) => {
+      describe(when, () => {
+        it(should, () => {
+          assert.deepEqual(initDataLoadStates(state, action).tokenBalance, expected)
+        })
+      })
+    })
+  })
+
   describe('accountsLoadingError', () => {
     [
       {
@@ -61,6 +91,24 @@ describe('initDataLoadStates', () => {
       describe(when, () => {
         it(should, () => {
           assert.deepEqual(initDataLoadStates(state, action).accounts, expected)
+        })
+      })
+    })
+  })
+
+  describe('tokenBalanceLoadingError', () => {
+    [
+      {
+        when: 'when given undefined state',
+        should: 'should set tokenBalance.errorMessage',
+        state: undefined,
+        action: tokenBalanceLoadingError({ errorMessage: 'mock_error' }),
+        expected: { errorMessage: 'mock_error', loaded: false }
+      }
+    ].forEach(({ when, should, state, action, expected }) => {
+      describe(when, () => {
+        it(should, () => {
+          assert.deepEqual(initDataLoadStates(state, action).tokenBalance, expected)
         })
       })
     })

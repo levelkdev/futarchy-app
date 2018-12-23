@@ -1,6 +1,5 @@
 import _ from 'lodash'
-import sendTransaction from '../client/sendTransaction'
-import fetchAccounts from '../client/fetchAccounts'
+import client from '../client'
 
 export const newDecisionTxPending = ({ question, txHash }) => ({
   type: 'NEW_DECISION_TX_PENDING',
@@ -27,19 +26,46 @@ export const accountsLoadingError = ({ errorMessage }) => ({
   errorMessage
 })
 
+export const tokenBalanceLoaded = ({ balance }) => ({
+  type: 'TOKEN_BALANCE_LOADED',
+  balance
+})
+
+export const tokenBalanceLoadingError = ({ errorMessage }) => ({
+  type: 'TOKEN_BALANCE_LOADING_ERROR',
+  errorMessage
+})
+
 export const newDecision = (bytes32Script, question) => dispatch => {
-  return sendTransaction('newDecision', [bytes32Script, question]).then(txHash => {
+  return client.sendTransaction('newDecision', bytes32Script, question).then(txHash => {
     dispatch(newDecisionTxPending({ question, txHash }))
   }, err => {
     // TODO: dispatch error action, to show something to the user
   })
 }
 
-export const fetchInitData = () => dispatch => {
-  return fetchAccounts().then(accounts => {
-    dispatch(accountsLoaded({ accounts }))
-  }, errorMessage => {
-    console.error(errorMessage)
-    dispatch(accountsLoadingError({ errorMessage }))
-  })
+export const fetchAccounts = () => dispatch => {
+  return client.accounts().then(
+    accounts => dispatch(accountsLoaded({ accounts })),
+    errorMessage => {
+      console.error(errorMessage)
+      return dispatch(accountsLoadingError({ errorMessage }))
+    }
+  )
+}
+
+export const fetchTokenBalance = (account) => dispatch => {
+  return client.tokenBalance(account).then(
+    tokenBalance => dispatch(tokenBalanceLoaded({ balance: tokenBalance })),
+    errorMessage => {
+      console.error(errorMessage)
+      return dispatch(tokenBalanceLoadingError({ errorMessage }))
+    }
+  )
+}
+
+export const fetchInitData = () => (dispatch, getState) => {
+  return dispatch(fetchAccounts()).then(() => 
+    dispatch(fetchTokenBalance(getState().accounts[0]))
+  )
 }
