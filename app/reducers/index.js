@@ -4,6 +4,7 @@ import { appEvents } from '../aragonRedux/aragonRedux'
 import decisionMarkets from './decisionMarkets'
 import sidePanel from './sidePanel'
 import accounts from './accounts'
+import tokenBalance from './tokenBalance'
 import initDataLoadStates from './initDataLoadStates'
 
 export default combineReducers({
@@ -12,5 +13,6 @@ export default combineReducers({
   form,
   sidePanel,
   accounts,
+  tokenBalance,
   initDataLoadStates
 })
