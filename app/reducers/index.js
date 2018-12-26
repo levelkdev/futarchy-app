@@ -3,8 +3,7 @@ import { reducer as form } from 'redux-form'
 import { appEvents } from '../aragonRedux/aragonRedux'
 import decisionMarkets from './decisionMarkets'
 import sidePanel from './sidePanel'
-import accounts from './accounts'
-import tokenBalance from './tokenBalance'
+import propValue from './propValue'
 import initDataLoadStates from './initDataLoadStates'
 
 export default combineReducers({
@@ -12,7 +11,13 @@ export default combineReducers({
   decisionMarkets,
   form,
   sidePanel,
-  accounts,
-  tokenBalance,
+  accounts: propValue({
+    prop: 'accounts',
+    defaultValue: []
+  }),
+  tokenBalance: propValue({
+    prop: 'tokenBalance',
+    defaultValue: []
+  }),
   initDataLoadStates
 })

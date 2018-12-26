@@ -16,27 +16,21 @@ export const hidePanel = () => ({
   type: 'HIDE_PANEL'
 })
 
-export const accountsLoaded = ({ accounts }) => ({
-  type: 'ACCOUNTS_LOADED',
-  accounts
+// property value loaded from the Futarchy smart contract
+export const propValueLoaded = ({ prop, value }) => ({
+  type: 'PROP_VALUE_LOADED',
+  prop,
+  value
 })
 
-export const accountsLoadingError = ({ errorMessage }) => ({
-  type: 'ACCOUNTS_LOADING_ERROR',
+// error loading property value from the Futarchy smart contract
+export const propValueLoadingError = ({ prop, errorMessage }) => ({
+  type: 'PROP_VALUE_LOADING_ERROR',
+  prop, 
   errorMessage
 })
 
-export const tokenBalanceLoaded = ({ balance }) => ({
-  type: 'TOKEN_BALANCE_LOADED',
-  balance
-})
-
-export const tokenBalanceLoadingError = ({ errorMessage }) => ({
-  type: 'TOKEN_BALANCE_LOADING_ERROR',
-  errorMessage
-})
-
-export const newDecision = (bytes32Script, question) => dispatch => {
+export const newDecision = (bytes32Script, question, fundingAmount) => dispatch => {
   return client.sendTransaction('newDecision', bytes32Script, question).then(txHash => {
     dispatch(newDecisionTxPending({ question, txHash }))
   }, err => {
@@ -46,26 +40,25 @@ export const newDecision = (bytes32Script, question) => dispatch => {
 
 export const fetchAccounts = () => dispatch => {
   return client.accounts().then(
-    accounts => dispatch(accountsLoaded({ accounts })),
+    accounts => dispatch(propValueLoaded({ prop: 'accounts', value: accounts })),
     errorMessage => {
       console.error(errorMessage)
-      return dispatch(accountsLoadingError({ errorMessage }))
+      return dispatch(propValueLoadingError({ prop: 'accounts', errorMessage }))
     }
   )
 }
 
 export const fetchTokenBalance = (account) => dispatch => {
   return client.tokenBalance(account).then(
-    tokenBalance => dispatch(tokenBalanceLoaded({ balance: tokenBalance })),
+    tokenBalance => dispatch(propValueLoaded({ prop: 'tokenBalance', value: tokenBalance })),
     errorMessage => {
       console.error(errorMessage)
-      return dispatch(tokenBalanceLoadingError({ errorMessage }))
+      return dispatch(propValueLoadingError({ prop: 'tokenBalance', errorMessage }))
     }
   )
 }
 
-export const fetchInitData = () => (dispatch, getState) => {
-  return dispatch(fetchAccounts()).then(() => 
-    dispatch(fetchTokenBalance(getState().accounts[0]))
-  )
+export const fetchInitData = () => async (dispatch, getState) => {
+  await dispatch(fetchAccounts())
+  await dispatch(fetchTokenBalance(getState().accounts[0]))
 }

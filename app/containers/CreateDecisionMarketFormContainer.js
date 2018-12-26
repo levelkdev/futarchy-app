@@ -13,7 +13,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   createDecision: async values => {
     dispatch(hidePanel())
-    dispatch(newDecision(ZERO_BYTES_32, values.question))
+    dispatch(newDecision(ZERO_BYTES_32, values.question, values.fundingAmount))
   }
 })
 
