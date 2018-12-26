@@ -38,15 +38,10 @@ export const newDecision = (bytes32Script, question, fundingAmount) => dispatch 
   })
 }
 
-export const fetchAccounts = () => dispatch => {
-  return client.accounts().then(
-    accounts => dispatch(propValueLoaded({ prop: 'accounts', value: accounts })),
-    errorMessage => {
-      console.error(errorMessage)
-      return dispatch(propValueLoadingError({ prop: 'accounts', errorMessage }))
-    }
-  )
-}
+export const fetchAccounts = propFetchDispatcher('accounts')
+export const fetchFee = propFetchDispatcher('fee')
+export const fetchTradingPeriod = propFetchDispatcher('tradingPeriod')
+export const fetchMarketFundAmount = propFetchDispatcher('marketFundAmount')
 
 export const fetchTokenBalance = (account) => dispatch => {
   return client.tokenBalance(account).then(
@@ -59,6 +54,23 @@ export const fetchTokenBalance = (account) => dispatch => {
 }
 
 export const fetchInitData = () => async (dispatch, getState) => {
-  await dispatch(fetchAccounts())
+  await Promise.all([
+    dispatch(fetchAccounts()),
+    dispatch(fetchFee()),
+    dispatch(fetchTradingPeriod()),
+    dispatch(fetchMarketFundAmount())
+  ])
   await dispatch(fetchTokenBalance(getState().accounts[0]))
+}
+
+function propFetchDispatcher (prop) {
+  return () => dispatch => {
+    return client[prop]().then(
+      fee => dispatch(propValueLoaded({ prop, value: fee })),
+      errorMessage => {
+        console.error(errorMessage)
+        return dispatch(propValueLoadingError({ prop, errorMessage }))
+      }
+    )
+  }
 }

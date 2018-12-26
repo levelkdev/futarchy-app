@@ -24,6 +24,21 @@ export const tokenBalance = async (account) => {
   return balance
 }
 
+export const fee = async () => {
+  const fee = await call('fee')
+  return fee
+}
+
+export const tradingPeriod = async () => {
+  const tradingPeriod = await call('tradingPeriod')
+  return tradingPeriod
+}
+
+export const marketFundAmount = async () => {
+  const marketFundAmount = await call('marketFundAmount')
+  return marketFundAmount
+}
+
 export const call = async (functionName, ...params) => {
   return contractCall(window.aragonClient, 'client', functionName, ...params)
 }
@@ -35,5 +50,8 @@ export const sendTransaction = async (functionName, ...params) => {
 export default {
   accounts,
   tokenBalance,
+  fee,
+  tradingPeriod,
+  marketFundAmount,
   sendTransaction
 }
