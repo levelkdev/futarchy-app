@@ -1,13 +1,6 @@
-const initDataLoadStates = (state = {
-  accounts: {
-    loaded: false,
-    errorMessage: null
-  },
-  tokenBalance: {
-    loaded: false,
-    errorMessage: null
-  }
-}, action) => {
+import initDataDefaultState from './initDataDefaultState'
+
+const initDataLoadStates = (state = initDataDefaultState, action) => {
   switch (action.type) {
     case 'PROP_VALUE_LOADED':
       return {
