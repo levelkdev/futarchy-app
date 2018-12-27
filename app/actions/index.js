@@ -66,7 +66,7 @@ export const fetchInitData = () => async (dispatch, getState) => {
 function propFetchDispatcher (prop) {
   return () => dispatch => {
     return client[prop]().then(
-      fee => dispatch(propValueLoaded({ prop, value: fee })),
+      propValue => dispatch(propValueLoaded({ prop, value: propValue })),
       errorMessage => {
         console.error(errorMessage)
         return dispatch(propValueLoadingError({ prop, errorMessage }))
