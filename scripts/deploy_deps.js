@@ -100,6 +100,6 @@ module.exports = async (
       }
     }
   } catch (err) {
-    console.log('Error in scripts/deploy.js: ', err)
+    console.log('Error in scripts/deploy_deps.js: ', err)
   }
 }

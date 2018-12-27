@@ -1,13 +1,14 @@
 const execa = require('execa')
 const getAccounts = require('@aragon/os/scripts/helpers/get-accounts')
 const deployDeps = require('./deploy_deps')
+const distributeTokens = require('./distribute_tokens')
 
+const TOKEN_DISTRIBUTION_AMOUNT = 100000000 * 10 ** 18
 const FEE = 20
 const TRADING_PERIOD = 60 * 60 * 24 * 7
 const MARKET_FUND_AMOUNT = 10 * 10 ** 18
 
 const defaultOwner = process.env.OWNER
-
 
 module.exports = async (
   truffleExecCallback,
@@ -16,8 +17,9 @@ module.exports = async (
   } = {}
 ) => {
   try {
+    let accounts
     if (!owner) {
-      const accounts = await getAccounts(web3)
+      accounts = await getAccounts(web3)
       owner = accounts[0]
     }
 
@@ -31,6 +33,14 @@ module.exports = async (
       lmsrMarketMakerAddress
     } = await deployDeps(null, { artifacts })
     console.log('')
+
+    await distributeTokens(null, {
+      artifacts,
+      tokenAddress: miniMeTokenAddress,
+      owner,
+      accounts,
+      amount: TOKEN_DISTRIBUTION_AMOUNT
+    })
 
     const aragonRunArgs = [
       'run',

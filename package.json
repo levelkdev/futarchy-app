@@ -10,6 +10,7 @@
     "@aragon/ui": "^0.16.0",
     "@gnosis.pm/pm-contracts": "git://git@github.com:levelkdev/pm-contracts#8d797fe23d2a7bdf8cbed9bfb43679f564dda34d",
     "@gnosis.pm/util-contracts": "2.0.0-alpha",
+    "bignumber.js": "^8.0.1",
     "eth-ens-namehash": "^2.0.8",
     "execa": "^1.0.0",
     "ganache-core": "2.2.1",
