@@ -7,6 +7,7 @@ const createReduxForm = reduxForm({ form: 'createDecisionMarket' })
 
 const CreateDecisionMarketForm = createReduxForm(({
   tokenBalance,
+  marketFundAmount,
   handleSubmit,
   createDecision
 }) => (
@@ -17,8 +18,9 @@ const CreateDecisionMarketForm = createReduxForm(({
     </div>
     <br /><br />
     <div>
-      <label htmlFor="fundingAmount">Funding Amount:</label>
-      <Field name="fundingAmount" component="input" type="text" />
+      <div>
+        Funding required: <b>{formatBalance(marketFundAmount)} TKN</b>
+      </div>
       <div>
         Your balance: <b>{formatBalance(tokenBalance)} TKN</b>
       </div>
