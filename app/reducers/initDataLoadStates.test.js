@@ -4,17 +4,7 @@ import {
   propValueLoadingError
 } from '../actions'
 import initDataLoadStates from './initDataLoadStates'
-
-const defaultState = {
-  accounts: {
-    loaded: false,
-    errorMessage: null
-  },
-  tokenBalance: {
-    loaded: false,
-    errorMessage: null
-  }
-}
+import initDataDefaultState from './initDataDefaultState'
 
 describe('initDataLoadStates', () => {
   describe('default', () => {
@@ -22,7 +12,7 @@ describe('initDataLoadStates', () => {
       it('should return default state', () => {
         assert.deepEqual(
           initDataLoadStates(undefined, { type: 'UNKNOWN' }),
-          defaultState
+          initDataDefaultState
         )
       })
     })
