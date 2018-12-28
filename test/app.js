@@ -64,6 +64,7 @@ contract('Futarchy', (accounts) => {
     await acl.createPermission(root, dao.address, APP_MANAGER_ROLE, root, { from: root })
     const receipt = await dao.newAppInstance('0x1234', futarchyBase.address, '0x', false, { from: root })
     token = await MiniMeToken.new(NULL_ADDRESS, NULL_ADDRESS, 0, 'n', 0, 'n', true)
+    await token.generateTokens(root, 100 * 10 ** 18)
     futarchy = Futarchy.at(receipt.logs.filter(l => l.event == 'NewAppProxy')[0].args.proxy)
     const CREATE_DECISION_ROLE = await futarchy.CREATE_DECISION_ROLE()
     await acl.createPermission(root, futarchy.address, CREATE_DECISION_ROLE, root);
@@ -135,6 +136,7 @@ contract('Futarchy', (accounts) => {
 
     describe('the newly created Decision struct', async () => {
       beforeEach(async () => {
+        await token.approve(futarchy.address, marketFundAmount, {from: root})
         currentBlockNumber = await getBlockNumber()
         const { logs } = await futarchy.newDecision(script, metadata)
         _logs = logs
@@ -170,6 +172,7 @@ contract('Futarchy', (accounts) => {
     })
 
     it('emits an accurate StartDecision event', async () => {
+      await token.approve(futarchy.address, marketFundAmount, {from: root})
       const { logs } = await futarchy.newDecision(script, metadata)
       const event = logs[0]
       expect(event.event).to.equal('StartDecision')
@@ -179,11 +182,14 @@ contract('Futarchy', (accounts) => {
     })
 
     it('returns the decisionId number', async () => {
+      await token.approve(futarchy.address, marketFundAmount, {from: root})
       expect((await futarchy.newDecision.call(script, metadata)).toNumber()).to.equal(0)
     })
 
     it('increments the decisionId number every time it is called', async () => {
+      await token.approve(futarchy.address, marketFundAmount, {from: root})
       await futarchy.newDecision(script, 'abc')
+      await token.approve(futarchy.address, marketFundAmount, {from: root})
       expect((await futarchy.newDecision.call(script, metadata)).toNumber()).to.equal(1)
     })
   })
@@ -193,6 +199,7 @@ contract('Futarchy', (accounts) => {
     beforeEach(async () => {
       script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
       metadata = 'Give voting rights to all kitties in the world'
+      await token.approve(futarchy.address, marketFundAmount, {from: root})
       currentBlockNumber = await getBlockNumber()
       await futarchy.newDecision(script, metadata)
       returnValue = await futarchy.getDecision(0)
@@ -231,6 +238,7 @@ contract('Futarchy', (accounts) => {
       script = await encodeExecutionScript(executionTarget)
       metadata = 'Give voting rights to all kitties in the world'
 
+      await token.approve(futarchy.address, marketFundAmount, {from: root})
       await futarchy.newDecision(script, metadata)
       decisionId = 0
       futarchyOracle = await FutarchyOracle.at((await futarchy.decisions(0))[0])
