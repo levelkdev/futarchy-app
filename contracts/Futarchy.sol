@@ -95,14 +95,15 @@ contract Futarchy is AragonApp {
       int lowerBound;
       int upperBound;
       decisionId = decisionLength++;
-      decisions[decisionId].startDate = getTimestamp64();
+      uint64 startDate = getTimestamp64();
+      decisions[decisionId].startDate = startDate;
       decisions[decisionId].tradingPeriod = tradingPeriod; // set tradingPeriod to protect against future variable updates
       decisions[decisionId].metadata = metadata;
       decisions[decisionId].snapshotBlock = getBlockNumber64() - 1;
       decisions[decisionId].executionScript = executionScript;
       (lowerBound, upperBound) = _calculateBounds();
 
-      decisions[decisionId].futarchyOracle = futarchyOracleFactory.createFutarchyOracle(
+      FutarchyOracle futarchyOracle = futarchyOracleFactory.createFutarchyOracle(
         ERC20Gnosis(token),
         priceOracleFactory.createCentralizedOracle("QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz"),
         2,
@@ -111,10 +112,13 @@ contract Futarchy is AragonApp {
         lmsrMarketMaker,
         fee,
         tradingPeriod,
-        decisions[decisionId].startDate
+        startDate
       );
+      decisions[decisionId].futarchyOracle = futarchyOracle;
 
-      decisions[decisionId].futarchyOracle.fund(marketFundAmount);
+      require(token.transferFrom(msg.sender, this, marketFundAmount));
+      require(token.approve(futarchyOracle, marketFundAmount));
+      futarchyOracle.fund(marketFundAmount);
 
       emit StartDecision(decisionId, msg.sender, metadata, decisions[decisionId].futarchyOracle);
     }
