@@ -29,9 +29,9 @@ module.exports = async (
       NULL_ADDRESS,
       NULL_ADDRESS,
       0,
-      'n',
+      'TokenCoin',
       0,
-      'n',
+      'TKN',
       true
     )
     console.log(`MiniMeToken instance: ${miniMeToken.address}`)

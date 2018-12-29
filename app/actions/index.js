@@ -31,14 +31,17 @@ export const propValueLoadingError = ({ prop, errorMessage }) => ({
 })
 
 export const newDecision = (bytes32Script, question) => dispatch => {
-  return client.sendTransaction('newDecision', bytes32Script, question).then(txHash => {
+  return client.newDecision(bytes32Script, question).then(txHash => {
+  // return client.sendTransaction('newDecision', bytes32Script, question).then(txHash => {
     dispatch(newDecisionTxPending({ question, txHash }))
   }, err => {
+    console.error(`newDecision: ${err}`)
     // TODO: dispatch error action, to show something to the user
   })
 }
 
 export const fetchAccounts = propFetchDispatcher('accounts')
+export const fetchFutarchyAddress = propFetchDispatcher('futarchyAddress')
 export const fetchFee = propFetchDispatcher('fee')
 export const fetchTradingPeriod = propFetchDispatcher('tradingPeriod')
 export const fetchMarketFundAmount = propFetchDispatcher('marketFundAmount')
@@ -56,6 +59,7 @@ export const fetchTokenBalance = (account) => dispatch => {
 export const fetchInitData = () => async (dispatch, getState) => {
   await Promise.all([
     dispatch(fetchAccounts()),
+    dispatch(fetchFutarchyAddress()),
     dispatch(fetchFee()),
     dispatch(fetchTradingPeriod()),
     dispatch(fetchMarketFundAmount())
