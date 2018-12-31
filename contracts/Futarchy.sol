@@ -185,6 +185,29 @@ contract Futarchy is AragonApp {
       emit ExecuteDecision(decisionId);
     }
 
+    event DebugTrade(address trader, uint tokenAmount);
+
+    function trade(
+      uint decisionId,
+      uint tokenAmount,
+      uint8 yesMarketOutcome,
+      uint8 noMarketOutcome
+    )
+      public
+    {
+      Decision storage decision = decisions[decisionId];
+      Event yesNoCategorical = decision.futarchyOracle.categoricalEvent();
+      Market yesMarket = decision.futarchyOracle.markets(0);
+      Market noMarket = decision.futarchyOracle.markets(1);
+
+      require(token.transferFrom(msg.sender, this, tokenAmount));
+      require(token.approve(yesNoCategorical, tokenAmount));
+
+      yesNoCategorical.buyAllOutcomes(tokenAmount);
+
+      emit DebugTrade(msg.sender, tokenAmount);
+    }
+
     // Workaround solution to get the contract address. Would be better to get from
     // Aragon client
     function contractAddress() public view returns (address) {
