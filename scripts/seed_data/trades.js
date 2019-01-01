@@ -1,9 +1,16 @@
+const BigNumber = require('bignumber.js')
 const advanceTime = require('./advanceTime')
 const getFutarchyContract = require('./getFutarchyContract')
+const calcOutcomeTokenCount = require('./calcOutcomeTokenCount')
 const tradesData = require('./tradesData001.json')
+
+const extraTokens = 1000
 
 module.exports = async (callback) => {
   const ERC20 = artifacts.require('ERC20')
+  const LMSRMarketMaker = artifacts.require('LMSRMarketMaker')
+  const FutarchyOracle = artifacts.require('FutarchyOracle')
+  const Market = artifacts.require('Market')
 
   try {
     const daoAddress = process.argv[6]
@@ -20,34 +27,48 @@ module.exports = async (callback) => {
 
     const app = await getFutarchyContract(artifacts, daoAddress)
     const token = ERC20.at(await app.token())
+    const futarchyOracle = FutarchyOracle.at((await app.decisions(decisionId))[0])
+    const lmsrMarketMaker = LMSRMarketMaker.at(await app.lmsrMarketMaker())
+    const yesMarket = Market.at(await futarchyOracle.markets(0))
+    const noMarket = Market.at(await futarchyOracle.markets(1))
 
     for (var i = 0; i < tradesData.length; i++) {
       const data = tradesData[i]
       if (data.type == 'buy') {
         const { tokenAmount, from, yesPrediction, noPrediction } = data
-        const yesOutcome = yesPrediction == 'SHORT' ? 0 : 1
-        const noOutcome = noPrediction == 'SHORT' ? 0 : 1
+        const yesOutcomeIndex = yesPrediction == 'SHORT' ? 0 : 1
+        const noOutcomeIndex = noPrediction == 'SHORT' ? 0 : 1
         const buyer = accounts[from]
 
         console.log(
           `Buying YES-${yesPrediction} / NO-${noPrediction} ` +
           `for ${tokenAmount / 10 ** 18} TKN ` +
+          `+ ${extraTokens} extra ` +
           `from ${buyer}`
         )
 
-        console.log(`token.approve(${app.address}, ${tokenAmount}) from: ${buyer}`)
-        await token.approve(
-          app.address,
-          tokenAmount,
-          { from: buyer }
+        const totalTokenAmount = tokenAmount + extraTokens
+
+        console.log(`token.approve(${app.address}, 0) from: ${buyer}`)
+        await token.approve(app.address, 0, { from: buyer })
+        console.log(`token.approve(${app.address}, ${totalTokenAmount}) from: ${buyer}`)
+        await token.approve(app.address, totalTokenAmount, { from: buyer })
+
+        let yesOutcomeTokenAmounts = [0, 0]
+        let noOutcomeTokenAmounts = [0, 0]
+        yesOutcomeTokenAmounts[yesOutcomeIndex] = await calcOutcomeTokenCount(
+          yesMarket, new BigNumber(tokenAmount), yesOutcomeIndex
         )
-  
-        console.log(`app.trade(${decisionId}, ${tokenAmount}, ${yesOutcome}, ${noOutcome})`)
+        noOutcomeTokenAmounts[noOutcomeIndex] = await calcOutcomeTokenCount(
+          noMarket, new BigNumber(tokenAmount), noOutcomeIndex
+        )
+
+        console.log(`app.trade(${decisionId}, ${totalTokenAmount}, [${yesOutcomeTokenAmounts}], [${noOutcomeTokenAmounts}])`)
         await app.trade(
           decisionId,
-          tokenAmount,
-          yesOutcome,
-          noOutcome,
+          totalTokenAmount,
+          yesOutcomeTokenAmounts,
+          noOutcomeTokenAmounts,
           { from: buyer }
         )
       } else if (data.type == 'advanceTime') {

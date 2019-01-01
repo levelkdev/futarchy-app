@@ -11,6 +11,7 @@
     "@gnosis.pm/pm-contracts": "github:levelkdev/pm-contracts#fa70a4cb722104187f9b6cbde3b92169c75935e2",
     "@gnosis.pm/util-contracts": "2.0.0-alpha",
     "bignumber.js": "^8.0.1",
+    "decimal.js": "^10.0.2",
     "eth-ens-namehash": "^2.0.8",
     "execa": "^1.0.0",
     "ganache-core": "2.2.1",
