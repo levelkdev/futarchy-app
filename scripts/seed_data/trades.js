@@ -8,7 +8,6 @@ const extraTokens = 1000
 
 module.exports = async (callback) => {
   const ERC20 = artifacts.require('ERC20')
-  const LMSRMarketMaker = artifacts.require('LMSRMarketMaker')
   const FutarchyOracle = artifacts.require('FutarchyOracle')
   const Market = artifacts.require('Market')
 
@@ -28,7 +27,6 @@ module.exports = async (callback) => {
     const app = await getFutarchyContract(artifacts, daoAddress)
     const token = ERC20.at(await app.token())
     const futarchyOracle = FutarchyOracle.at((await app.decisions(decisionId))[0])
-    const lmsrMarketMaker = LMSRMarketMaker.at(await app.lmsrMarketMaker())
     const yesMarket = Market.at(await futarchyOracle.markets(0))
     const noMarket = Market.at(await futarchyOracle.markets(1))
 

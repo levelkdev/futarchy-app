@@ -6,13 +6,15 @@ import sidePanel from './sidePanel'
 import propValue from './propValue'
 import initDataLoadStates from './initDataLoadStates'
 import initDataProps from './initDataProps'
+import trades from './trades'
 
 let reducers = {
   appEvents,
   decisionMarkets,
   form,
   sidePanel,
-  initDataLoadStates
+  initDataLoadStates,
+  trades
 }
 
 initDataProps.forEach(val => {
