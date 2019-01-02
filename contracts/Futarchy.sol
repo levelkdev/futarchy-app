@@ -185,7 +185,7 @@ contract Futarchy is AragonApp {
       emit ExecuteDecision(decisionId);
     }
 
-    event DebugTrade(address trader, uint decisionId, uint tokenAmount, int yesShortTokenAmount, int yesLongTokenAmount, int noShortTokenAmount, int noLongTokenAmount, int netYesCost, int netNoCost);
+    event DebugTrade(address trader, uint decisionId, uint tradeTime, uint tokenAmount, int yesShortTokenAmount, int yesLongTokenAmount, int noShortTokenAmount, int noLongTokenAmount, int netYesCost, int netNoCost);
 
     function trade(
       uint decisionId,
@@ -211,7 +211,7 @@ contract Futarchy is AragonApp {
       int netYesCost = yesMarket.trade(yesOutcomeTokenAmounts, 0);
       int netNoCost = noMarket.trade(noOutcomeTokenAmounts, 0);
 
-      emit DebugTrade(msg.sender, decisionId, tokenAmount, yesOutcomeTokenAmounts[0], yesOutcomeTokenAmounts[1], noOutcomeTokenAmounts[0], noOutcomeTokenAmounts[1], netYesCost, netNoCost);
+      emit DebugTrade(msg.sender, decisionId, now, tokenAmount, yesOutcomeTokenAmounts[0], yesOutcomeTokenAmounts[1], noOutcomeTokenAmounts[0], noOutcomeTokenAmounts[1], netYesCost, netNoCost);
     }
 
     // Workaround solution to get the contract address. Would be better to get from

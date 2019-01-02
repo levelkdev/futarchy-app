@@ -6,6 +6,7 @@ const mockShortTradesAction = {
   type: 'DEBUG_TRADE_EVENT',
   returnValues: {
     decisionId: '0',
+    tradeTime: '1546469212',
     netNoCost: '100',
     netYesCost: '100',
     noShortTokenAmount: '250',
@@ -21,6 +22,7 @@ const mockLongTradesAction = {
   type: 'DEBUG_TRADE_EVENT',
   returnValues: {
     decisionId: '0',
+    tradeTime: '1546469212',
     netNoCost: '100',
     netYesCost: '100',
     noShortTokenAmount: '0',
@@ -34,6 +36,7 @@ const mockLongTradesAction = {
 
 const shortTrade = {
   decisionId: '0',
+  tradeTime: '1546469212',
   tokenAmount: '102',
   trader: 'mock_trader_addr',
   noTokenName: 'NO-SHORT',
@@ -44,6 +47,7 @@ const shortTrade = {
 
 const longTrade = {
   decisionId: '0',
+  tradeTime: '1546469212',
   tokenAmount: '102',
   trader: 'mock_trader_addr',
   noTokenName: 'NO-LONG',

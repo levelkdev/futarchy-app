@@ -6,12 +6,14 @@ const TradeList = ({ trades }) => (
   <div>
     <DataTable>
       <tr>
+        <DataHeaderCell>Time</DataHeaderCell>
         <DataHeaderCell>TKN Amount</DataHeaderCell>
         <DataHeaderCell>YES Trade</DataHeaderCell>
         <DataHeaderCell>NO Trade</DataHeaderCell>
       </tr>
       {trades.map((trade, i) => (
         <tr key={i}>
+          <DataCell>{trade.tradeTime}</DataCell>
           <DataCell>{formatBalance(trade.tokenAmount)}</DataCell>
           <DataCell>{formatBalance(trade.yesTokenAmount)} {trade.yesTokenName}</DataCell>
           <DataCell>{formatBalance(trade.noTokenAmount)} {trade.noTokenName}</DataCell>

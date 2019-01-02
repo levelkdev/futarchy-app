@@ -7,6 +7,7 @@ const trades = (state = [], action) => {
       const {
         decisionId,
         trader,
+        tradeTime,
         tokenAmount,
         yesShortTokenAmount,
         yesLongTokenAmount,
@@ -18,6 +19,7 @@ const trades = (state = [], action) => {
         {
           decisionId,
           trader,
+          tradeTime,
           tokenAmount,
           noTokenName: `NO-${noShortTokenAmount == 0 ? 'LONG' : 'SHORT'}`,
           yesTokenName: `YES-${yesShortTokenAmount == 0 ? 'LONG' : 'SHORT'}`,
