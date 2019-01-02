@@ -9,9 +9,18 @@ const MiniMeToken = artifacts.require('MiniMeToken')
 const LMSRMarketMaker = artifacts.require('LMSRMarketMaker')
 const CentralizedOracle = artifacts.require('CentralizedOracle')
 const CentralizedOracleFactory = artifacts.require('CentralizedOracleFactory')
-const FutarchyOracle = artifacts.require('FutarchyOracleMock.sol')
-const FutarchyOracleFactory = artifacts.require('FutarchyOracleFactoryMock.sol')
+const FutarchyOracleFull = artifacts.require('FutarchyOracle.sol')
+const FutarchyOracleFactoryFull = artifacts.require('FutarchyOracleFactory.sol')
+const FutarchyOracleMock = artifacts.require('FutarchyOracleMock.sol')
+const FutarchyOracleFactoryMock = artifacts.require('FutarchyOracleFactoryMock.sol')
 const Fixed192x64Math = artifacts.require('Fixed192x64Math')
+
+const EventFactory = artifacts.require('EventFactory')
+const CategoricalEvent = artifacts.require('CategoricalEvent')
+const ScalarEvent = artifacts.require('ScalarEvent')
+const OutcomeToken = artifacts.require('OutcomeToken')
+const StandardMarketWithPriceLogger = artifacts.require('StandardMarketWithPriceLogger')
+const StandardMarketWithPriceLoggerFactory = artifacts.require('StandardMarketWithPriceLoggerFactory')
 
 // local contracts
 const Futarchy = artifacts.require('Futarchy.sol')
@@ -25,6 +34,8 @@ const { assertRevert } = require('@aragon/test-helpers/assertThrow')
 const getBlockNumber = require('@aragon/test-helpers/blockNumber')(web3)
 const timeTravel = require('@aragon/test-helpers/timeTravel')(web3)
 const { encodeCallScript } = require('@aragon/test-helpers/evmScript')
+const { calcLMSROutcomeTokenCount } = require('./helpers.js')
+const leftPad = require('left-pad')
 
 const ANY_ADDR = '0xffffffffffffffffffffffffffffffffffffffff'
 const NULL_ADDRESS = '0x00'
@@ -48,13 +59,13 @@ contract('Futarchy', (accounts) => {
     const fixed192x64Math = await Fixed192x64Math.new()
     await LMSRMarketMaker.link('Fixed192x64Math', fixed192x64Math.address)
     const centralizedOracleMaster = await CentralizedOracle.new()
-
     fee = 2000
     tradingPeriod = 60 * 60 * 24 * 7
     marketFundAmount = 10 * 10 ** 18
     priceOracleFactory = await CentralizedOracleFactory.new(centralizedOracleMaster.address)
     lmsrMarketMaker = await LMSRMarketMaker.new()
-    futarchyOracleFactory = await deployFutarchyMasterCopies()
+    futarchyOracleFactoryFull = await deployFutarchyMasterCopies()
+    futarchyOracleFactoryMock = await FutarchyOracleFactoryMock.new()
   })
 
   beforeEach(async () => {
@@ -68,30 +79,16 @@ contract('Futarchy', (accounts) => {
     futarchy = Futarchy.at(receipt.logs.filter(l => l.event == 'NewAppProxy')[0].args.proxy)
     const CREATE_DECISION_ROLE = await futarchy.CREATE_DECISION_ROLE()
     await acl.createPermission(root, futarchy.address, CREATE_DECISION_ROLE, root);
-
-    await futarchy.initialize(
-      fee,
-      tradingPeriod,
-      marketFundAmount,
-      token.address,
-      futarchyOracleFactory.address,
-      priceOracleFactory.address,
-      lmsrMarketMaker.address
-    )
 })
 
   describe('initialize()', async () => {
+    beforeEach(async () => {
+      await initializeFutarchy()
+    })
+
     it('can only be called once on an instance of Futarchy', async () => {
       return assertRevert(async () => {
-        await futarchy.initialize(
-          fee,
-          tradingPeriod,
-          marketFundAmount,
-          token.address,
-          futarchyOracleFactory.address,
-          priceOracleFactory.address,
-          lmsrMarketMaker.address
-        )
+        await initializeFutarchy()
       })
     })
 
@@ -112,7 +109,7 @@ contract('Futarchy', (accounts) => {
     })
 
     it('sets futarchyOracleFactory', async () => {
-      expect(await futarchy.futarchyOracleFactory()).to.equal(futarchyOracleFactory.address)
+      expect(await futarchy.futarchyOracleFactory()).to.equal(futarchyOracleFactoryMock.address)
     })
 
     it('sets priceOracleFactory', async () => {
@@ -128,6 +125,7 @@ contract('Futarchy', (accounts) => {
     let script, metadata, _logs, currentBlockNumber
 
     beforeEach(async () => {
+      await initializeFutarchy()
       script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
       metadata = 'Give voting rights to all kitties in the world'
     })
@@ -197,6 +195,7 @@ contract('Futarchy', (accounts) => {
   describe('getDecision()', async () => {
     let script, metadata, returnValue, currentBlockNumber
     beforeEach(async () => {
+      await initializeFutarchy()
       script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
       metadata = 'Give voting rights to all kitties in the world'
       await token.approve(futarchy.address, marketFundAmount, {from: root})
@@ -234,6 +233,7 @@ contract('Futarchy', (accounts) => {
     let script, metadata, decisionId, currentBlockNumber, futarchyOracle, exeutionTarget
 
     beforeEach(async () => {
+      await initializeFutarchy()
       executionTarget = await ExecutionTarget.new()
       script = await encodeExecutionScript(executionTarget)
       metadata = 'Give voting rights to all kitties in the world'
@@ -241,7 +241,7 @@ contract('Futarchy', (accounts) => {
       await token.approve(futarchy.address, marketFundAmount, {from: root})
       await futarchy.newDecision(script, metadata)
       decisionId = 0
-      futarchyOracle = await FutarchyOracle.at((await futarchy.decisions(0))[0])
+      futarchyOracle = await FutarchyOracleMock.at((await futarchy.decisions(0))[0])
     })
 
     describe('when decision is not in ready state', async () => {
@@ -306,16 +306,211 @@ contract('Futarchy', (accounts) => {
       })
     })
   })
+
+  describe('tradeInMarkets()', async () => {
+    let script, metadata, decisionId, futarchyOracle, twenty, five, three, keccak
+    let yesLongToken, yesShortToken, noLongToken, noShortToken
+
+    beforeEach(async () => {
+      twenty = 20 * 10 ** 18
+      five = 5 * 10 ** 18
+      three = 3 * 10 ** 18
+      initializeFutarchy({_futarchyOracleFactoryAddr: futarchyOracleFactoryFull.address})
+      script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
+      metadata = 'Give voting rights to all kitties in the world'
+      await token.approve(futarchy.address, marketFundAmount +  (40 * 10 ** 18), {from: root})
+      await futarchy.newDecision(script, metadata)
+      futarchyOracle = await FutarchyOracleFull.at((await futarchy.decisions(0))[0])
+    })
+
+    it('creates a new TradePorfolio for each unique trader', async () => {
+      let account2 = web3.eth.accounts[1]
+      token.generateTokens(account2, twenty)
+      await futarchy.tradeInMarkets(0, twenty, 0, 1, five, five, {from: root})
+      expect((await futarchy.trades(await keccak256(root, 0)))[2].toNumber()).to.equal(five)
+      expect((await futarchy.trades(await keccak256(account2, 0)))[2].toNumber()).to.equal(0)
+      await token.approve(futarchy.address, twenty, {from: account2})
+      await futarchy.tradeInMarkets(0, twenty, 0, 1, three, three, {from: account2})
+      expect((await futarchy.trades(await keccak256(account2, 0)))[2].toNumber()).to.equal(three)
+    })
+
+    describe('when trader is trading again on the same market', async () => {
+      beforeEach(async () => {
+        let yesMarket = await StandardMarketWithPriceLogger.at(await futarchyOracle.markets(0))
+        let yesEvent = await ScalarEvent.at(await yesMarket.eventContract())
+        yesLongToken = await OutcomeToken.at(await yesEvent.outcomeTokens(0))
+        yesShortToken = await OutcomeToken.at(await yesEvent.outcomeTokens(1))
+        await futarchy.tradeInMarkets(0, twenty, 0, 1, five, five)
+      })
+
+      it('records the correct data in the existing TradePortfolio for the trader', async () => {
+        expect((await yesLongToken.balanceOf(futarchy.address)).toNumber()).to.equal(five)
+        await futarchy.tradeInMarkets(0, twenty, 0, 1, three, five)
+        expect((await yesLongToken.balanceOf(futarchy.address)).toNumber()).to.equal(five + three)
+        expect((await futarchy.trades(await keccak256(root, 0)))[2].toNumber()).to.equal(five + three)
+      })
+    })
+
+    describe('for yesMarket trades', async () => {
+      beforeEach(async () => {
+        let yesMarket = await StandardMarketWithPriceLogger.at(await futarchyOracle.markets(0))
+        let yesEvent = await ScalarEvent.at(await yesMarket.eventContract())
+        yesLongToken = await OutcomeToken.at(await yesEvent.outcomeTokens(0))
+        yesShortToken = await OutcomeToken.at(await yesEvent.outcomeTokens(1))
+      })
+
+
+      describe('when yesPrediction is 0 (long)', async () => {
+        beforeEach(async () => {
+          await futarchy.tradeInMarkets(0, twenty, 0, 1, five, five)
+        })
+
+        it('purchases the correct amount of yesLong tokens', async () => {
+          expect((await yesLongToken.balanceOf(futarchy.address)).toNumber()).to.equal(five)
+        })
+
+        it('does not purchase any yesShort tokens', async () => {
+          expect((await yesShortToken.balanceOf(futarchy.address)).toNumber()).to.equal(0)
+        })
+
+        it('logs the correct amount of yesLong tokens for the trader', async () => {
+          expect((await futarchy.trades(await keccak256(root, 0)))[2].toNumber()).to.equal(five)
+        })
+
+        it('does not affect yesShort log for trader', async () => {
+          expect((await futarchy.trades(await keccak256(root, 0)))[3].toNumber()).to.equal(0)
+        })
+      })
+
+      describe('when yesPrediction is 1 (short)', async () => {
+        beforeEach(async () => {
+          await futarchy.tradeInMarkets(0, twenty, 1, 1, five, five)
+        })
+
+        it('purchases the correct amount of yesShort tokens', async () => {
+          expect((await yesShortToken.balanceOf(futarchy.address)).toNumber()).to.equal(five)
+        })
+
+        it('does not purchase any yesLong tokens', async () => {
+          expect((await yesLongToken.balanceOf(futarchy.address)).toNumber()).to.equal(0)
+        })
+
+        it('logs the correct amount of yesShort tokens for the trader', async () => {
+          expect((await futarchy.trades(await keccak256(root, 0)))[3].toNumber()).to.equal(five)
+        })
+
+        it('does not affect yesLong log for trader', async () => {
+          expect((await futarchy.trades(await keccak256(root, 0)))[2].toNumber()).to.equal(0)
+        })
+      })
+    })
+
+    describe('for noMarket Trades', async () => {
+      beforeEach(async () => {
+        let noMarket = await StandardMarketWithPriceLogger.at(await futarchyOracle.markets(1))
+        let noEvent = await ScalarEvent.at(await noMarket.eventContract())
+        noLongToken = await OutcomeToken.at(await noEvent.outcomeTokens(0))
+        noShortToken = await OutcomeToken.at(await noEvent.outcomeTokens(1))
+      })
+
+      describe('when noPrediction is 0 (long)', async () => {
+
+        beforeEach(async () => {
+          await futarchy.tradeInMarkets(0, twenty, 1, 0, five, five)
+        })
+
+        it('purchases the correct amount of noLong tokens', async () => {
+          expect((await noLongToken.balanceOf(futarchy.address)).toNumber()).to.equal(five)
+        })
+
+        it('does not purchase any noShort tokens', async () => {
+          expect((await noShortToken.balanceOf(futarchy.address)).toNumber()).to.equal(0)
+        })
+
+        it('logs the correct amount of noLong tokens for the trader', async () => {
+          expect((await futarchy.trades(await keccak256(root, 0)))[4].toNumber()).to.equal(five)
+        })
+
+        it('does not affect noShort log for trader', async () => {
+          expect((await futarchy.trades(await keccak256(root, 0)))[5].toNumber()).to.equal(0)
+        })
+      })
+
+      describe('when noPrediction is 1 (short)', async () => {
+        beforeEach(async () => {
+          await futarchy.tradeInMarkets(0, twenty, 1, 1, five, five)
+        })
+
+        it('purchases the correct amount of noShort tokens', async () => {
+          expect((await noShortToken.balanceOf(futarchy.address)).toNumber()).to.equal(five)
+        })
+
+        it('does not purchase any noLong tokens', async () => {
+          expect((await noLongToken.balanceOf(futarchy.address)).toNumber()).to.equal(0)
+        })
+
+        it('logs the correct amount of noShort tokens for the trader', async () => {
+          expect((await futarchy.trades(await keccak256(root, 0)))[5].toNumber()).to.equal(five)
+        })
+
+        it('does not affect noLong log for trader', async () => {
+          expect((await futarchy.trades(await keccak256(root, 0)))[4].toNumber()).to.equal(0)
+        })
+      })
+    })
+
+    it('logs remaining yesMarket/noMarket collateral tokens that belong to the trader', async () => {
+      expect((await futarchy.trades(await keccak256(root, 0)))[0].toNumber()).to.equal(0)
+      expect((await futarchy.trades(await keccak256(root, 0)))[1].toNumber()).to.equal(0)
+      await futarchy.tradeInMarkets(0, twenty, 0, 1, five, five)
+      expect((await futarchy.trades(await keccak256(root, 0)))[0].toNumber()).to.equal(17279035902300609000)
+      expect((await futarchy.trades(await keccak256(root, 0)))[1].toNumber()).to.equal(17279035902300609000)
+    })
+  })
+
+  async function initializeFutarchy(customParams = {}) {
+    const {
+      _fee = fee,
+      _tradingPeriod = tradingPeriod,
+      _marketFundAmount = marketFundAmount,
+      _tokenAddr = token.address,
+      _futarchyOracleFactoryAddr = futarchyOracleFactoryMock.address,
+      _priceOracleFactoryAddr = priceOracleFactory.address,
+      _lmsrMarketMakerAddr = lmsrMarketMaker.address
+    } = customParams
+
+    await futarchy.initialize(
+      _fee,
+      _tradingPeriod,
+      _marketFundAmount,
+      _tokenAddr,
+      _futarchyOracleFactoryAddr,
+      _priceOracleFactoryAddr,
+      _lmsrMarketMakerAddr
+    )
+  }
 })
 
-async function deployFutarchyMasterCopies() {
-   let futarchyOracleFactory = await FutarchyOracleFactory.new()
-  return futarchyOracleFactory
 
+async function deployFutarchyMasterCopies() {
+  const categoricalEvent = await CategoricalEvent.new()
+  const scalarEvent = await ScalarEvent.new()
+  const outcomeToken = await OutcomeToken.new()
+  const futarchyOracle = await FutarchyOracleFull.new()
+  const standardMarketWithPriceLogger = await StandardMarketWithPriceLogger.new()
+  const eventFactory = await EventFactory.new(categoricalEvent.address, scalarEvent.address, outcomeToken.address)
+  const standardMarketWithPriceLoggerFactory = await StandardMarketWithPriceLoggerFactory.new(standardMarketWithPriceLogger.address)
+  const futarchyOracleFactory = await FutarchyOracleFactoryFull.new(futarchyOracle.address, eventFactory.address, standardMarketWithPriceLoggerFactory.address)
+  return futarchyOracleFactory
 }
 
 async function encodeExecutionScript(executionTargetParam) {
   executionTarget = executionTargetParam || await ExecutionTarget.new()
   const action = { to: executionTarget.address, calldata: executionTarget.contract.execute.getData() }
   return encodeCallScript([action])
+}
+
+async function keccak256(address, decisionId) {
+  let result = await web3.sha3(address + leftPad(decisionId, 64, 0), {encoding: "hex"})
+  return result
 }

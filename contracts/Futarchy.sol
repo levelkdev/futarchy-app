@@ -2,14 +2,19 @@ pragma solidity ^0.4.24;
 
 import "@aragon/os/contracts/apps/AragonApp.sol";
 import "@aragon/os/contracts/common/IForwarder.sol";
+/* import "@aragon/os/contracts/lib/math/SafeMath.sol"; */
 import "@aragon/os/contracts/lib/math/SafeMath64.sol";
 import '@gnosis.pm/pm-contracts/contracts/Oracles/FutarchyOracleFactory.sol';
+import '@gnosis.pm/pm-contracts/contracts/Events/CategoricalEvent.sol';
+import '@gnosis.pm/pm-contracts/contracts/Events/ScalarEvent.sol';
+import '@gnosis.pm/pm-contracts/contracts/Markets/StandardMarket.sol';
 import '@gnosis.pm/pm-contracts/contracts/MarketMakers/LMSRMarketMaker.sol';
 import '@gnosis.pm/pm-contracts/contracts/Oracles/CentralizedOracleFactory.sol';
 import "@aragon/apps-shared-minime/contracts/MiniMeToken.sol";
 import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 
 contract Futarchy is AragonApp {
+  using SafeMath for uint;
   using SafeMath64 for uint64;
 
   event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle);
@@ -35,8 +40,19 @@ contract Futarchy is AragonApp {
     bytes executionScript;
   }
 
+  struct TradePortfolio {
+    uint yesCollateral;
+    uint noCollateral;
+    uint yesLong;
+    uint yesShort;
+    uint noLong;
+    uint noShort;
+  }
+
   mapping(uint256 => Decision) public decisions;
   uint public decisionLength;
+
+  mapping(bytes32 => TradePortfolio) public trades;
 
   modifier decisionExists(uint256 _decisionId) {
       require(_decisionId < decisionLength);
@@ -136,7 +152,7 @@ contract Futarchy is AragonApp {
         bool executed,
         uint64 startDate,
         uint64 snapshotBlock,
-        uint256 marketPower,
+        uint marketPower,
         bytes script
 
         )
@@ -145,8 +161,8 @@ contract Futarchy is AragonApp {
       open = !decision.futarchyOracle.isOutcomeSet();
       executed = decision.executed;
       startDate = decision.startDate;
-      snapshotBlock = decision.snapshotBlock;
       marketPower = token.totalSupplyAt(decision.snapshotBlock);
+      snapshotBlock = decision.snapshotBlock;
       script = decision.executionScript;
     }
 
@@ -162,7 +178,7 @@ contract Futarchy is AragonApp {
       require(!decision.executed);
       require(tradingPeriodEnded(decisionId));
       if (!decision.futarchyOracle.isOutcomeSet()) {
-          decision.futarchyOracle.setOutcome();
+        decision.futarchyOracle.setOutcome();
       }
       require(decision.futarchyOracle.getOutcome() == 0); // 0 == YES; 1 == NO
 
@@ -180,6 +196,53 @@ contract Futarchy is AragonApp {
     }
 
     /**
+    * @notice trades in decision market on users behalf
+    * @param decisionId unique identifier for decision
+    * @param stakeAmount amount of tokens sender will stake in market
+    * @param yesPrediction 0 == long, 1 == short
+    * @param noPrediction 0 == long, 1 == short
+    * @param yesPurchaseAmount amount of YES market outcome tokens to purchase
+    * @param noPurchaseAmount amount of NO market outcome tokens to purchase
+    */
+    function tradeInMarkets(
+      uint decisionId,
+      uint stakeAmount,
+      uint8 yesPrediction,
+      uint8 noPrediction,
+      uint yesPurchaseAmount,
+      uint noPurchaseAmount
+    ) public {
+      // make these local vars for now to avoid 'CompilerError: Stack too deep' (??)
+      uint id = decisionId;
+      uint collateralAmount = stakeAmount;
+
+      // set necessary contracts
+      Decision storage decision = decisions[id];
+      FutarchyOracle futarchyOracle = decision.futarchyOracle;
+      CategoricalEvent categoricalEvent = futarchyOracle.categoricalEvent();
+      StandardMarket yesMarket = futarchyOracle.markets(0);
+      StandardMarket noMarket = futarchyOracle.markets(1);
+
+      // buy market positions
+      require(token.transferFrom(msg.sender, this, collateralAmount));
+      token.approve(categoricalEvent, collateralAmount);
+      categoricalEvent.buyAllOutcomes(collateralAmount);
+      categoricalEvent.outcomeTokens(0).approve(yesMarket, collateralAmount);
+      categoricalEvent.outcomeTokens(1).approve(noMarket, collateralAmount);
+      uint yesCost = yesMarket.buy(yesPrediction, yesPurchaseAmount, collateralAmount);
+      uint noCost = noMarket.buy(noPrediction, noPurchaseAmount, collateralAmount);
+
+      // set tradePortfolio data for msg.sender
+      TradePortfolio storage tradePorfolio = trades[keccak256(msg.sender, id)];
+      tradePorfolio.yesCollateral = tradePorfolio.yesCollateral.add((collateralAmount.sub(yesCost)));
+      tradePorfolio.noCollateral = tradePorfolio.noCollateral.add((collateralAmount.sub(noCost)));
+      if (yesPrediction == 0) { tradePorfolio.yesLong = tradePorfolio.yesLong.add(yesPurchaseAmount); }
+      if (yesPrediction == 1) { tradePorfolio.yesShort = tradePorfolio.yesShort.add(yesPurchaseAmount); }
+      if (noPrediction == 0) { tradePorfolio.noLong = tradePorfolio.noLong.add(noPurchaseAmount); }
+      if (noPrediction == 1) { tradePorfolio.noShort = tradePorfolio.noShort.add(yesPurchaseAmount); }
+    }
+
+    /**
     * @notice returns true if the trading period before making the decision has passed
     * @param decisionId decision unique identifier
     */
@@ -187,6 +250,7 @@ contract Futarchy is AragonApp {
       Decision storage decision = decisions[decisionId];
       return (now > decision.startDate.add(uint64(decision.tradingPeriod)));
     }
+
 
     /* TODO: actually get real bounds */
     function _calculateBounds() internal returns(int lowerBound, int upperBound) {
