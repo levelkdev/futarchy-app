@@ -32,7 +32,6 @@ export const propValueLoadingError = ({ prop, errorMessage }) => ({
 
 export const newDecision = (bytes32Script, question) => dispatch => {
   return client.newDecision(bytes32Script, question).then(txHash => {
-  // return client.sendTransaction('newDecision', bytes32Script, question).then(txHash => {
     dispatch(newDecisionTxPending({ question, txHash }))
   }, err => {
     console.error(`newDecision: ${err}`)
