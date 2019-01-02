@@ -43,6 +43,8 @@ const shortTrade = {
   noTokenAmount: '250',
   yesTokenName: 'YES-SHORT',
   yesTokenAmount: '250',
+  netNoCost: '100',
+  netYesCost: '100'
 }
 
 const longTrade = {
@@ -54,6 +56,8 @@ const longTrade = {
   noTokenAmount: '250',
   yesTokenName: 'YES-LONG',
   yesTokenAmount: '250',
+  netNoCost: '100',
+  netYesCost: '100'
 }
 
 describe('trades', () => {
