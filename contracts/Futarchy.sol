@@ -173,6 +173,12 @@ contract Futarchy is AragonApp {
       emit ExecuteDecision(decisionId);
     }
 
+    // Workaround solution to get the contract address. Would be better to get from
+    // Aragon client
+    function contractAddress() public view returns (address) {
+      return this;
+    }
+
     /**
     * @notice returns true if the trading period before making the decision has passed
     * @param decisionId decision unique identifier

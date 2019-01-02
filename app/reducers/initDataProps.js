@@ -8,6 +8,10 @@ export default [
     defaultValue: null
   },
   {
+    prop: 'futarchyAddress',
+    defaultValue: null
+  },
+  {
     prop: 'fee',
     defaultValue: null
   },
