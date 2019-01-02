@@ -49,8 +49,11 @@ export const marketFundAmount = async () => {
   return amount
 }
 
+// this function includes a "pretransaction" to approve marketing funding
+// token transfer. Aragon client uses the `token` property in transaction
+// options to send a token approval transaction before the requested
+// transaction (in this case, a `newDecision` transaction)
 export const newDecision = async (script, question) => {
-  // this includes a "pretransaction" to approve marketing funding token transfer
   const address = await call('token')
   const value = await marketFundAmount()
   const transactionOptions = {
