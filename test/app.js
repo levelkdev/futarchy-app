@@ -34,7 +34,6 @@ const { assertRevert } = require('@aragon/test-helpers/assertThrow')
 const getBlockNumber = require('@aragon/test-helpers/blockNumber')(web3)
 const timeTravel = require('@aragon/test-helpers/timeTravel')(web3)
 const { encodeCallScript } = require('@aragon/test-helpers/evmScript')
-const { calcLMSROutcomeTokenCount } = require('./helpers.js')
 const leftPad = require('left-pad')
 
 const ANY_ADDR = '0xffffffffffffffffffffffffffffffffffffffff'
@@ -241,7 +240,7 @@ contract('Futarchy', (accounts) => {
       await token.approve(futarchy.address, marketFundAmount, {from: root})
       await futarchy.newDecision(script, metadata)
       decisionId = 0
-      futarchyOracle = await FutarchyOracleMock.at((await futarchy.decisions(0))[0])
+      futarchyOracle = FutarchyOracleMock.at((await futarchy.decisions(0))[0])
     })
 
     describe('when decision is not in ready state', async () => {
@@ -320,43 +319,43 @@ contract('Futarchy', (accounts) => {
       metadata = 'Give voting rights to all kitties in the world'
       await token.approve(futarchy.address, marketFundAmount +  (40 * 10 ** 18), {from: root})
       await futarchy.newDecision(script, metadata)
-      futarchyOracle = await FutarchyOracleFull.at((await futarchy.decisions(0))[0])
+      futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
     })
 
     it('creates a new TradePorfolio for each unique trader', async () => {
       let account2 = web3.eth.accounts[1]
       token.generateTokens(account2, twenty)
       await futarchy.tradeInMarkets(0, twenty, 0, 1, five, five, {from: root})
-      expect((await futarchy.trades(await keccak256(root, 0)))[2].toNumber()).to.equal(five)
-      expect((await futarchy.trades(await keccak256(account2, 0)))[2].toNumber()).to.equal(0)
+      expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[2].toNumber()).to.equal(five)
+      expect((await futarchy.traderDecisionBalances(await keccak256(account2, 0)))[2].toNumber()).to.equal(0)
       await token.approve(futarchy.address, twenty, {from: account2})
       await futarchy.tradeInMarkets(0, twenty, 0, 1, three, three, {from: account2})
-      expect((await futarchy.trades(await keccak256(account2, 0)))[2].toNumber()).to.equal(three)
+      expect((await futarchy.traderDecisionBalances(await keccak256(account2, 0)))[2].toNumber()).to.equal(three)
     })
 
     describe('when trader is trading again on the same market', async () => {
       beforeEach(async () => {
-        let yesMarket = await StandardMarketWithPriceLogger.at(await futarchyOracle.markets(0))
-        let yesEvent = await ScalarEvent.at(await yesMarket.eventContract())
-        yesLongToken = await OutcomeToken.at(await yesEvent.outcomeTokens(0))
-        yesShortToken = await OutcomeToken.at(await yesEvent.outcomeTokens(1))
+        let yesMarket = StandardMarketWithPriceLogger.at(await futarchyOracle.markets(0))
+        let yesEvent = ScalarEvent.at(await yesMarket.eventContract())
+        yesLongToken = OutcomeToken.at(await yesEvent.outcomeTokens(0))
+        yesShortToken = OutcomeToken.at(await yesEvent.outcomeTokens(1))
         await futarchy.tradeInMarkets(0, twenty, 0, 1, five, five)
       })
 
-      it('records the correct data in the existing TradePortfolio for the trader', async () => {
+      it('records the correct data in the existing OutcomeTokenBalances for the trader', async () => {
         expect((await yesLongToken.balanceOf(futarchy.address)).toNumber()).to.equal(five)
         await futarchy.tradeInMarkets(0, twenty, 0, 1, three, five)
         expect((await yesLongToken.balanceOf(futarchy.address)).toNumber()).to.equal(five + three)
-        expect((await futarchy.trades(await keccak256(root, 0)))[2].toNumber()).to.equal(five + three)
+        expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[2].toNumber()).to.equal(five + three)
       })
     })
 
     describe('for yesMarket trades', async () => {
       beforeEach(async () => {
-        let yesMarket = await StandardMarketWithPriceLogger.at(await futarchyOracle.markets(0))
-        let yesEvent = await ScalarEvent.at(await yesMarket.eventContract())
-        yesLongToken = await OutcomeToken.at(await yesEvent.outcomeTokens(0))
-        yesShortToken = await OutcomeToken.at(await yesEvent.outcomeTokens(1))
+        let yesMarket = StandardMarketWithPriceLogger.at(await futarchyOracle.markets(0))
+        let yesEvent = ScalarEvent.at(await yesMarket.eventContract())
+        yesLongToken = OutcomeToken.at(await yesEvent.outcomeTokens(0))
+        yesShortToken = OutcomeToken.at(await yesEvent.outcomeTokens(1))
       })
 
 
@@ -373,12 +372,12 @@ contract('Futarchy', (accounts) => {
           expect((await yesShortToken.balanceOf(futarchy.address)).toNumber()).to.equal(0)
         })
 
-        it('logs the correct amount of yesLong tokens for the trader', async () => {
-          expect((await futarchy.trades(await keccak256(root, 0)))[2].toNumber()).to.equal(five)
+        it('stores the correct amount of yesLong tokens for the trader', async () => {
+          expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[2].toNumber()).to.equal(five)
         })
 
         it('does not affect yesShort log for trader', async () => {
-          expect((await futarchy.trades(await keccak256(root, 0)))[3].toNumber()).to.equal(0)
+          expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[3].toNumber()).to.equal(0)
         })
       })
 
@@ -395,22 +394,22 @@ contract('Futarchy', (accounts) => {
           expect((await yesLongToken.balanceOf(futarchy.address)).toNumber()).to.equal(0)
         })
 
-        it('logs the correct amount of yesShort tokens for the trader', async () => {
-          expect((await futarchy.trades(await keccak256(root, 0)))[3].toNumber()).to.equal(five)
+        it('stores the correct amount of yesShort tokens for the trader', async () => {
+          expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[3].toNumber()).to.equal(five)
         })
 
         it('does not affect yesLong log for trader', async () => {
-          expect((await futarchy.trades(await keccak256(root, 0)))[2].toNumber()).to.equal(0)
+          expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[2].toNumber()).to.equal(0)
         })
       })
     })
 
-    describe('for noMarket Trades', async () => {
+    describe('for noMarket trades', async () => {
       beforeEach(async () => {
-        let noMarket = await StandardMarketWithPriceLogger.at(await futarchyOracle.markets(1))
-        let noEvent = await ScalarEvent.at(await noMarket.eventContract())
-        noLongToken = await OutcomeToken.at(await noEvent.outcomeTokens(0))
-        noShortToken = await OutcomeToken.at(await noEvent.outcomeTokens(1))
+        let noMarket = StandardMarketWithPriceLogger.at(await futarchyOracle.markets(1))
+        let noEvent = ScalarEvent.at(await noMarket.eventContract())
+        noLongToken = OutcomeToken.at(await noEvent.outcomeTokens(0))
+        noShortToken = OutcomeToken.at(await noEvent.outcomeTokens(1))
       })
 
       describe('when noPrediction is 0 (long)', async () => {
@@ -427,12 +426,12 @@ contract('Futarchy', (accounts) => {
           expect((await noShortToken.balanceOf(futarchy.address)).toNumber()).to.equal(0)
         })
 
-        it('logs the correct amount of noLong tokens for the trader', async () => {
-          expect((await futarchy.trades(await keccak256(root, 0)))[4].toNumber()).to.equal(five)
+        it('stores the correct amount of noLong tokens for the trader', async () => {
+          expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[4].toNumber()).to.equal(five)
         })
 
         it('does not affect noShort log for trader', async () => {
-          expect((await futarchy.trades(await keccak256(root, 0)))[5].toNumber()).to.equal(0)
+          expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[5].toNumber()).to.equal(0)
         })
       })
 
@@ -449,22 +448,22 @@ contract('Futarchy', (accounts) => {
           expect((await noLongToken.balanceOf(futarchy.address)).toNumber()).to.equal(0)
         })
 
-        it('logs the correct amount of noShort tokens for the trader', async () => {
-          expect((await futarchy.trades(await keccak256(root, 0)))[5].toNumber()).to.equal(five)
+        it('stores the correct amount of noShort tokens for the trader', async () => {
+          expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[5].toNumber()).to.equal(five)
         })
 
         it('does not affect noLong log for trader', async () => {
-          expect((await futarchy.trades(await keccak256(root, 0)))[4].toNumber()).to.equal(0)
+          expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[4].toNumber()).to.equal(0)
         })
       })
     })
 
-    it('logs remaining yesMarket/noMarket collateral tokens that belong to the trader', async () => {
-      expect((await futarchy.trades(await keccak256(root, 0)))[0].toNumber()).to.equal(0)
-      expect((await futarchy.trades(await keccak256(root, 0)))[1].toNumber()).to.equal(0)
+    it('stores remaining yesMarket/noMarket collateral tokens that belong to the trader', async () => {
+      expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[0].toNumber()).to.equal(0)
+      expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[1].toNumber()).to.equal(0)
       await futarchy.tradeInMarkets(0, twenty, 0, 1, five, five)
-      expect((await futarchy.trades(await keccak256(root, 0)))[0].toNumber()).to.equal(17279035902300609000)
-      expect((await futarchy.trades(await keccak256(root, 0)))[1].toNumber()).to.equal(17279035902300609000)
+      expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[0].toNumber()).to.equal(17279035902300609000)
+      expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[1].toNumber()).to.equal(17279035902300609000)
     })
   })
 

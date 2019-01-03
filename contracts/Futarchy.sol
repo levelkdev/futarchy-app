@@ -2,12 +2,8 @@ pragma solidity ^0.4.24;
 
 import "@aragon/os/contracts/apps/AragonApp.sol";
 import "@aragon/os/contracts/common/IForwarder.sol";
-/* import "@aragon/os/contracts/lib/math/SafeMath.sol"; */
 import "@aragon/os/contracts/lib/math/SafeMath64.sol";
 import '@gnosis.pm/pm-contracts/contracts/Oracles/FutarchyOracleFactory.sol';
-import '@gnosis.pm/pm-contracts/contracts/Events/CategoricalEvent.sol';
-import '@gnosis.pm/pm-contracts/contracts/Events/ScalarEvent.sol';
-import '@gnosis.pm/pm-contracts/contracts/Markets/StandardMarket.sol';
 import '@gnosis.pm/pm-contracts/contracts/MarketMakers/LMSRMarketMaker.sol';
 import '@gnosis.pm/pm-contracts/contracts/Oracles/CentralizedOracleFactory.sol';
 import "@aragon/apps-shared-minime/contracts/MiniMeToken.sol";
@@ -40,7 +36,7 @@ contract Futarchy is AragonApp {
     bytes executionScript;
   }
 
-  struct TradePortfolio {
+  struct OutcomeTokenBalances {
     uint yesCollateral;
     uint noCollateral;
     uint yesLong;
@@ -52,7 +48,7 @@ contract Futarchy is AragonApp {
   mapping(uint256 => Decision) public decisions;
   uint public decisionLength;
 
-  mapping(bytes32 => TradePortfolio) public trades;
+  mapping(bytes32 => OutcomeTokenBalances) public traderDecisionBalances;
 
   modifier decisionExists(uint256 _decisionId) {
       require(_decisionId < decisionLength);
@@ -232,14 +228,14 @@ contract Futarchy is AragonApp {
       uint yesCost = yesMarket.buy(yesPrediction, yesPurchaseAmount, collateralAmount);
       uint noCost = noMarket.buy(noPrediction, noPurchaseAmount, collateralAmount);
 
-      // set tradePortfolio data for msg.sender
-      TradePortfolio storage tradePorfolio = trades[keccak256(msg.sender, id)];
-      tradePorfolio.yesCollateral = tradePorfolio.yesCollateral.add((collateralAmount.sub(yesCost)));
-      tradePorfolio.noCollateral = tradePorfolio.noCollateral.add((collateralAmount.sub(noCost)));
-      if (yesPrediction == 0) { tradePorfolio.yesLong = tradePorfolio.yesLong.add(yesPurchaseAmount); }
-      if (yesPrediction == 1) { tradePorfolio.yesShort = tradePorfolio.yesShort.add(yesPurchaseAmount); }
-      if (noPrediction == 0) { tradePorfolio.noLong = tradePorfolio.noLong.add(noPurchaseAmount); }
-      if (noPrediction == 1) { tradePorfolio.noShort = tradePorfolio.noShort.add(yesPurchaseAmount); }
+      // set OutcomeTokenBalances data for msg.sender
+      OutcomeTokenBalances storage outcomeTokenBalances = traderDecisionBalances[keccak256(msg.sender, id)];
+      outcomeTokenBalances.yesCollateral = outcomeTokenBalances.yesCollateral.add((collateralAmount.sub(yesCost)));
+      outcomeTokenBalances.noCollateral = outcomeTokenBalances.noCollateral.add((collateralAmount.sub(noCost)));
+      if (yesPrediction == 0) { outcomeTokenBalances.yesLong = outcomeTokenBalances.yesLong.add(yesPurchaseAmount); }
+      if (yesPrediction == 1) { outcomeTokenBalances.yesShort = outcomeTokenBalances.yesShort.add(yesPurchaseAmount); }
+      if (noPrediction == 0) { outcomeTokenBalances.noLong = outcomeTokenBalances.noLong.add(noPurchaseAmount); }
+      if (noPrediction == 1) { outcomeTokenBalances.noShort = outcomeTokenBalances.noShort.add(yesPurchaseAmount); }
     }
 
     /**
