@@ -16,6 +16,8 @@ const trades = (state = [], action) => {
         noShortTokenAmount,
         noLongTokenAmount
       } = returnValues
+      const noTokenAmount = noShortTokenAmount == 0 ? noLongTokenAmount : noShortTokenAmount
+      const yesTokenAmount = yesShortTokenAmount == 0 ? yesLongTokenAmount : yesShortTokenAmount
       return [
         ...state,
         {
@@ -27,8 +29,10 @@ const trades = (state = [], action) => {
           netNoCost,
           noTokenName: `NO-${noShortTokenAmount == 0 ? 'LONG' : 'SHORT'}`,
           yesTokenName: `YES-${yesShortTokenAmount == 0 ? 'LONG' : 'SHORT'}`,
-          noTokenAmount: noShortTokenAmount == 0 ? noLongTokenAmount : noShortTokenAmount,
-          yesTokenAmount: yesShortTokenAmount == 0 ? yesLongTokenAmount : yesShortTokenAmount
+          noTokenAmount,
+          yesTokenAmount,
+          noTokenPrice: calcTokenPrice(netNoCost, noTokenAmount),
+          yesTokenPrice: calcTokenPrice(netYesCost, yesTokenAmount),
         }
       ]
     default:
@@ -37,3 +41,7 @@ const trades = (state = [], action) => {
 }
 
 export default trades
+
+function calcTokenPrice(netCost, amount) {
+  return parseInt(netCost) / parseInt(amount)
+}
