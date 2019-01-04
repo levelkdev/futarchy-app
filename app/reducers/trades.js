@@ -16,6 +16,12 @@ const trades = (state = [], action) => {
         noShortTokenAmount,
         noLongTokenAmount
       } = returnValues
+  
+      const {
+        lowerBound,
+        upperBound
+      } = action // lowerBound and upperBound are set by `appEventInterceptor` middleware
+
       const noTokenAmount = noShortTokenAmount == 0 ? noLongTokenAmount : noShortTokenAmount
       const yesTokenAmount = yesShortTokenAmount == 0 ? yesLongTokenAmount : yesShortTokenAmount
       return [
@@ -33,6 +39,8 @@ const trades = (state = [], action) => {
           yesTokenAmount,
           noTokenPrice: calcTokenPrice(netNoCost, noTokenAmount),
           yesTokenPrice: calcTokenPrice(netYesCost, yesTokenAmount),
+          lowerBound,
+          upperBound
         }
       ]
     default:

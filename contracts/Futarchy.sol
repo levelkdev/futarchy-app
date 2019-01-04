@@ -13,7 +13,7 @@ contract Futarchy is AragonApp {
   using SafeMath for uint;
   using SafeMath64 for uint64;
 
-  event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle);
+  event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle, int marketLowerBound, int marketUpperBound);
   event ExecuteDecision(uint decisionId);
 
   bytes32 public constant CREATE_DECISION_ROLE = keccak256("CREATE_DECISION_ROLE");
@@ -132,7 +132,7 @@ contract Futarchy is AragonApp {
       require(token.approve(futarchyOracle, marketFundAmount));
       futarchyOracle.fund(marketFundAmount);
 
-      emit StartDecision(decisionId, msg.sender, metadata, decisions[decisionId].futarchyOracle);
+      emit StartDecision(decisionId, msg.sender, metadata, decisions[decisionId].futarchyOracle, lowerBound, upperBound);
     }
 
     /**
@@ -280,7 +280,7 @@ contract Futarchy is AragonApp {
     /* TODO: actually get real bounds */
     function _calculateBounds() internal returns(int lowerBound, int upperBound) {
       lowerBound = 0;
-      upperBound = 100;
+      upperBound = 1000;
     }
 
     /* IForwarder API */
