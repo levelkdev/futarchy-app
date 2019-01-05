@@ -3,33 +3,29 @@ import trades from './trades'
 
 // TODO: check if it's 0=SHORT and 1=LONG
 const mockShortTradesAction = {
-  type: 'DEBUG_TRADE_EVENT',
+  type: 'BUY_MARKET_POSITIONS_EVENT',
   returnValues: {
     decisionId: '0',
     tradeTime: '1546469212',
-    netNoCost: '500',
-    netYesCost: '500',
-    noShortTokenAmount: '250',
-    noLongTokenAmount: '0',
-    yesShortTokenAmount: '250',
-    yesLongTokenAmount: '0',
-    tokenAmount: '550',
+    noCosts: ['400', '100'],
+    yesCosts: ['300', '200'],
+    noPurchaseAmounts: ['250', '0'],
+    yesPurchaseAmounts: ['250', '0'],
+    collateralAmount: '550',
     trader: 'mock_trader_addr'
   }
 }
 
 const mockLongTradesAction = {
-  type: 'DEBUG_TRADE_EVENT',
+  type: 'BUY_MARKET_POSITIONS_EVENT',
   returnValues: {
     decisionId: '0',
     tradeTime: '1546469212',
-    netNoCost: '500',
-    netYesCost: '500',
-    noShortTokenAmount: '0',
-    noLongTokenAmount: '250',
-    yesShortTokenAmount: '0',
-    yesLongTokenAmount: '250',
-    tokenAmount: '550',
+    noCosts: ['400', '100'],
+    yesCosts: ['300', '200'],
+    noPurchaseAmounts: ['0', '250'],
+    yesPurchaseAmounts: ['0', '250'],
+    collateralAmount: '550',
     trader: 'mock_trader_addr'
   }
 }
@@ -64,6 +60,16 @@ describe('trades', () => {
       expectedProps: {
         noTokenPrice: 2,
         yesTokenPrice: 2
+      }
+    },
+    {
+      when: 'when given token amounts and costs',
+      should: 'should return state with correctly calculated netYesCost and netNoCost',
+      state: undefined,
+      action: mockShortTradesAction,
+      expectedProps: {
+        netYesCost: 500,
+        netNoCost: 500
       }
     }
   ].forEach(({ when, should, state, action, expectedProps }) => {

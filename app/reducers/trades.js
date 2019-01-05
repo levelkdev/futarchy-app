@@ -2,19 +2,17 @@ import _ from 'lodash'
 
 const trades = (state = [], action) => {
   switch (action.type) {
-    case 'DEBUG_TRADE_EVENT':
+    case 'BUY_MARKET_POSITIONS_EVENT':
       const { returnValues } = action
       const {
         decisionId,
         trader,
         tradeTime,
-        tokenAmount,
-        netYesCost,
-        netNoCost,
-        yesShortTokenAmount,
-        yesLongTokenAmount,
-        noShortTokenAmount,
-        noLongTokenAmount
+        collateralAmount,
+        yesCosts,
+        noCosts,
+        yesPurchaseAmounts,
+        noPurchaseAmounts
       } = returnValues
   
       const {
@@ -22,19 +20,21 @@ const trades = (state = [], action) => {
         upperBound
       } = action // lowerBound and upperBound are set by `appEventInterceptor` middleware
 
-      const noTokenAmount = noShortTokenAmount == 0 ? noLongTokenAmount : noShortTokenAmount
-      const yesTokenAmount = yesShortTokenAmount == 0 ? yesLongTokenAmount : yesShortTokenAmount
+      const noTokenAmount = sumTokenValueArray(noPurchaseAmounts)
+      const yesTokenAmount = sumTokenValueArray(yesPurchaseAmounts)
+      const netYesCost = sumTokenValueArray(yesCosts)
+      const netNoCost = sumTokenValueArray(noCosts)
       return [
         ...state,
         {
           decisionId,
           trader,
           tradeTime,
-          tokenAmount,
+          tokenAmount: collateralAmount,
           netYesCost,
           netNoCost,
-          noTokenName: `NO-${noShortTokenAmount == 0 ? 'LONG' : 'SHORT'}`,
-          yesTokenName: `YES-${yesShortTokenAmount == 0 ? 'LONG' : 'SHORT'}`,
+          noTokenName: `NO-${noPurchaseAmounts[0] == 0 ? 'LONG' : 'SHORT'}`,
+          yesTokenName: `YES-${yesPurchaseAmounts[0] == 0 ? 'LONG' : 'SHORT'}`,
           noTokenAmount,
           yesTokenAmount,
           noTokenPrice: calcTokenPrice(netNoCost, noTokenAmount),
@@ -52,4 +52,8 @@ export default trades
 
 function calcTokenPrice(netCost, amount) {
   return parseInt(netCost) / parseInt(amount)
+}
+
+function sumTokenValueArray(tokenVals) {
+  return parseInt(tokenVals[0]) + parseInt(tokenVals[1])
 }

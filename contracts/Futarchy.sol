@@ -15,6 +15,7 @@ contract Futarchy is AragonApp {
 
   event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle, int marketLowerBound, int marketUpperBound);
   event ExecuteDecision(uint decisionId);
+  event BuyMarketPositions(address trader, uint decisionId, uint tradeTime, uint collateralAmount, uint[2] yesPurchaseAmounts, uint[2] noPurchaseAmounts, uint[2] yesCosts, uint[2] noCosts);
 
   bytes32 public constant CREATE_DECISION_ROLE = keccak256("CREATE_DECISION_ROLE");
 
@@ -185,35 +186,6 @@ contract Futarchy is AragonApp {
       emit ExecuteDecision(decisionId);
     }
 
-    event DebugTrade(address trader, uint decisionId, uint tradeTime, uint tokenAmount, int yesShortTokenAmount, int yesLongTokenAmount, int noShortTokenAmount, int noLongTokenAmount, int netYesCost, int netNoCost);
-
-    function trade(
-      uint decisionId,
-      uint tokenAmount,
-      int[] yesOutcomeTokenAmounts,
-      int[] noOutcomeTokenAmounts
-    )
-      public
-    {
-      Decision storage decision = decisions[decisionId];
-      Event yesNoCategorical = decision.futarchyOracle.categoricalEvent();
-      Market yesMarket = decision.futarchyOracle.markets(0);
-      Market noMarket = decision.futarchyOracle.markets(1);
-
-      require(token.transferFrom(msg.sender, this, tokenAmount));
-      require(token.approve(yesNoCategorical, tokenAmount));
-
-      yesNoCategorical.buyAllOutcomes(tokenAmount);
-
-      require(yesNoCategorical.outcomeTokens(0).approve(yesMarket, tokenAmount));
-      require(yesNoCategorical.outcomeTokens(1).approve(noMarket, tokenAmount));
-
-      int netYesCost = yesMarket.trade(yesOutcomeTokenAmounts, 0);
-      int netNoCost = noMarket.trade(noOutcomeTokenAmounts, 0);
-
-      emit DebugTrade(msg.sender, decisionId, now, tokenAmount, yesOutcomeTokenAmounts[0], yesOutcomeTokenAmounts[1], noOutcomeTokenAmounts[0], noOutcomeTokenAmounts[1], netYesCost, netNoCost);
-    }
-
     // Workaround solution to get the contract address. Would be better to get from
     // Aragon client
     function contractAddress() public view returns (address) {
@@ -221,14 +193,14 @@ contract Futarchy is AragonApp {
     }
 
     /**
-    * @notice trades in decision market on users behalf
+    * @notice buys outcome tokens in YES/NO decision markets for the sender
     * @param decisionId unique identifier for decision
     * @param collateralAmount amount of tokens sender will stake in market
     * @param yesPurchaseAmounts amount of YES market outcome tokens to purchase. 0 == long, 1 == short
     * @param noPurchaseAmounts amount of NO market outcome tokens to purchase. 0 == long, 1 == short
     * @return yesCosts and noCosts arrays of outcome token cost in collateral token
     */
-    function tradeInMarkets(
+    function buyInMarkets(
       uint decisionId,
       uint collateralAmount,
       uint[2] yesPurchaseAmounts,
@@ -275,6 +247,8 @@ contract Futarchy is AragonApp {
         yesPurchaseAmounts,
         noPurchaseAmounts
       );
+
+      emit BuyMarketPositions(msg.sender, decisionId, now, collateralAmount, yesPurchaseAmounts, noPurchaseAmounts, yesCosts, noCosts);
     }
 
     /**

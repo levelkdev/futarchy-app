@@ -3,7 +3,7 @@ import _ from 'lodash'
 const appEventInterceptor = store => next => action => {
   const state = store.getState()
   switch (action.type) {
-    case 'DEBUG_TRADE_EVENT':
+    case 'BUY_MARKET_POSITIONS_EVENT':
       action = addDecisionBoundsToAction({
         decisions: state.decisionMarkets,
         decisionId: action.returnValues.decisionId,
