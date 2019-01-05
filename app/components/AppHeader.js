@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import LeftArrow from '../icons/LeftArrow'
 import { Link } from 'react-router-dom'
-import ShowPanelButtonContainer from '../Containers/ShowPanelButtonContainer'
+import ShowPanelButtonContainer from '../containers/ShowPanelButtonContainer'
 
 const AppHeader = ({ decision }) => (
   <AppHeaderStyled>
