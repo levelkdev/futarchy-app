@@ -223,48 +223,58 @@ contract Futarchy is AragonApp {
     /**
     * @notice trades in decision market on users behalf
     * @param decisionId unique identifier for decision
-    * @param stakeAmount amount of tokens sender will stake in market
-    * @param yesPrediction 0 == long, 1 == short
-    * @param noPrediction 0 == long, 1 == short
-    * @param yesPurchaseAmount amount of YES market outcome tokens to purchase
-    * @param noPurchaseAmount amount of NO market outcome tokens to purchase
+    * @param collateralAmount amount of tokens sender will stake in market
+    * @param yesPurchaseAmounts amount of YES market outcome tokens to purchase. 0 == long, 1 == short
+    * @param noPurchaseAmounts amount of NO market outcome tokens to purchase. 0 == long, 1 == short
+    * @return yesCosts and noCosts arrays of outcome token cost in collateral token
     */
     function tradeInMarkets(
       uint decisionId,
-      uint stakeAmount,
-      uint8 yesPrediction,
-      uint8 noPrediction,
-      uint yesPurchaseAmount,
-      uint noPurchaseAmount
-    ) public {
-      // make these local vars for now to avoid 'CompilerError: Stack too deep' (??)
-      uint id = decisionId;
-      uint collateralAmount = stakeAmount;
-
+      uint collateralAmount,
+      uint[2] yesPurchaseAmounts,
+      uint[2] noPurchaseAmounts
+    )
+      public
+      returns (uint[2] yesCosts, uint[2] noCosts)
+    {
       // set necessary contracts
-      Decision storage decision = decisions[id];
-      FutarchyOracle futarchyOracle = decision.futarchyOracle;
-      CategoricalEvent categoricalEvent = futarchyOracle.categoricalEvent();
-      StandardMarket yesMarket = futarchyOracle.markets(0);
-      StandardMarket noMarket = futarchyOracle.markets(1);
+      CategoricalEvent categoricalEvent = decisions[decisionId].futarchyOracle.categoricalEvent();
+      StandardMarket yesMarket = decisions[decisionId].futarchyOracle.markets(0);
+      StandardMarket noMarket = decisions[decisionId].futarchyOracle.markets(1);
 
-      // buy market positions
       require(token.transferFrom(msg.sender, this, collateralAmount));
       token.approve(categoricalEvent, collateralAmount);
       categoricalEvent.buyAllOutcomes(collateralAmount);
       categoricalEvent.outcomeTokens(0).approve(yesMarket, collateralAmount);
       categoricalEvent.outcomeTokens(1).approve(noMarket, collateralAmount);
-      uint yesCost = yesMarket.buy(yesPrediction, yesPurchaseAmount, collateralAmount);
-      uint noCost = noMarket.buy(noPrediction, noPurchaseAmount, collateralAmount);
 
-      // set OutcomeTokenBalances data for msg.sender
-      OutcomeTokenBalances storage outcomeTokenBalances = traderDecisionBalances[keccak256(msg.sender, id)];
-      outcomeTokenBalances.yesCollateral = outcomeTokenBalances.yesCollateral.add((collateralAmount.sub(yesCost)));
-      outcomeTokenBalances.noCollateral = outcomeTokenBalances.noCollateral.add((collateralAmount.sub(noCost)));
-      if (yesPrediction == 0) { outcomeTokenBalances.yesLong = outcomeTokenBalances.yesLong.add(yesPurchaseAmount); }
-      if (yesPrediction == 1) { outcomeTokenBalances.yesShort = outcomeTokenBalances.yesShort.add(yesPurchaseAmount); }
-      if (noPrediction == 0) { outcomeTokenBalances.noLong = outcomeTokenBalances.noLong.add(noPurchaseAmount); }
-      if (noPrediction == 1) { outcomeTokenBalances.noShort = outcomeTokenBalances.noShort.add(yesPurchaseAmount); }
+      // buy market positions
+      for(uint8 outcomeTokenIndex = 0; outcomeTokenIndex < 2; outcomeTokenIndex++) {
+        if(yesPurchaseAmounts[outcomeTokenIndex] > 0) {
+          yesCosts[outcomeTokenIndex] = yesMarket.buy(
+            outcomeTokenIndex,
+            yesPurchaseAmounts[outcomeTokenIndex],
+            collateralAmount
+          );
+        }
+        if(noPurchaseAmounts[outcomeTokenIndex] > 0) {
+          noCosts[outcomeTokenIndex] = noMarket.buy(
+            outcomeTokenIndex,
+            noPurchaseAmounts[outcomeTokenIndex],
+            collateralAmount
+          );
+        }
+      }
+
+      _addToTraderDecisionBalances(
+        decisionId,
+        [
+          collateralAmount.sub(_calcTotalCost(yesCosts)),
+          collateralAmount.sub(_calcTotalCost(noCosts))
+        ],
+        yesPurchaseAmounts,
+        noPurchaseAmounts
+      );
     }
 
     /**
@@ -276,6 +286,24 @@ contract Futarchy is AragonApp {
       return (now > decision.startDate.add(uint64(decision.tradingPeriod)));
     }
 
+    function _addToTraderDecisionBalances(
+      uint decisionId,
+      uint[2] collateralAmounts,
+      uint[2] yesOutcomeAmounts,
+      uint[2] noOutcomeAmounts
+    ) internal {
+      OutcomeTokenBalances storage currentBalances = traderDecisionBalances[keccak256(msg.sender, decisionId)];
+      currentBalances.yesCollateral = currentBalances.yesCollateral.add(collateralAmounts[0]);
+      currentBalances.noCollateral = currentBalances.noCollateral.add(collateralAmounts[1]);
+      currentBalances.yesLong = currentBalances.yesLong.add(yesOutcomeAmounts[0]);
+      currentBalances.yesShort = currentBalances.yesShort.add(yesOutcomeAmounts[1]);
+      currentBalances.noLong = currentBalances.noLong.add(noOutcomeAmounts[0]);
+      currentBalances.noShort = currentBalances.noShort.add(noOutcomeAmounts[1]);
+    }
+
+    function _calcTotalCost(uint[2] costs) internal pure returns (uint) {
+      return costs[0].add(costs[1]);
+    }
 
     /* TODO: actually get real bounds */
     function _calculateBounds() internal returns(int lowerBound, int upperBound) {
