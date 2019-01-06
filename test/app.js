@@ -41,9 +41,9 @@ const NULL_ADDRESS = '0x00'
 
 contract('Futarchy', (accounts) => {
   let APP_MANAGER_ROLE
-  let futarchyBase, daoFact
+  let futarchyBase
   let futarchy, fee, tradingPeriod, marketFundAmount, token, priceOracleFactory, futarchyOracleFactory, lmsrMarketMaker
-  let metadata, script, executionTarget
+  let executionTarget
 
   const root = accounts[0]
   const account2 = accounts[1]
@@ -79,7 +79,7 @@ contract('Futarchy', (accounts) => {
     futarchy = Futarchy.at(receipt.logs.filter(l => l.event == 'NewAppProxy')[0].args.proxy)
     const CREATE_DECISION_ROLE = await futarchy.CREATE_DECISION_ROLE()
     await acl.createPermission(root, futarchy.address, CREATE_DECISION_ROLE, root);
-})
+  })
 
   describe('initialize()', async () => {
     beforeEach(async () => {
@@ -373,7 +373,7 @@ contract('Futarchy', (accounts) => {
         })
 
         it('stores the correct amount of yesShort tokens for the trader', async () => {
-          expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[2].toNumber()).to.equal(five)
+          expect((await rootDecisionBalances()).yesShort).to.equal(five)
         })
 
         it('does not affect yesLong log for trader', async () => {
@@ -459,11 +459,11 @@ contract('Futarchy', (accounts) => {
     })
 
     it('stores remaining yesMarket/noMarket collateral tokens that belong to the trader', async () => {
-      expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[0].toNumber()).to.equal(0)
-      expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[1].toNumber()).to.equal(0)
+      expect((await rootDecisionBalances()).yesCollateral).to.equal(0)
+      expect((await rootDecisionBalances()).noCollateral).to.equal(0)
       await futarchy.buyInMarkets(0, twenty, [0, five], [five, 0])
-      expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[0].toNumber()).to.equal(17279035902300609000)
-      expect((await futarchy.traderDecisionBalances(await keccak256(root, 0)))[1].toNumber()).to.equal(17279035902300609000)
+      expect((await rootDecisionBalances()).yesCollateral).to.equal(17279035902300609000)
+      expect((await rootDecisionBalances()).noCollateral).to.equal(17279035902300609000)
     })
   })
 
