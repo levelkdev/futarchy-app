@@ -40,10 +40,10 @@ contract Futarchy is AragonApp {
   struct OutcomeTokenBalances {
     uint yesCollateral;
     uint noCollateral;
-    uint yesLong;
     uint yesShort;
-    uint noLong;
+    uint yesLong;
     uint noShort;
+    uint noLong;
   }
 
   mapping(uint256 => Decision) public decisions;
@@ -196,8 +196,8 @@ contract Futarchy is AragonApp {
     * @notice buys outcome tokens in YES/NO decision markets for the sender
     * @param decisionId unique identifier for decision
     * @param collateralAmount amount of tokens sender will stake in market
-    * @param yesPurchaseAmounts amount of YES market outcome tokens to purchase. 0 == long, 1 == short
-    * @param noPurchaseAmounts amount of NO market outcome tokens to purchase. 0 == long, 1 == short
+    * @param yesPurchaseAmounts amount of YES market outcome tokens to purchase. 0 == short, 1 == long
+    * @param noPurchaseAmounts amount of NO market outcome tokens to purchase. 0 == short, 1 == long
     * @return yesCosts and noCosts arrays of outcome token cost in collateral token
     */
     function buyInMarkets(
@@ -269,10 +269,10 @@ contract Futarchy is AragonApp {
       OutcomeTokenBalances storage currentBalances = traderDecisionBalances[keccak256(msg.sender, decisionId)];
       currentBalances.yesCollateral = currentBalances.yesCollateral.add(collateralAmounts[0]);
       currentBalances.noCollateral = currentBalances.noCollateral.add(collateralAmounts[1]);
-      currentBalances.yesLong = currentBalances.yesLong.add(yesOutcomeAmounts[0]);
-      currentBalances.yesShort = currentBalances.yesShort.add(yesOutcomeAmounts[1]);
-      currentBalances.noLong = currentBalances.noLong.add(noOutcomeAmounts[0]);
-      currentBalances.noShort = currentBalances.noShort.add(noOutcomeAmounts[1]);
+      currentBalances.yesShort = currentBalances.yesShort.add(yesOutcomeAmounts[0]);
+      currentBalances.yesLong = currentBalances.yesLong.add(yesOutcomeAmounts[1]);
+      currentBalances.noShort = currentBalances.noShort.add(noOutcomeAmounts[0]);
+      currentBalances.noLong = currentBalances.noLong.add(noOutcomeAmounts[1]);
     }
 
     function _calcTotalCost(uint[2] costs) internal pure returns (uint) {
