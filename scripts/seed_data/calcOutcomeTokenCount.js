@@ -10,7 +10,6 @@ let Decimal = DecimalJS.clone({ precision: 80, toExpPos: 9999 })
  * @returns {Decimal} The number of outcome tokens that can be bought
  */
 module.exports = async function calcOutcomeTokenCount (market, cost, outcomeTokenIndex) {
-    // uint[], uint, uint
     let netOutcomeTokensSold, funding, feeFactor
 
     netOutcomeTokensSold = [
@@ -19,10 +18,7 @@ module.exports = async function calcOutcomeTokenCount (market, cost, outcomeToke
     ]
     
     funding = await market.funding()
-    // console.log('funding: ', funding.toString())
-
     feeFactor = await market.fee()
-    // console.log('fee: ', feeFactor.toString())
     
     cost = new Decimal(cost.toString())
     let b = new Decimal(funding.toString()).dividedBy(new Decimal(netOutcomeTokensSold.length).ln())
