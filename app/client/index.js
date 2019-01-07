@@ -49,6 +49,11 @@ export const marketFundAmount = async () => {
   return amount
 }
 
+export const avgPricesForDecisionMarkets = async (decisionId) => {
+  const [ yesMarketPrice, noMarketPrice ] = await call('getAvgPricesForDecisionMarkets', decisionId)
+  return { yesMarketPrice, noMarketPrice }
+}
+
 // this function includes a "pretransaction" to approve marketing funding
 // token transfer. Aragon client uses the `token` property in transaction
 // options to send a token approval transaction before the requested
@@ -85,6 +90,7 @@ export default {
   fee,
   tradingPeriod,
   marketFundAmount,
+  avgPricesForDecisionMarkets,
   newDecision,
   sendTransaction
 }

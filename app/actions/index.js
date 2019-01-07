@@ -7,6 +7,13 @@ export const newDecisionTxPending = ({ question, txHash }) => ({
   txHash
 })
 
+export const avgDecisionMarketPricesLoaded = ({ decisionId, yesMarketPrice, noMarketPrice }) => ({
+  type: 'AVG_DECISION_MARKET_PRICES_LOADED',
+  decisionId,
+  yesMarketPrice,
+  noMarketPrice
+})
+
 export const showPanel = ({ panelName }) => ({
   type: 'SHOW_PANEL',
   panelName
@@ -51,6 +58,20 @@ export const fetchTokenBalance = (account) => dispatch => {
     errorMessage => {
       console.error(errorMessage)
       return dispatch(propValueLoadingError({ prop: 'tokenBalance', errorMessage }))
+    }
+  )
+}
+
+export const fetchAvgPricesForDecisionMarkets = (decisionId) => dispatch => {
+  return client.avgPricesForDecisionMarkets(decisionId).then(
+    avgPrices => dispatch(avgDecisionMarketPricesLoaded({
+      decisionId,
+      yesMarketPrice: avgPrices.yesMarketPrice,
+      noMarketPrice: avgPrices.noMarketPrice
+    })),
+    errorMessage => {
+      console.error(`fetchAvgPricesForDecisionMarkets: ${errorMessage}`)
+      // TODO: dispatch error action, to show something to the user
     }
   )
 }

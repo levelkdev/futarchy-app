@@ -1,6 +1,10 @@
 import assert from 'assert'
-import { newDecisionTxPending, startDecision } from '../actions'
+import { newDecisionTxPending, avgDecisionMarketPricesLoaded } from '../actions'
 import decisionMarkets from './decisionMarkets'
+
+const ONE = 0x10000000000000000
+const SEVENTY_FIVE_PERCENT = (ONE * 0.75) + ''
+const FIFTY_PERCENT = (ONE * 0.50) + ''
 
 const mockDecision = (n, pending = false) => {
   return { id: `mock_decision_id_${n}`, question: `mock_question_${n}`, pending }
@@ -146,6 +150,89 @@ describe('decisionMarkets', () => {
         it(should, () => {
           assert.deepEqual(decisionMarkets(state, action), expected)
         })
+      })
+    })
+  })
+
+  describe('avgDecisionMarketPricesLoaded', () => {
+    [
+      {
+        when: 'when there is an existing decision with no avg price data',
+        should: 'should return state with new price data',
+        state: [mockDecision(0), mockDecision(123)],
+        action: avgDecisionMarketPricesLoaded({
+          decisionId: 'mock_decision_id_123',
+          yesMarketPrice: SEVENTY_FIVE_PERCENT,
+          noMarketPrice: FIFTY_PERCENT
+        }),
+        marketIndex: 1,
+        expectedProps: {
+          yesMarketPrice: 0.75,
+          noMarketPrice: 0.50
+        }
+      },
+      {
+        when: 'when there is an existing decision with avg price data',
+        should: 'should return state with new price data',
+        state: [mockDecision(0), {
+          ...mockDecision(123),
+          ...{
+            yesMarketPrice: 0.01,
+            noMarketPrice: 0.99
+          }
+        }],
+        action: avgDecisionMarketPricesLoaded({
+          decisionId: 'mock_decision_id_123',
+          yesMarketPrice: SEVENTY_FIVE_PERCENT,
+          noMarketPrice: FIFTY_PERCENT
+        }),
+        marketIndex: 1,
+        expectedProps: {
+          yesMarketPrice: 0.75,
+          noMarketPrice: 0.50
+        }
+      },
+      {
+        when: 'when there is an existing decision with upper and lower bound',
+        should: 'should return state with calculated price predictions',
+        state: [mockDecision(0), {
+          ...mockDecision(123),
+          ...{
+            lowerBound: '1000',
+            upperBound: '2000'
+          }
+        }],
+        action: avgDecisionMarketPricesLoaded({
+          decisionId: 'mock_decision_id_123',
+          yesMarketPrice: SEVENTY_FIVE_PERCENT,
+          noMarketPrice: FIFTY_PERCENT
+        }),
+        marketIndex: 1,
+        expectedProps: {
+          yesMarketPredictedPrice: 1750,
+          noMarketPredictedPrice: 1500
+        }
+      }
+    ].forEach(({ when, should, state, action, marketIndex, expectedProps }) => {
+      describe(when, () => {
+        it(should, () => {
+          for (var propName in expectedProps) {
+            const expectedPropVal = expectedProps[propName]
+            assert.equal(decisionMarkets(state, action)[marketIndex][propName], expectedPropVal)
+          }
+        })
+      })
+    })
+
+    describe('when there is no existing decision', () => {
+      it('should not change state', () => {
+        const state = [mockDecision(0), mockDecision(1)]
+        const action = avgDecisionMarketPricesLoaded({
+          decisionId: 'mock_decision_id_123',
+          yesMarketPrice: SEVENTY_FIVE_PERCENT,
+          noMarketPrice: FIFTY_PERCENT
+        })
+        assert.deepEqual(decisionMarkets(state, action), state)
       })
     })
   })

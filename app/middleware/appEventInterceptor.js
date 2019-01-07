@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { fetchAvgPricesForDecisionMarkets } from '../actions'
 
 const appEventInterceptor = store => next => action => {
   const state = store.getState()
@@ -9,6 +10,12 @@ const appEventInterceptor = store => next => action => {
         decisionId: action.returnValues.decisionId,
         action
       })
+      break
+    case 'START_DECISION_EVENT':
+      store.dispatch(
+        fetchAvgPricesForDecisionMarkets(action.returnValues.decisionId)
+      )
+      break
   }
   return next(action)
 }
