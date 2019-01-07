@@ -307,7 +307,7 @@ contract('Futarchy', (accounts) => {
     })
   })
 
-  describe('buyInMarkets()', async () => {
+  describe('buyMarketPositions()', async () => {
     let script, metadata, futarchyOracle, twenty, five, three
     let yesLongToken, yesShortToken, noLongToken, noShortToken
 
@@ -325,11 +325,11 @@ contract('Futarchy', (accounts) => {
 
     it('creates new decision balances for each unique trader', async () => {
       token.generateTokens(account2, twenty)
-      await futarchy.buyInMarkets(0, twenty, [five, 0], [0, five], {from: root})
+      await futarchy.buyMarketPositions(0, twenty, [five, 0], [0, five], {from: root})
       expect((await rootDecisionBalances()).yesShort).to.equal(five)
       expect((await account2DecisionBalances()).yesShort).to.equal(0)
       await token.approve(futarchy.address, twenty, {from: account2})
-      await futarchy.buyInMarkets(0, twenty, [three, 0], [0, three], {from: account2})
+      await futarchy.buyMarketPositions(0, twenty, [three, 0], [0, three], {from: account2})
       expect((await account2DecisionBalances()).yesShort).to.equal(three)
     })
 
@@ -339,12 +339,12 @@ contract('Futarchy', (accounts) => {
         let yesEvent = ScalarEvent.at(await yesMarket.eventContract())
         yesShortToken = OutcomeToken.at(await yesEvent.outcomeTokens(0))
         yesLongToken = OutcomeToken.at(await yesEvent.outcomeTokens(1))
-        await futarchy.buyInMarkets(0, twenty, [five, 0], [0, five])
+        await futarchy.buyMarketPositions(0, twenty, [five, 0], [0, five])
       })
 
       it('records the correct data in the existing OutcomeTokenBalances for the trader', async () => {
         expect((await yesShortToken.balanceOf(futarchy.address)).toNumber()).to.equal(five)
-        await futarchy.buyInMarkets(0, twenty, [three, 0], [0, five])
+        await futarchy.buyMarketPositions(0, twenty, [three, 0], [0, five])
         expect((await yesShortToken.balanceOf(futarchy.address)).toNumber()).to.equal(five + three)
         expect((await rootDecisionBalances()).yesShort).to.equal(five + three)
       })
@@ -361,7 +361,7 @@ contract('Futarchy', (accounts) => {
 
       describe('when yesPrediction is 0 (short)', async () => {
         beforeEach(async () => {
-          await futarchy.buyInMarkets(0, twenty, [five, 0], [0, five])
+          await futarchy.buyMarketPositions(0, twenty, [five, 0], [0, five])
         })
 
         it('purchases the correct amount of yesLong tokens', async () => {
@@ -383,7 +383,7 @@ contract('Futarchy', (accounts) => {
 
       describe('when yesPrediction is 1 (long)', async () => {
         beforeEach(async () => {
-          await futarchy.buyInMarkets(0, twenty, [0, five], [0, five])
+          await futarchy.buyMarketPositions(0, twenty, [0, five], [0, five])
         })
 
         it('purchases the correct amount of yesLong tokens', async () => {
@@ -415,7 +415,7 @@ contract('Futarchy', (accounts) => {
       describe('when noPrediction is 0 (short)', async () => {
 
         beforeEach(async () => {
-          await futarchy.buyInMarkets(0, twenty, [0, five], [five, 0])
+          await futarchy.buyMarketPositions(0, twenty, [0, five], [five, 0])
         })
 
         it('purchases the correct amount of noShort tokens', async () => {
@@ -437,7 +437,7 @@ contract('Futarchy', (accounts) => {
 
       describe('when noPrediction is 1 (long)', async () => {
         beforeEach(async () => {
-          await futarchy.buyInMarkets(0, twenty, [0, five], [0, five])
+          await futarchy.buyMarketPositions(0, twenty, [0, five], [0, five])
         })
 
         it('purchases the correct amount of noLong tokens', async () => {
@@ -461,7 +461,7 @@ contract('Futarchy', (accounts) => {
     it('stores remaining yesMarket/noMarket collateral tokens that belong to the trader', async () => {
       expect((await rootDecisionBalances()).yesCollateral).to.equal(0)
       expect((await rootDecisionBalances()).noCollateral).to.equal(0)
-      await futarchy.buyInMarkets(0, twenty, [0, five], [five, 0])
+      await futarchy.buyMarketPositions(0, twenty, [0, five], [five, 0])
       expect((await rootDecisionBalances()).yesCollateral).to.equal(17279035902300609000)
       expect((await rootDecisionBalances()).noCollateral).to.equal(17279035902300609000)
     })

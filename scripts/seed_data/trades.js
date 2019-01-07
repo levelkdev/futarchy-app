@@ -61,8 +61,8 @@ module.exports = async (callback) => {
           noMarket, new BigNumber(tokenAmount), noOutcomeIndex
         )
 
-        console.log(`app.buyInMarkets(${decisionId}, ${totalTokenAmount}, [${yesOutcomeTokenAmounts}], [${noOutcomeTokenAmounts}])`)
-        await app.buyInMarkets(
+        console.log(`app.buyMarketPositions(${decisionId}, ${totalTokenAmount}, [${yesOutcomeTokenAmounts}], [${noOutcomeTokenAmounts}])`)
+        await app.buyMarketPositions(
           decisionId,
           totalTokenAmount,
           yesOutcomeTokenAmounts,

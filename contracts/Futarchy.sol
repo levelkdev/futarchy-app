@@ -200,7 +200,7 @@ contract Futarchy is AragonApp {
     * @param noPurchaseAmounts amount of NO market outcome tokens to purchase. 0 == short, 1 == long
     * @return yesCosts and noCosts arrays of outcome token cost in collateral token
     */
-    function buyInMarkets(
+    function buyMarketPositions(
       uint decisionId,
       uint collateralAmount,
       uint[2] yesPurchaseAmounts,
