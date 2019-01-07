@@ -324,6 +324,22 @@ contract Futarchy is AragonApp {
       return (now > decision.startDate.add(uint64(decision.tradingPeriod)));
     }
 
+    /**
+    * @notice gets average prices from YES and NO decision markets
+    * @param decisionId decision to get average prices for
+    * @return uint array with YES and NO market average price
+    */
+    function getAvgPricesForDecisionMarkets(
+      uint decisionId
+    )
+      public
+      view
+      returns(uint[2] marketPrices)
+    {
+      marketPrices[0] = decisions[decisionId].futarchyOracle.markets(0).getAvgPrice();
+      marketPrices[1] = decisions[decisionId].futarchyOracle.markets(1).getAvgPrice();
+    }
+
     function _addToTraderDecisionBalances(
       uint decisionId,
       uint[2] collateralAmounts,
