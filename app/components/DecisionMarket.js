@@ -1,14 +1,16 @@
 import React from 'react'
 
-const DecisionMarket = ({ pending, id, question }) => (
+const DecisionMarket = ({ decision }) => (
   <div>
     {
-      pending ?
+      decision.pending ?
         <div>Transaction pending...</div> :
-        <div>ID: {id}</div>
+        <div>ID: {decision.id}</div>
     }
-    <div>{question}</div>
+    <div>{decision.question}</div>
     <br /><br />
+    <div>YES: {decision.yesMarketPredictedPrice}</div>
+    <div>NO: {decision.noMarketPredictedPrice}</div>
   </div>
 )
 

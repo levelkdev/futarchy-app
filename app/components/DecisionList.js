@@ -22,7 +22,7 @@ const DecisionTiles = ({ decisions }) => decisions.map(decision => { console.log
     key={decision.id}
   >
     <Tile>
-      <DecisionMarket {...decision} />
+      <DecisionMarket decision={decision} />
     </Tile>
   </LinkStyled>
 )})
