@@ -7,6 +7,7 @@ import thunk from 'redux-thunk'
 import { Provider } from 'react-redux'
 import Aragon, { providers } from '@aragon/client'
 import { aragonReduxMiddleware, subscribeToAppState } from './aragonRedux/aragonRedux'
+import appEventInterceptor from './middleware/appEventInterceptor'
 import { fetchInitData } from './actions'
 import rootReducer from './reducers'
 import App from './App'
@@ -25,7 +26,8 @@ const store = createStore(
   rootReducer,
   applyMiddleware(
     thunk,
-    aragonReduxMiddleware
+    aragonReduxMiddleware,
+    appEventInterceptor
   )
 )
 

@@ -22,6 +22,33 @@ App for futarchy
 
 ## Scripts
 
+### Seeding data
+
+Seeding scripts in `scripts/seed_data` can be used to seed the UI with decisions and market trades.
+
+To run the scripts, first run through the "Run" instructions above. Make sure all processes have succeeded and are running. Then:
+
+1. Copy the DAO address from the URL of the app. This can be found in the `npm run start:aragon` output:
+
+```
+Open DAO [completed]
+ ℹ You are now ready to open your app in Aragon.
+
+ ℹ This is the configuration for your development deployment:
+    Ethereum Node: ws://localhost:8545
+    ENS registry: 0x5f6f7e8cc7346a11ca2def8f827b7a0b612c56a1
+    APM registry: aragonpm.eth
+    DAO address: 0x5b48408a77645bd31e5eBaa460E84B588eaae1d4
+
+    Opening http://localhost:3000/#/0x5b48408a77645bd31e5eBaa460E84B588eaae1d4 to view your DAO
+```
+
+2. Run `npm run seed:decisions <DAO_ADDRESS>`. Replace `<DAO_ADDRESS>` with your copied address
+
+3. Run `npm run seed:trades <DAO_ADDRESS>`
+
+When these succeed, you will see 3 decisions in the UI. If you click on the first decision, you will see a series of trades.
+
 ### `npm run devchain:reset`
 
 Starts the devchain with `--reset`, which deletes existing ganache snapshots

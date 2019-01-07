@@ -55,11 +55,19 @@ describe('decisionMarkets', () => {
           type: 'START_DECISION_EVENT',
           returnValues: {
             decisionId: '123',
-            metadata: 'mock_question'
+            metadata: 'mock_question',
+            marketLowerBound: '0',
+            marketUpperBound: '1000'
           }
         },
         expected: [
-          { id: '123', question: 'mock_question', pending: false }
+          {
+            id: '123',
+            question: 'mock_question',
+            lowerBound: '0',
+            upperBound: '1000',
+            pending: false
+          }
         ]
       },
       {
@@ -70,12 +78,20 @@ describe('decisionMarkets', () => {
           type: 'START_DECISION_EVENT',
           returnValues: {
             decisionId: '123',
-            metadata: 'mock_question_123'
+            metadata: 'mock_question_123',
+            marketLowerBound: '0',
+            marketUpperBound: '1000'
           }
         },
         expected: [
           mockDecision(0),
-          { id: '123', question: 'mock_question_123', pending: false }
+          {
+            id: '123',
+            question: 'mock_question_123',
+            lowerBound: '0',
+            upperBound: '1000',
+            pending: false
+          }
         ]
       },
       {
@@ -86,11 +102,19 @@ describe('decisionMarkets', () => {
           type: 'START_DECISION_EVENT',
           returnValues: {
             decisionId: '123',
-            metadata: 'mock_question_88'
+            metadata: 'mock_question_88',
+            marketLowerBound: '0',
+            marketUpperBound: '1000'
           }
         },
         expected: [
-          { id: '123', question: 'mock_question_88', pending: false }
+          {
+            id: '123',
+            question: 'mock_question_88',
+            lowerBound: '0',
+            upperBound: '1000',
+            pending: false
+          }
         ]
       },
       {
@@ -101,12 +125,20 @@ describe('decisionMarkets', () => {
           type: 'START_DECISION_EVENT',
           returnValues: {
             decisionId: '123',
-            metadata: 'mock_question_88'
+            metadata: 'mock_question_88',
+            marketLowerBound: '0',
+            marketUpperBound: '1000'
           }
         },
         expected: [
           mockDecision(99, true),
-          { id: '123', question: 'mock_question_88', pending: false }
+          {
+            id: '123',
+            question: 'mock_question_88',
+            lowerBound: '0',
+            upperBound: '1000',
+            pending: false
+          }
         ]
       }
     ].forEach(({ when, should, state, action, expected }) => {

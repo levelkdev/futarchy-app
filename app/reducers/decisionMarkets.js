@@ -24,7 +24,9 @@ const decisionMarkets = (state = [], action) => {
         {
           pending: false,
           id: returnValues.decisionId,
-          question: returnValues.metadata
+          question: returnValues.metadata,
+          lowerBound: returnValues.marketLowerBound,
+          upperBound: returnValues.marketUpperBound
         }
       ]
     default:

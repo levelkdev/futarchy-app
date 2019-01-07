@@ -1,0 +1,41 @@
+[
+  {
+    "type": "buy",
+    "from": 0,
+    "tokenAmount": 2500000000000000000,
+    "yesPrediction": "LONG",
+    "noPrediction": "SHORT"
+  },
+  {
+    "type": "buy",
+    "from": 0,
+    "tokenAmount": 2900000000000000000,
+    "yesPrediction": "SHORT",
+    "noPrediction": "SHORT"
+  },
+  {
+    "type": "buy",
+    "from": 0,
+    "tokenAmount": 700000000000000000,
+    "yesPrediction": "LONG",
+    "noPrediction": "LONG"
+  },
+  {
+    "type": "advanceTime",
+    "seconds": 1800
+  },
+  {
+    "type": "buy",
+    "from": 1,
+    "tokenAmount": 8700000000000000000,
+    "yesPrediction": "SHORT",
+    "noPrediction": "LONG"
+  },
+  {
+    "type": "buy",
+    "from": 1,
+    "tokenAmount": 5100000000000000000,
+    "yesPrediction": "SHORT",
+    "noPrediction": "LONG"
+  }
+]
