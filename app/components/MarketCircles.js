@@ -6,6 +6,7 @@ const OUTER_CIRCLE_RADIUS = OUTER_CIRCLE_DIAMETER / 2
 const CIRCLE_MIN_RELATIVE_PERCENTAGE = 0.32
 const CIRCLE_NAME_MAX_FONT_SIZE = 35
 const CIRCLE_PRICE_MAX_FONT_SIZE = 28
+const MIN_FONT_SIZE = 8
 
 const MarketCircles = ({
   yesDisplayPrice,
@@ -52,17 +53,19 @@ const MarketCircles = ({
 const Circle = ({ angle, diameter, color, nameText, priceText, isYes }) => {
   const radians = toRadians(angle)
 
+  const magicNumber = 8
+
   const radius = diameter / 2 - 1
   const virtualRadius = circleOffset(diameter, isYes)
-  const virtualOrigin = (OUTER_CIRCLE_RADIUS - 12) / Math.PI
+  const virtualOrigin = (OUTER_CIRCLE_RADIUS - magicNumber) / Math.PI
   const xOffset = virtualOrigin + virtualRadius * Math.cos(radians)
   const yOffset = virtualOrigin + virtualRadius * Math.sin(radians)
 
   let nameFontSize = Math.round(CIRCLE_NAME_MAX_FONT_SIZE * (radius / OUTER_CIRCLE_RADIUS))
-  if (nameFontSize < 8) nameFontSize = 8
+  if (nameFontSize < MIN_FONT_SIZE) nameFontSize = MIN_FONT_SIZE
 
   let priceFontSize = Math.round(CIRCLE_PRICE_MAX_FONT_SIZE * (radius / OUTER_CIRCLE_RADIUS))
-  if (priceFontSize < 8) priceFontSize = 8
+  if (priceFontSize < MIN_FONT_SIZE) priceFontSize = MIN_FONT_SIZE
 
   let priceTextOffset = nameFontSize
 
