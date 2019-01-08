@@ -1,5 +1,5 @@
 import React from 'react'
-import styled from 'styled-components'
+import formatPrice from '../util/formatPrice'
 
 const OUTER_CIRCLE_DIAMETER = 300
 const OUTER_CIRCLE_RADIUS = OUTER_CIRCLE_DIAMETER / 2
@@ -13,11 +13,6 @@ const MarketCircles = ({
   const relativePercentages = calcRelativePercentages(yesPercentage, noPercentage)
   return (
     <div>
-      <div>{yesDisplayPrice}</div>
-      <div>{noDisplayPrice}</div>
-      <div>{yesPercentage}</div>
-      <div>{noPercentage}</div>
-
       <svg height={OUTER_CIRCLE_DIAMETER} width={OUTER_CIRCLE_DIAMETER}>
         <circle
           cx={OUTER_CIRCLE_RADIUS}
@@ -50,16 +45,24 @@ const Circle = ({ diameter, color, nameText, priceText, isYes }) => {
   const radius = diameter / 2 - 1
   const xOffset = circleOffset(diameter, isYes)
   const yOffset = OUTER_CIRCLE_RADIUS
-  let fontSize = Math.round(55 * (radius / OUTER_CIRCLE_RADIUS))
-  if (fontSize < 8) fontSize = 8
+  let nameFontSize = Math.round(55 * (radius / OUTER_CIRCLE_RADIUS))
+  if (nameFontSize < 8) nameFontSize = 8
+  let priceFontSize = Math.round(26 * (radius / OUTER_CIRCLE_RADIUS))
+  if (priceFontSize < 8) priceFontSize = 8
+  let priceTextOffset = nameFontSize - 3
   return (
     <g>
       <circle cx={xOffset} cy={yOffset} r={radius} fill={color} />
       <text x={xOffset} y={yOffset}
         font-family="sans-serif"
-        font-size={`${fontSize}px`}
+        font-size={`${nameFontSize}px`}
         text-anchor="middle"
         fill="white">{nameText}</text>
+      <text x={xOffset} y={yOffset + priceTextOffset}
+        font-family="sans-serif"
+        font-size={`${priceFontSize}px`}
+        text-anchor="middle"
+        fill="white">{`${formatPrice(priceText)} ETH`}</text>
     </g>
   )
 }
