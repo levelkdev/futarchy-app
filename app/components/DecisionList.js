@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Link } from 'react-router-dom'
 import DecisionListEmptyState from './DecisionListEmptyState'
 import DecisionCard from './DecisionCard'
 
@@ -17,14 +16,9 @@ const DecisionList = ({ decisions }) => (
 )
 
 const DecisionCards = ({ decisions }) => decisions.map(decision => (
-  <LinkStyled
-    to={`/decision/${decision.id}`}
-    key={decision.id}
-  >
-    <Card>
-      <DecisionCard decision={decision} />
-    </Card>
-  </LinkStyled>
+  <Card>
+    <DecisionCard decision={decision} />
+  </Card>
 ))
 
 const CardGroup = styled.div`
@@ -34,10 +28,6 @@ const CardGroup = styled.div`
 const Card = styled.div`
   min-width: 300px;
   margin-right: 20px;
-`
-
-const LinkStyled = styled(Link)`
-  text-decoration: none;
 `
 
 export default DecisionList
