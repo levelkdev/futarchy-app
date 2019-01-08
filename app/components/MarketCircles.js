@@ -1,8 +1,11 @@
 import React from 'react'
 import formatPrice from '../util/formatPrice'
 
-const OUTER_CIRCLE_DIAMETER = 300
+const OUTER_CIRCLE_DIAMETER = 200
 const OUTER_CIRCLE_RADIUS = OUTER_CIRCLE_DIAMETER / 2
+const CIRCLE_MIN_RELATIVE_PERCENTAGE = 0.32
+const CIRCLE_NAME_MAX_FONT_SIZE = 35
+const CIRCLE_PRICE_MAX_FONT_SIZE = 28
 
 const MarketCircles = ({
   yesDisplayPrice,
@@ -10,10 +13,9 @@ const MarketCircles = ({
   yesPercentage,
   noPercentage
 }) => {
-  const relativePercentages = calcRelativePercentages(yesPercentage, noPercentage)
-
   // TODO: get this working at all angles, write some formula for semi-randomizing
   const angle = 45
+  const circleDiameters = calcCircleDiameters(yesPercentage, noPercentage)
 
   return (
     <div>
@@ -28,7 +30,7 @@ const MarketCircles = ({
         />
         <Circle
           angle={angle}
-          diameter={OUTER_CIRCLE_DIAMETER * relativePercentages.yes - 2}
+          diameter={circleDiameters.yes}
           color="#80aedc"
           nameText="YES"
           isYes={true}
@@ -36,7 +38,7 @@ const MarketCircles = ({
         />
         <Circle
           angle={angle}
-          diameter={OUTER_CIRCLE_DIAMETER * relativePercentages.no - 2}
+          diameter={circleDiameters.no}
           color="#38cad0"
           nameText="NO"
           isYes={false}
@@ -56,13 +58,13 @@ const Circle = ({ angle, diameter, color, nameText, priceText, isYes }) => {
   const xOffset = virtualOrigin + virtualRadius * Math.cos(radians)
   const yOffset = virtualOrigin + virtualRadius * Math.sin(radians)
 
-  let nameFontSize = Math.round(55 * (radius / OUTER_CIRCLE_RADIUS))
+  let nameFontSize = Math.round(CIRCLE_NAME_MAX_FONT_SIZE * (radius / OUTER_CIRCLE_RADIUS))
   if (nameFontSize < 8) nameFontSize = 8
 
-  let priceFontSize = Math.round(26 * (radius / OUTER_CIRCLE_RADIUS))
+  let priceFontSize = Math.round(CIRCLE_PRICE_MAX_FONT_SIZE * (radius / OUTER_CIRCLE_RADIUS))
   if (priceFontSize < 8) priceFontSize = 8
 
-  let priceTextOffset = nameFontSize - 3
+  let priceTextOffset = nameFontSize
 
   return (
     <g>
@@ -76,7 +78,7 @@ const Circle = ({ angle, diameter, color, nameText, priceText, isYes }) => {
         font-family="sans-serif"
         font-size={`${priceFontSize}px`}
         text-anchor="middle"
-        fill="white">{`${formatPrice(priceText)} ETH`}</text>
+        fill="#ffffffab">{`${formatPrice(priceText)} ETH`}</text>
     </g>
   )
 }
@@ -86,12 +88,26 @@ function circleOffset(circleDiameter, offsetNegative) {
   return OUTER_CIRCLE_RADIUS + ((OUTER_CIRCLE_DIAMETER - circleDiameter) / 2) * offsetSign - (3 * offsetSign)
 }
 
+function calcCircleDiameters(yesPercentage, noPercentage) {
+  const relativePercentages = calcRelativePercentages(yesPercentage, noPercentage)
+  return {
+    yes: OUTER_CIRCLE_DIAMETER * relativePercentages.yes - 2,
+    no: OUTER_CIRCLE_DIAMETER * relativePercentages.no - 2
+  }
+}
+
 function calcRelativePercentages(yesPercentage, noPercentage) {
   const diff = yesPercentage - noPercentage
-  return {
+  let relativePercentages = {
     yes: .5 + (diff / 2),
     no: .5 - (diff / 2)
   }
+  if(relativePercentages.yes < CIRCLE_MIN_RELATIVE_PERCENTAGE) {
+    const adjustmentDiff = CIRCLE_MIN_RELATIVE_PERCENTAGE - relativePercentages.yes
+    relativePercentages.yes = CIRCLE_MIN_RELATIVE_PERCENTAGE
+    relativePercentages.no = relativePercentages.no - adjustmentDiff
+  }
+  return relativePercentages
 }
 
 function toRadians (angle) {
