@@ -291,15 +291,13 @@ contract Futarchy is AragonApp {
     * @param decisionId ID of price oracle's corresponding decision
     */
     function setPriceOutcome(
-      int price,
-      uint decisionId
+      uint decisionId,
+      int price
     )
       public
       auth(CREATE_DECISION_ROLE)
     {
-      Decision storage decision = decisions[decisionId];
-      FutarchyOracle futarchyOracle = decision.futarchyOracle;
-      CentralizedOracle priceOracle = CentralizedOracle(futarchyOracle.markets(0).eventContract().oracle());
+      CentralizedOracle priceOracle = CentralizedOracle(decisions[decisionId].futarchyOracle.markets(0).eventContract().oracle());
       priceOracle.setOutcome(price);
     }
 

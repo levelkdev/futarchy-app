@@ -312,6 +312,7 @@ contract('Futarchy', (accounts) => {
 
   describe('setPriceOutcome()', async () => {
     let script, metadata, returnValue, currentBlockNumber, price
+    let futarchyOracle, scalarMarket, scalarEvent, priceOracle
     beforeEach(async () => {
       script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
       metadata = 'Give voting rights to all kitties in the world'
@@ -327,7 +328,7 @@ contract('Futarchy', (accounts) => {
       scalarEvent = Event.at(await scalarMarket.eventContract())
       priceOracle = CentralizedOracle.at(await scalarEvent.oracle())
 
-      await futarchy.setPriceOutcome(price, 0)
+      await futarchy.setPriceOutcome(0, price)
     })
 
     it('sets the correct price on the price oracle', async () => {
