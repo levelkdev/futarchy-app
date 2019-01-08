@@ -11,6 +11,10 @@ const MarketCircles = ({
   noPercentage
 }) => {
   const relativePercentages = calcRelativePercentages(yesPercentage, noPercentage)
+
+  // TODO: get this working at all angles, write some formula for semi-randomizing
+  const angle = 45
+
   return (
     <div>
       <svg height={OUTER_CIRCLE_DIAMETER} width={OUTER_CIRCLE_DIAMETER}>
@@ -23,6 +27,7 @@ const MarketCircles = ({
           fill="transparent"
         />
         <Circle
+          angle={angle}
           diameter={OUTER_CIRCLE_DIAMETER * relativePercentages.yes - 2}
           color="#80aedc"
           nameText="YES"
@@ -30,6 +35,7 @@ const MarketCircles = ({
           priceText={yesDisplayPrice}
         />
         <Circle
+          angle={angle}
           diameter={OUTER_CIRCLE_DIAMETER * relativePercentages.no - 2}
           color="#38cad0"
           nameText="NO"
@@ -41,15 +47,23 @@ const MarketCircles = ({
   )
 }
 
-const Circle = ({ diameter, color, nameText, priceText, isYes }) => {
+const Circle = ({ angle, diameter, color, nameText, priceText, isYes }) => {
+  const radians = toRadians(angle)
+
   const radius = diameter / 2 - 1
-  const xOffset = circleOffset(diameter, isYes)
-  const yOffset = OUTER_CIRCLE_RADIUS
+  const virtualRadius = circleOffset(diameter, isYes)
+  const virtualOrigin = (OUTER_CIRCLE_RADIUS - 12) / Math.PI
+  const xOffset = virtualOrigin + virtualRadius * Math.cos(radians)
+  const yOffset = virtualOrigin + virtualRadius * Math.sin(radians)
+
   let nameFontSize = Math.round(55 * (radius / OUTER_CIRCLE_RADIUS))
   if (nameFontSize < 8) nameFontSize = 8
+
   let priceFontSize = Math.round(26 * (radius / OUTER_CIRCLE_RADIUS))
   if (priceFontSize < 8) priceFontSize = 8
+
   let priceTextOffset = nameFontSize - 3
+
   return (
     <g>
       <circle cx={xOffset} cy={yOffset} r={radius} fill={color} />
@@ -78,6 +92,10 @@ function calcRelativePercentages(yesPercentage, noPercentage) {
     yes: .5 + (diff / 2),
     no: .5 - (diff / 2)
   }
+}
+
+function toRadians (angle) {
+  return angle * (Math.PI / 180);
 }
 
 export default MarketCircles
