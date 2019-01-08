@@ -285,6 +285,22 @@ contract Futarchy is AragonApp {
       upperBound = 1000;
     }
 
+    /**
+    * @notice Sets outcome of the price oracle for a specified decision
+    * @param price Price used to set oracle outcome
+    * @param decisionId ID of price oracle's corresponding decision
+    */
+    function setPriceOutcome(
+      uint decisionId,
+      int price
+    )
+      public
+      auth(CREATE_DECISION_ROLE)
+    {
+      CentralizedOracle priceOracle = CentralizedOracle(decisions[decisionId].futarchyOracle.markets(0).eventContract().oracle());
+      priceOracle.setOutcome(price);
+    }
+
     /* IForwarder API */
 
     /* @notice confirms Futarchy implements IForwarder */

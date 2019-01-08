@@ -22,6 +22,9 @@ const OutcomeToken = artifacts.require('OutcomeToken')
 const StandardMarketWithPriceLogger = artifacts.require('StandardMarketWithPriceLogger')
 const StandardMarketWithPriceLoggerFactory = artifacts.require('StandardMarketWithPriceLoggerFactory')
 
+const StandardMarket = artifacts.require('StandardMarket')
+const Event = artifacts.require('Event')
+
 // local contracts
 const Futarchy = artifacts.require('Futarchy.sol')
 const ExecutionTarget = artifacts.require('ExecutionTarget')
@@ -304,6 +307,32 @@ contract('Futarchy', (accounts) => {
           expect(logs[1].args.decisionId.toNumber()).to.equal(0)
         })
       })
+    })
+  })
+
+  describe('setPriceOutcome()', async () => {
+    let script, metadata, returnValue, currentBlockNumber, price
+    let futarchyOracle, scalarMarket, scalarEvent, priceOracle
+    beforeEach(async () => {
+      script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
+      metadata = 'Give voting rights to all kitties in the world'
+      price = 500
+      initializeFutarchy({_futarchyOracleFactoryAddr: futarchyOracleFactoryFull.address})
+      await token.approve(futarchy.address, marketFundAmount, {from: root})
+      currentBlockNumber = await getBlockNumber()
+      await futarchy.newDecision(script, metadata)
+
+      // Get price oracle
+      futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
+      scalarMarket = StandardMarket.at(await futarchyOracle.markets(0))
+      scalarEvent = Event.at(await scalarMarket.eventContract())
+      priceOracle = CentralizedOracle.at(await scalarEvent.oracle())
+
+      await futarchy.setPriceOutcome(0, price)
+    })
+
+    it('sets the correct price on the price oracle', async () => {
+      expect((await priceOracle.getOutcome()).toNumber()).to.equal(price)
     })
   })
 
