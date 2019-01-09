@@ -16,6 +16,7 @@ contract Futarchy is AragonApp {
   event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle, int marketLowerBound, int marketUpperBound);
   event ExecuteDecision(uint decisionId);
   event BuyMarketPositions(address trader, uint decisionId, uint tradeTime, uint collateralAmount, uint[2] yesPurchaseAmounts, uint[2] noPurchaseAmounts, uint[2] yesCosts, uint[2] noCosts);
+  event SellMarketPositions(address trader, uint decisionId, uint tradeTime, int[] yesMarketPositions, int[] noMarketPositions, uint yesCollateralGains, uint noCollateralGains);
 
   bytes32 public constant CREATE_DECISION_ROLE = keccak256("CREATE_DECISION_ROLE");
 
@@ -249,6 +250,53 @@ contract Futarchy is AragonApp {
       );
 
       emit BuyMarketPositions(msg.sender, decisionId, now, collateralAmount, yesPurchaseAmounts, noPurchaseAmounts, yesCosts, noCosts);
+    }
+
+    /* @notice sells all price prediction positions and adds rewarded collateral tokens to trader's yesCollateral and noCollateral balances
+     * @param decisionId unique identifier for the decision
+     */
+    function sellMarketPositions(uint decisionId) {
+      OutcomeTokenBalances storage outcomeTokenBalances = traderDecisionBalances[keccak256(msg.sender, decisionId)];
+
+      // set necessary contracts
+      FutarchyOracle futarchyOracle = decisions[decisionId].futarchyOracle;
+      StandardMarket yesMarket = futarchyOracle.markets(0);
+      StandardMarket noMarket = futarchyOracle.markets(1);
+
+      // approve token transfers
+      yesMarket.eventContract().outcomeTokens(1).approve(yesMarket, outcomeTokenBalances.yesLong);
+      yesMarket.eventContract().outcomeTokens(0).approve(yesMarket, outcomeTokenBalances.yesShort);
+      noMarket.eventContract().outcomeTokens(1).approve(noMarket, outcomeTokenBalances.noLong);
+      noMarket.eventContract().outcomeTokens(0).approve(noMarket, outcomeTokenBalances.noShort);
+
+      int[] memory yesSellPositions = _getMarketPositionsArray(decisionId, msg.sender, 0);
+      int[] memory noSellPositions = _getMarketPositionsArray(decisionId, msg.sender, 1);
+
+      // sell positions (market.trade() with negative numbers to perform a sell)
+      int yesCollateralNetCost = yesMarket.trade(yesSellPositions, 0);
+      int noCollateralNetCost  = noMarket.trade(noSellPositions, 0);
+
+      // translate int netCost into uint collateral received (netCost will be a negative number representing a gain)
+      uint yesCollateralReceived = uint(-yesCollateralNetCost);
+      uint noCollateralReceived = uint(-noCollateralNetCost);
+
+      // store updated balances
+      outcomeTokenBalances.yesCollateral = outcomeTokenBalances.yesCollateral.add(yesCollateralReceived);
+      outcomeTokenBalances.noCollateral = outcomeTokenBalances.noCollateral.add(noCollateralReceived);
+      outcomeTokenBalances.yesLong = 0;
+      outcomeTokenBalances.yesShort = 0;
+      outcomeTokenBalances.noLong = 0;
+      outcomeTokenBalances.noShort = 0;
+
+      emit SellMarketPositions(msg.sender, decisionId, now, yesSellPositions, noSellPositions, yesCollateralReceived, noCollateralReceived);
+    }
+
+    function _getMarketPositionsArray(uint decisionId, address trader, uint marketIndex) internal returns(int[]) {
+      OutcomeTokenBalances storage outcomeTokenBalances = traderDecisionBalances[keccak256(trader, decisionId)];
+      int[] memory marketPositions = new int[](2);
+      marketPositions[0] = marketIndex == 0 ? -int(outcomeTokenBalances.yesShort) : -int(outcomeTokenBalances.noShort);
+      marketPositions[1] = marketIndex == 0 ? -int(outcomeTokenBalances.yesLong) : -int(outcomeTokenBalances.noLong);
+      return marketPositions;
     }
 
     /**
