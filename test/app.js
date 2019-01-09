@@ -563,6 +563,88 @@ contract('Futarchy', (accounts) => {
     })
   })
 
+  describe('redeemTokenWinnings()', () => {
+    beforeEach(async () => {
+      let account2 = web3.eth.accounts[1]
+      await token.generateTokens(account2, 100 * 10 ** 18)
+      await token.approve(futarchy.address, marketFundAmount +  (40 * 10 ** 18), {from: root})
+      await token.approve(futarchy.address, marketFundAmount +  (40 * 10 ** 18), {from: account2})
+
+      initializeFutarchy({_futarchyOracleFactoryAddr: futarchyOracleFactoryFull.address})
+      script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
+      metadata = 'Give voting rights to all kitties in the world'
+      await futarchy.newDecision(script, metadata)
+
+      futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
+      yesMarket = StandardMarketWithPriceLogger.at(await futarchyOracle.markets(0))
+      noMarket = StandardMarketWithPriceLogger.at(await futarchyOracle.markets(1))
+      let yesEvent = ScalarEvent.at(await yesMarket.eventContract())
+      let noEvent = ScalarEvent.at(await noMarket.eventContract())
+
+      yesToken = OutcomeToken.at(await yesEvent.collateralToken())
+      noToken = OutcomeToken.at(await noEvent.collateralToken())
+      yesShortToken = OutcomeToken.at(await yesEvent.outcomeTokens(0))
+      yesLongToken = OutcomeToken.at(await yesEvent.outcomeTokens(1))
+      noShortToken = OutcomeToken.at(await noEvent.outcomeTokens(0))
+      noLongToken = OutcomeToken.at(await noEvent.outcomeTokens(1))
+    })
+
+    it('emits a RedeemWinnings event', async () => {
+      await futarchy.buyMarketPositions(0, TWENTY, [TWO, 0], [0, FIVE])
+      await timeTravel(tradingPeriod + 1)
+      await futarchyOracle.setOutcome()
+      await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
+      const { logs } = await futarchy.redeemTokenWinnings(0, {from: root})
+      expect(logs[0].event).to.equal('RedeemWinnings')
+    })
+
+    describe('when outcome is YES', () => {
+      beforeEach(async () => {
+        await futarchy.buyMarketPositions(0, TWENTY, [0, TWO], [FIVE,0])
+        await timeTravel(tradingPeriod + 1)
+        await futarchyOracle.setOutcome()
+        await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
+      })
+
+      it('transfers dao token amount matching trader yesCollateral balance', async () => {
+        let yesCollateralBalance = (await rootDecisionBalances()).yesCollateral
+        let previousTokenBalance = (await token.balanceOf(root)).toNumber()
+        await futarchy.redeemTokenWinnings(0, {from: root})
+        let newTokenBalance = (await token.balanceOf(root)).toNumber()
+        expect(newTokenBalance).to.equal(previousTokenBalance + yesCollateralBalance)
+      })
+
+      it('sets yesCollateral trader balance to 0', async () => {
+        expect((await rootDecisionBalances()).yesCollateral).to.be.above(0)
+        await futarchy.redeemTokenWinnings(0, {from: root})
+        expect((await rootDecisionBalances()).yesCollateral).to.equal(0)
+      })
+    })
+
+    describe('when outcome is NO', () => {
+      beforeEach(async () => {
+        await futarchy.buyMarketPositions(0, TWENTY, [TWO, 0], [0, FIVE])
+        await timeTravel(tradingPeriod + 1)
+        await futarchyOracle.setOutcome()
+        await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
+      })
+
+      it('transfers dao token amount matching trader noCollateral balance', async () => {
+        let noCollateralBalance = (await rootDecisionBalances()).noCollateral
+        let previousTokenBalance = (await token.balanceOf(root)).toNumber()
+        await futarchy.redeemTokenWinnings(0, {from: root})
+        let newTokenBalance = (await token.balanceOf(root)).toNumber()
+        expect(newTokenBalance).to.equal(previousTokenBalance + noCollateralBalance)
+      })
+
+      it('sets noCollateral trader balance to 0', async () => {
+        expect((await rootDecisionBalances()).noCollateral).to.be.above(0)
+        await futarchy.redeemTokenWinnings(0, {from: root})
+        expect((await rootDecisionBalances()).noCollateral).to.equal(0)
+      })
+    })
+  })
+
   async function initializeFutarchy(customParams = {}) {
     const {
       _fee = fee,
