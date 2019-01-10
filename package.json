@@ -7,7 +7,7 @@
     "@aragon/client": "^1.1.0",
     "@aragon/kits-base": "^1.0.0",
     "@aragon/os": "4.0.1",
-    "@aragon/ui": "^0.16.0",
+    "@aragon/ui": "^0.28.0",
     "@gnosis.pm/pm-contracts": "github:levelkdev/pm-contracts#fa70a4cb722104187f9b6cbde3b92169c75935e2",
     "@gnosis.pm/util-contracts": "2.0.0-alpha",
     "bignumber.js": "^8.0.1",
@@ -26,7 +26,7 @@
     "redux": "^4.0.1",
     "redux-form": "^7.4.2",
     "redux-thunk": "^2.3.0",
-    "styled-components": "^3.4.9"
+    "styled-components": "^4.0.0"
   },
   "devDependencies": {
     "@aragon/cli": "^5.0.0",
