@@ -16,7 +16,8 @@ contract Futarchy is AragonApp {
   event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle, int marketLowerBound, int marketUpperBound);
   event ExecuteDecision(uint decisionId);
   event BuyMarketPositions(address trader, uint decisionId, uint tradeTime, uint collateralAmount, uint[2] yesPurchaseAmounts, uint[2] noPurchaseAmounts, uint[2] yesCosts, uint[2] noCosts);
-  event SellMarketPositions(address trader, uint decisionId, uint tradeTime, int[] yesMarketPositions, int[] noMarketPositions, uint yesCollateralGains, uint noCollateralGains);
+  event SellMarketPositions(address trader, uint decisionId, uint tradeTime, int[] yesMarketPositions, int[] noMarketPositions, uint yesCollateralReceived, uint noCollateralReceived);
+  event RedeemWinnings(address trader, uint decisionId, int winningIndex, uint winningsAmount);
 
   bytes32 public constant CREATE_DECISION_ROLE = keccak256("CREATE_DECISION_ROLE");
 
@@ -291,12 +292,27 @@ contract Futarchy is AragonApp {
       emit SellMarketPositions(msg.sender, decisionId, now, yesSellPositions, noSellPositions, yesCollateralReceived, noCollateralReceived);
     }
 
-    function _getMarketPositionsArray(uint decisionId, address trader, uint marketIndex) internal returns(int[]) {
-      OutcomeTokenBalances storage outcomeTokenBalances = traderDecisionBalances[keccak256(trader, decisionId)];
-      int[] memory marketPositions = new int[](2);
-      marketPositions[0] = marketIndex == 0 ? -int(outcomeTokenBalances.yesShort) : -int(outcomeTokenBalances.noShort);
-      marketPositions[1] = marketIndex == 0 ? -int(outcomeTokenBalances.yesLong) : -int(outcomeTokenBalances.noLong);
-      return marketPositions;
+    /* @notice allocates token back to the sender based on their balance of the winning outcome collateralToken
+     * @param decisionId unique identifier for the decision
+     */
+    function redeemTokenWinnings(uint decisionId) public {
+      require(tradingPeriodEnded(decisionId));
+
+      FutarchyOracle futarchyOracle = decisions[decisionId].futarchyOracle;
+      int winningIndex = futarchyOracle.getOutcome();
+      futarchyOracle.categoricalEvent().redeemWinnings();
+
+      uint winnings;
+      if (winningIndex == 0) {
+        winnings = traderDecisionBalances[keccak256(msg.sender, decisionId)].yesCollateral;
+        traderDecisionBalances[keccak256(msg.sender, decisionId)].yesCollateral = 0;
+      } else {
+        winnings = traderDecisionBalances[keccak256(msg.sender, decisionId)].noCollateral;
+        traderDecisionBalances[keccak256(msg.sender, decisionId)].noCollateral = 0;
+      }
+
+      require(token.transfer(msg.sender, winnings));
+      emit RedeemWinnings(msg.sender, decisionId, winningIndex, winnings);
     }
 
     /**
@@ -321,6 +337,14 @@ contract Futarchy is AragonApp {
       currentBalances.yesLong = currentBalances.yesLong.add(yesOutcomeAmounts[1]);
       currentBalances.noShort = currentBalances.noShort.add(noOutcomeAmounts[0]);
       currentBalances.noLong = currentBalances.noLong.add(noOutcomeAmounts[1]);
+    }
+
+    function _getMarketPositionsArray(uint decisionId, address trader, uint marketIndex) internal returns(int[]) {
+      OutcomeTokenBalances storage outcomeTokenBalances = traderDecisionBalances[keccak256(trader, decisionId)];
+      int[] memory marketPositions = new int[](2);
+      marketPositions[0] = marketIndex == 0 ? -int(outcomeTokenBalances.yesShort) : -int(outcomeTokenBalances.noShort);
+      marketPositions[1] = marketIndex == 0 ? -int(outcomeTokenBalances.yesLong) : -int(outcomeTokenBalances.noLong);
+      return marketPositions;
     }
 
     function _calcTotalCost(uint[2] costs) internal pure returns (uint) {
