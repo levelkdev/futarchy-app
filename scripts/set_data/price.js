@@ -22,15 +22,12 @@ module.exports = async callback => {
     console.log('')
 
     const app = await getFutarchyContract(artifacts, daoAddress)
-    console.log('fetched the app:', app.address)
 
     //  Grab futarchy oracle
     const futarchyOracle = FutarchyOracle.at((await app.decisions(decisionID))[0])
-    console.log('got futarchyOracle:', futarchyOracle.address)
     
     // Grab first scalar market.  Either works since they both use the same price oracle.
     const scalarMarket = StandardMarket.at(await futarchyOracle.markets(0))
-    console.log('got first scalar market: ', await futarchyOracle.markets(0))
     
     // Get scalar event
     const scalarEvent = Event.at(await scalarMarket.eventContract())
