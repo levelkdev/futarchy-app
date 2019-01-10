@@ -17,9 +17,9 @@ module.exports = async callback => {
     const marketFundAmount = await app.marketFundAmount()
 
     const decisions = [
-      { executionScript: '', metadata: 'one?' },
-      { executionScript: '', metadata: 'two?' },
-      { executionScript: '', metadata: 'three?' }
+      { executionScript: '', metadata: 'Execute a transfer of 1,000 ETH to 0xa1b2c3...?' },
+      { executionScript: '', metadata: 'Increase the minimum funding parameter to 45 TKN?' },
+      { executionScript: '', metadata: 'Change the timeframe for future futarchy decisions to 30 days?' }
     ]
 
     for(var i = 0; i < decisions.length; i++) {
