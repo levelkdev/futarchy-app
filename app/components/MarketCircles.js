@@ -19,9 +19,16 @@ const MarketCircles = ({
 
   const { yes: yesDiam, no: noDiam } = calcCircleDiameters(y, n)
 
+  // Moves the inner circle axis angle between -60 degrees and 60 degrees
+  // (60 degrees = π/3 radians)
+  // When the YES diameter is at it's max value, the angle is 60 degrees
+  // When the NO diameter is at it's max value, the angle is -60 degrees
+  // Since YES is positioned to the left and NO is positioned to the right,
+  // this calculation ensures that the bigger circle is always above the smaller circle
+  const SIXTY_DEGREES_IN_RADIANS = Math.PI / 3
   const angle = 
     ((yesDiam - noDiam) / (yesDiam + noDiam))
-       * (Math.PI / 3)
+       * SIXTY_DEGREES_IN_RADIANS
        * (1 / (1 - (2 * CIRCLE_MIN_RELATIVE_PERCENTAGE)))
 
   return (
@@ -58,8 +65,10 @@ const MarketCircles = ({
 
 const Circle = ({ angle, diameter, color, nameText, priceText, isYes }) => {
   const radius = diameter / 2
-  const xOffset = OUTER_CIRCLE_RADIUS - (OUTER_CIRCLE_RADIUS - radius) * (isYes ? 1 : -1) * Math.cos(angle)
-  const yOffset = OUTER_CIRCLE_RADIUS - (OUTER_CIRCLE_RADIUS - radius) * (isYes ? 1 : -1) * Math.sin(angle)
+
+  // offset YES circle to left and NO circle to right
+  const xOffset = OUTER_CIRCLE_RADIUS + (OUTER_CIRCLE_RADIUS - radius) * (isYes ? -1 : 1) * Math.cos(angle)
+  const yOffset = OUTER_CIRCLE_RADIUS + (OUTER_CIRCLE_RADIUS - radius) * (isYes ? -1 : 1) * Math.sin(angle)
 
   let nameFontSize = Math.round(CIRCLE_NAME_MAX_FONT_SIZE * (radius / OUTER_CIRCLE_RADIUS))
   if (nameFontSize < MIN_FONT_SIZE) nameFontSize = MIN_FONT_SIZE
