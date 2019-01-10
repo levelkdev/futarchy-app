@@ -17,7 +17,7 @@ contract Futarchy is AragonApp {
   event ExecuteDecision(uint decisionId);
   event BuyMarketPositions(address trader, uint decisionId, uint tradeTime, uint collateralAmount, uint[2] yesPurchaseAmounts, uint[2] noPurchaseAmounts, uint[2] yesCosts, uint[2] noCosts);
   event SellMarketPositions(address trader, uint decisionId, uint tradeTime, int[] yesMarketPositions, int[] noMarketPositions, uint yesCollateralReceived, uint noCollateralReceived);
-  event RedeemWinnings(address trader, uint decisionId,  uint winningsAmount);
+  event RedeemWinnings(address trader, uint decisionId, int winningIndex, uint winningsAmount);
 
   bytes32 public constant CREATE_DECISION_ROLE = keccak256("CREATE_DECISION_ROLE");
 
@@ -312,7 +312,7 @@ contract Futarchy is AragonApp {
       }
 
       require(token.transfer(msg.sender, winnings));
-      emit RedeemWinnings(msg.sender, decisionId, winnings);
+      emit RedeemWinnings(msg.sender, decisionId, winningIndex, winnings);
     }
 
     /**
