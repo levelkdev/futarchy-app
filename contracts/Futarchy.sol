@@ -316,6 +316,61 @@ contract Futarchy is AragonApp {
     }
 
     /**
+    * @notice calculates the amount of YES/NO collateral needed to buy the given amounts of
+    *         YES-SHORT, YES-LONG, NO-SHORT, and NO-LONG on the YES or NO markets for the given
+    *         decision
+    * @param decisionId unique identifier for the decision
+    * @param outcomeTokenAmounts array of 0: YES-SHORT, 1: YES-LONG, 2: NO-SHORT, and 3: NO-LONG
+    *        outcome token amounts
+    * @return array of YES/NO collateral amounts need to buy the given outcome token amounts
+    */
+    function calcCosts(
+      uint decisionId,
+      uint[4] outcomeTokenAmounts
+    )
+      public
+      view
+      returns (uint[4] collateralTokenAmounts)
+    {
+      for(uint8 i = 0; i < 4; i++) {
+        uint8 yesOrNo = i < 2 ? 0 : 1;
+        collateralTokenAmounts[i] = lmsrMarketMaker.calcCost(
+          decisions[decisionId].futarchyOracle.markets(yesOrNo),
+          i % 2,
+          outcomeTokenAmounts[i]
+        );
+      }
+    }
+
+    /**
+    * @notice calculates the amount of YES/NO collateral recieved from selling the given
+    *         amounts of YES-SHORT, YES-LONG, NO-SHORT, and NO-LONG on the YES or NO markets
+    *         for the given decision
+    * @param decisionId unique identifier for the decision
+    * @param outcomeTokenAmounts array of 0: YES-SHORT, 1: YES-LONG, 2: NO-SHORT, and 3: NO-LONG
+    *        outcome token amounts
+    * @return array of YES/NO collateral amounts that would be received for the sale of the
+    *         given outcome token amounts
+    */
+    function calcProfits(
+      uint decisionId,
+      uint[4] outcomeTokenAmounts
+    )
+      public
+      view
+      returns (uint[4] collateralTokenAmounts)
+    {
+      for(uint8 i = 0; i < 4; i++) {
+        uint8 yesOrNo = i < 2 ? 0 : 1;
+        collateralTokenAmounts[i] = lmsrMarketMaker.calcProfit(
+          decisions[decisionId].futarchyOracle.markets(yesOrNo),
+          i % 2,
+          outcomeTokenAmounts[i]
+        );
+      }
+    }
+
+    /**
     * @notice returns true if the trading period before making the decision has passed
     * @param decisionId decision unique identifier
     */
