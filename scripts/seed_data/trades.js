@@ -1,8 +1,8 @@
 const BigNumber = require('bignumber.js')
-const advanceTime = require('./advanceTime')
-const getFutarchyContract = require('./getFutarchyContract')
-const calcOutcomeTokenCount = require('./calcOutcomeTokenCount')
-const tradesData = require('./tradesData001.json')
+const advanceTime = require('../utilities/advanceTime')
+const getFutarchyContract = require('../utilities/getFutarchyContract')
+const calcOutcomeTokenCount = require('../utilities/calcOutcomeTokenCount')
+const tradesData = require('./data/tradesData001.json')
 
 const extraTokens = 1000
 
