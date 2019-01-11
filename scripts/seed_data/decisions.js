@@ -6,7 +6,7 @@ module.exports = async callback => {
   try {
     const daoAddress = process.argv[6]
     if (!daoAddress) {
-      throw new Error('DAO address was not provided. Script expects `npm run seed:trades <DAO_ADDRESS>`. The DAO address can be copied from the `aragon run` output.')
+      throw new Error('DAO address was not provided. Script expects `npm run seed:decisions <DAO_ADDRESS>`. The DAO address can be copied from the `aragon run` output.')
     }
 
     console.log('creating some decisions...')
