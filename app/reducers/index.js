@@ -6,6 +6,7 @@ import sidePanel from './sidePanel'
 import propValue from './propValue'
 import initDataLoadStates from './initDataLoadStates'
 import initDataProps from './initDataProps'
+import performance from './performance'
 import trades from './trades'
 
 let reducers = {
@@ -14,6 +15,7 @@ let reducers = {
   form,
   sidePanel,
   initDataLoadStates,
+  performance,
   trades
 }
 
