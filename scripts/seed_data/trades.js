@@ -72,6 +72,17 @@ module.exports = async (callback) => {
             noOutcomeTokenAmounts,
             { from: buyer }
           )
+        } else if (data.type == 'sell') {
+          const { from } = data
+          const seller = accounts[from]
+
+          console.log(
+            `Selling market positions ` +
+            `from ${seller}`
+          )   
+
+          await app.sellMarketPositions(decisionId, { from: seller })
+          console.log('sold positions')
         } else if (data.type == 'advanceTime') {
           await advanceTime(web3, data.seconds)
         } else {
