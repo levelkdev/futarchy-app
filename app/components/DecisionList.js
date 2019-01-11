@@ -23,10 +23,11 @@ const DecisionCards = ({ decisions }) => decisions.map(decision => (
 
 const CardGroup = styled.div`
   display: flex;
+  flex-wrap: wrap;
 `
 
 const Card = styled.div`
-  min-width: 300px;
+  width: 300px;
   margin-right: 20px;
 `
 
