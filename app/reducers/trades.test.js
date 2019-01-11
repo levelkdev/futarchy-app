@@ -87,5 +87,9 @@ describe('trades', () => {
     it('should return state with new trades appended', () => {
       assert.equal(trades(['mock_trade'], mockLongTradesAction).length, 2)
     })
+
+    it('should set incremental tradeId on new trades', () => {
+      assert.equal(trades(['mock_trade'], mockLongTradesAction)[1].tradeId, 1)
+    })
   })
 })

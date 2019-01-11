@@ -24,9 +24,11 @@ const trades = (state = [], action) => {
       const yesTokenAmount = sumTokenValueArray(yesPurchaseAmounts)
       const netYesCost = sumTokenValueArray(yesCosts)
       const netNoCost = sumTokenValueArray(noCosts)
+      const idx = state.length
       return [
         ...state,
         {
+          tradeId: idx,
           decisionId,
           trader,
           tradeTime,
