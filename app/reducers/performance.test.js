@@ -13,6 +13,16 @@ const mockTradesAction_Decision23_trader11 = {
   }
 }
 
+const mockPotentialProfitDataLoadedAction_Decision23_trader11 = {
+  type: 'POTENTIAL_PROFIT_DATA_LOADED',
+  decisionId: '23',
+  trader: 'trader_11',
+  yesShort: '300',
+  yesLong: '400',
+  noShort: '25',
+  noLong: '50'
+}
+
 const mockTotal = (
   decisionId,
   trader,
@@ -135,6 +145,39 @@ describe('performance', () => {
       assert.equal(result[1].noLongBalance, 6)
     })
 
+  })
+
+  describe('when given a POTENTIAL_PROFIT_DATA_LOADED action', () => {
+    let result
+
+    beforeEach(() => {
+      result = performance(
+        [
+          mockTotal('23', 'trader_09', 100, 200, 300, 400, 500, 600),
+          mockTotal('23', 'trader_11', 100, 200, 300, 400, 500, 600)
+        ],
+        mockPotentialProfitDataLoadedAction_Decision23_trader11
+      )
+    })
+
+    it('should update YES performance data for target trader', () => {
+      assert.equal(result[1].yesShortPotentialProfit, 300)
+      assert.equal(result[1].yesLongPotentialProfit, 400)
+      assert.equal(result[1].yesPotentialProfit, 700)
+      assert.equal(result[1].yesGainLoss, 600)
+    })
+
+    it('should update NO performance data for target trader', () => {
+      assert.equal(result[1].noShortPotentialProfit, 25)
+      assert.equal(result[1].noLongPotentialProfit, 50)
+      assert.equal(result[1].noPotentialProfit, 75)
+      assert.equal(result[1].noGainLoss, -125)
+    })
+
+    it('should update total performance data for target trader', () => {
+      assert.equal(result[1].totalPotentialProfit, 775)
+      assert.equal(result[1].totalGainLoss, 475)
+    })
   })
 
 })
