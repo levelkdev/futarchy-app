@@ -39,6 +39,8 @@ const { encodeCallScript } = require('@aragon/test-helpers/evmScript')
 const leftPad = require('left-pad')
 
 const NULL_ADDRESS = '0x00'
+const LOWER_BOUND = 1
+const UPPER_BOUND = 100
 const TWENTY = 20 * 10 ** 18
 const TEN = 10 * 10 ** 18
 const FIVE = 5 * 10 ** 18
@@ -142,7 +144,7 @@ contract('Futarchy', (accounts) => {
       beforeEach(async () => {
         await token.approve(futarchy.address, marketFundAmount, {from: root})
         currentBlockNumber = await getBlockNumber()
-        const { logs } = await futarchy.newDecision(script, metadata)
+        const { logs } = await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
         _logs = logs
       })
 
@@ -177,7 +179,7 @@ contract('Futarchy', (accounts) => {
 
     it('emits an accurate StartDecision event', async () => {
       await token.approve(futarchy.address, marketFundAmount, {from: root})
-      const { logs } = await futarchy.newDecision(script, metadata)
+      const { logs } = await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
       const event = logs[0]
       expect(event.event).to.equal('StartDecision')
       expect(event.args.decisionId.toNumber()).to.equal(0)
@@ -187,14 +189,14 @@ contract('Futarchy', (accounts) => {
 
     it('returns the decisionId number', async () => {
       await token.approve(futarchy.address, marketFundAmount, {from: root})
-      expect((await futarchy.newDecision.call(script, metadata)).toNumber()).to.equal(0)
+      expect((await futarchy.newDecision.call(script, metadata, LOWER_BOUND, UPPER_BOUND)).toNumber()).to.equal(0)
     })
 
     it('increments the decisionId number every time it is called', async () => {
       await token.approve(futarchy.address, marketFundAmount, {from: root})
-      await futarchy.newDecision(script, 'abc')
+      await futarchy.newDecision(script, 'abc', LOWER_BOUND, UPPER_BOUND)
       await token.approve(futarchy.address, marketFundAmount, {from: root})
-      expect((await futarchy.newDecision.call(script, metadata)).toNumber()).to.equal(1)
+      expect((await futarchy.newDecision.call(script, metadata, LOWER_BOUND, UPPER_BOUND)).toNumber()).to.equal(1)
     })
   })
 
@@ -206,7 +208,7 @@ contract('Futarchy', (accounts) => {
       metadata = 'Give voting rights to all kitties in the world'
       await token.approve(futarchy.address, marketFundAmount, {from: root})
       currentBlockNumber = await getBlockNumber()
-      await futarchy.newDecision(script, metadata)
+      await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
       returnValue = await futarchy.getDecision(0)
     })
 
@@ -241,11 +243,11 @@ contract('Futarchy', (accounts) => {
     beforeEach(async () => {
       await initializeFutarchy()
       executionTarget = await ExecutionTarget.new()
-      script = await encodeExecutionScript(executionTarget)
+      script = await encodeExecutionScript(executionTarget, futarchy)
       metadata = 'Give voting rights to all kitties in the world'
 
       await token.approve(futarchy.address, marketFundAmount, {from: root})
-      await futarchy.newDecision(script, metadata)
+      await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
       decisionId = 0
       futarchyOracle = FutarchyOracleMock.at((await futarchy.decisions(0))[0])
     })
@@ -323,7 +325,7 @@ contract('Futarchy', (accounts) => {
       initializeFutarchy({_futarchyOracleFactoryAddr: futarchyOracleFactoryFull.address})
       await token.approve(futarchy.address, marketFundAmount, {from: root})
       currentBlockNumber = await getBlockNumber()
-      await futarchy.newDecision(script, metadata)
+      await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
 
       // Get price oracle
       futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
@@ -348,7 +350,7 @@ contract('Futarchy', (accounts) => {
       script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
       metadata = 'Give voting rights to all kitties in the world'
       await token.approve(futarchy.address, marketFundAmount +  (40 * 10 ** 18), {from: root})
-      await futarchy.newDecision(script, metadata)
+      await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
       futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
     })
 
@@ -509,7 +511,7 @@ contract('Futarchy', (accounts) => {
       initializeFutarchy({_futarchyOracleFactoryAddr: futarchyOracleFactoryFull.address})
       script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
       metadata = 'Give voting rights to all kitties in the world'
-      await futarchy.newDecision(script, metadata)
+      await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
 
       futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
       yesMarket = StandardMarketWithPriceLogger.at(await futarchyOracle.markets(0))
@@ -600,7 +602,7 @@ contract('Futarchy', (accounts) => {
       initializeFutarchy({_futarchyOracleFactoryAddr: futarchyOracleFactoryFull.address})
       script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
       metadata = 'Give voting rights to all kitties in the world'
-      await futarchy.newDecision(script, metadata)
+      await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
 
       futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
       yesMarket = StandardMarketWithPriceLogger.at(await futarchyOracle.markets(0))
@@ -686,7 +688,7 @@ contract('Futarchy', (accounts) => {
       script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
       metadata = 'Give voting rights to all kitties in the world'
       await token.approve(futarchy.address, marketFundAmount +  (40 * 10 ** 18), {from: root})
-      await futarchy.newDecision(script, metadata)
+      await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
       futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
     })
 
@@ -759,7 +761,6 @@ contract('Futarchy', (accounts) => {
     }
   }
 })
-
 
 async function deployFutarchyMasterCopies() {
   const categoricalEvent = await CategoricalEvent.new()
