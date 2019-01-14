@@ -16,6 +16,9 @@ module.exports = async callback => {
     const token = ERC20.at(await app.token())
     const marketFundAmount = await app.marketFundAmount()
 
+    const lowerBound = 0
+    const upperBound = 1000
+
     const decisions = [
       { executionScript: '', metadata: 'Execute a transfer of 1,000 ETH to 0xa1b2c3...?' },
       { executionScript: '', metadata: 'Increase the minimum funding parameter to 45 TKN?' },
@@ -26,8 +29,8 @@ module.exports = async callback => {
       let decision = decisions[i]
       console.log(`token.approve(${app.address}, ${marketFundAmount})`)
       await token.approve(app.address, marketFundAmount)
-      console.log(`app.newDecision(${decision.executionScript}, ${decision.metadata})`)
-      await app.newDecision(decision.executionScript, decision.metadata)
+      console.log(`app.newDecision(${decision.executionScript}, ${decision.metadata}, ${lowerBound}, ${upperBound})`)
+      await app.newDecision(decision.executionScript, decision.metadata, lowerBound, upperBound)
       console.log('')
     }
 

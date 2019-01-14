@@ -5,6 +5,8 @@ import { newDecision, hidePanel } from '../actions'
 import CreateDecisionMarketForm from '../components/CreateDecisionMarketForm'
 
 const ZERO_BYTES_32 = '0x0000000000000000000000000000000000000000000000000000000000000000'
+const LOWER_BOUND = 0
+const UPPER_BOUND = 1000
 
 const mapStateToProps = state => ({
   tokenBalance: state.tokenBalance,
@@ -14,7 +16,12 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   createDecision: async values => {
     dispatch(hidePanel())
-    dispatch(newDecision(ZERO_BYTES_32, values.question))
+    dispatch(newDecision({
+      bytes32Script: ZERO_BYTES_32,
+      question: values.question,
+      lowerBound: LOWER_BOUND,
+      upperBound: UPPER_BOUND
+    }))
   }
 })
 

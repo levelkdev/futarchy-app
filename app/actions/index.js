@@ -54,8 +54,13 @@ export const propValueLoadingError = ({ prop, errorMessage }) => ({
   errorMessage
 })
 
-export const newDecision = (bytes32Script, question) => dispatch => {
-  return client.newDecision(bytes32Script, question).then(txHash => {
+export const newDecision = ({
+  bytes32Script,
+  question,
+  lowerBound,
+  upperBound
+}) => dispatch => {
+  return client.newDecision(bytes32Script, question, lowerBound, upperBound).then(txHash => {
     dispatch(newDecisionTxPending({ question, txHash }))
   }, err => {
     console.error(`newDecision: ${err}`)
