@@ -7,10 +7,10 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   showPanel: () => dispatch(showPanel({ panelName: ownProps.panelName }))
 })
 
-const ShowPanelButton = ({ showPanel, children }) => (
+const ShowPanelButton = ({ showPanel, children, buttonMode }) => (
   <Button
     onClick={showPanel}
-    mode="strong"
+    mode={buttonMode}
   >
     {children}
   </Button>

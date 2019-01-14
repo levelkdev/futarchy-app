@@ -14,7 +14,7 @@ const AppHeader = ({ decision }) => (
       }
     </AlignLeft>
     <AlignRight>
-      <ShowPanelButtonContainer panelName="createDecisionMarket">
+      <ShowPanelButtonContainer panelName="createDecisionMarket" buttonMode="strong">
         New Decision
       </ShowPanelButtonContainer>
     </AlignRight>
