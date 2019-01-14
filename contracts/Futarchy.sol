@@ -101,14 +101,14 @@ contract Futarchy is AragonApp {
     **/
     function newDecision(
       bytes executionScript,
-      string metadata
+      string metadata,
+      int lowerBound,
+      int upperBound
     )
       public
       auth(CREATE_DECISION_ROLE)
       returns (uint decisionId)
     {
-      int lowerBound;
-      int upperBound;
       decisionId = decisionLength++;
       uint64 startDate = getTimestamp64();
       decisions[decisionId].startDate = startDate;
@@ -116,7 +116,6 @@ contract Futarchy is AragonApp {
       decisions[decisionId].metadata = metadata;
       decisions[decisionId].snapshotBlock = getBlockNumber64() - 1;
       decisions[decisionId].executionScript = executionScript;
-      (lowerBound, upperBound) = _calculateBounds();
 
       FutarchyOracle futarchyOracle = futarchyOracleFactory.createFutarchyOracle(
         ERC20Gnosis(token),
@@ -355,7 +354,7 @@ contract Futarchy is AragonApp {
       currentBalances.noLong = currentBalances.noLong.add(noOutcomeAmounts[1]);
     }
 
-    function _getMarketPositionsArray(uint decisionId, address trader, uint marketIndex) internal returns(int[]) {
+    function _getMarketPositionsArray(uint decisionId, address trader, uint marketIndex) internal view returns(int[]) {
       OutcomeTokenBalances storage outcomeTokenBalances = traderDecisionBalances[keccak256(trader, decisionId)];
       int[] memory marketPositions = new int[](2);
       marketPositions[0] = marketIndex == 0 ? -int(outcomeTokenBalances.yesShort) : -int(outcomeTokenBalances.noShort);
@@ -365,12 +364,6 @@ contract Futarchy is AragonApp {
 
     function _calcTotalCost(uint[2] costs) internal pure returns (uint) {
       return costs[0].add(costs[1]);
-    }
-
-    /* TODO: actually get real bounds */
-    function _calculateBounds() internal returns(int lowerBound, int upperBound) {
-      lowerBound = 0;
-      upperBound = 1000;
     }
 
     /**
@@ -396,14 +389,17 @@ contract Futarchy is AragonApp {
       return true;
     }
 
+
     /**
-    * @notice Creates a new decision to execute the desired action
+    * @notice Purpose is to be called with an evmCallScript that will execute newDecision()
     * @dev IForwarder interface conformance
-    * @param evmCallScript executionScript for a successful YES decision
+    * @param evmCallScript a script expected to execute futarchy.newDecision()
     */
     function forward(bytes evmCallScript) public {
       require(canForward(msg.sender, evmCallScript));
-      newDecision(evmCallScript, '');
+
+      bytes memory input = new bytes(0);
+      runScript(evmCallScript, input, new address[](0));
     }
 
     /**
