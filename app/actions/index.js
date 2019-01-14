@@ -93,7 +93,7 @@ export const fetchAvgPricesForDecisionMarkets = (decisionId) => dispatch => {
   )
 }
 
-// fetches the amount of collateral token a trader would receive if the sold
+// fetches the amount of collateral token a trader would receive if they sold
 // outcome tokens for a given decision, and dispatches an action
 // `balances` expects an array: [yesShort, yesLong, noShort, noLong]
 export const fetchPotentialProfitData = ({ decisionId, trader, balances }) => dispatch => {
