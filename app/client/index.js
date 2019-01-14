@@ -54,6 +54,20 @@ export const avgPricesForDecisionMarkets = async (decisionId) => {
   return { yesMarketPrice, noMarketPrice }
 }
 
+export const calcCosts = async (decisionId, outcomeTokenAmounts) => {
+  const [ yesShort, yesLong, noShort, noLong ] = await call(
+    'calcCosts', decisionId, outcomeTokenAmounts
+  )
+  return { yesShort, yesLong, noShort, noLong }
+}
+
+export const calcProfits = async (decisionId, outcomeTokenAmounts) => {
+  const [ yesShort, yesLong, noShort, noLong ] = await call(
+    'calcProfits', decisionId, outcomeTokenAmounts, {}
+  )
+  return { yesShort, yesLong, noShort, noLong }
+}
+
 // this function includes a "pretransaction" to approve marketing funding
 // token transfer. Aragon client uses the `token` property in transaction
 // options to send a token approval transaction before the requested
@@ -91,6 +105,8 @@ export default {
   tradingPeriod,
   marketFundAmount,
   avgPricesForDecisionMarkets,
+  calcCosts,
+  calcProfits,
   newDecision,
   sendTransaction
 }
