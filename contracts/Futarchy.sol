@@ -9,7 +9,7 @@ import '@gnosis.pm/pm-contracts/contracts/Oracles/CentralizedOracleFactory.sol';
 import "@aragon/apps-shared-minime/contracts/MiniMeToken.sol";
 import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 
-contract Futarchy is AragonApp {
+contract Futarchy is AragonApp, IForwarder {
   using SafeMath for uint;
   using SafeMath64 for uint64;
 
@@ -408,7 +408,7 @@ contract Futarchy is AragonApp {
     * @param sender msg.sender
     * @param evmCallScript script to execute upon successful YES decision
     */
-    function canForward(address sender, bytes evmCallScript) public returns (bool) {
+    function canForward(address sender, bytes evmCallScript) public view returns (bool) {
       return canPerform(sender, CREATE_DECISION_ROLE, arr());
     }
 }
