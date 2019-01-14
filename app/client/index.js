@@ -72,7 +72,7 @@ export const calcProfits = async (decisionId, outcomeTokenAmounts) => {
 // token transfer. Aragon client uses the `token` property in transaction
 // options to send a token approval transaction before the requested
 // transaction (in this case, a `newDecision` transaction)
-export const newDecision = async (script, question) => {
+export const newDecision = async (script, question, lowerBound, upperBound) => {
   const address = await call('token')
   const value = await marketFundAmount()
   const transactionOptions = {
@@ -84,6 +84,8 @@ export const newDecision = async (script, question) => {
     'newDecision',
     script,
     question,
+    lowerBound,
+    upperBound,
     transactionOptions
   )
 }
