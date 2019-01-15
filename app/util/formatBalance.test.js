@@ -20,6 +20,12 @@ describe('formatBalance', () => {
       should: 'should return "< 0.0001"',
       balance: .000099999 * 10 ** 18,
       expected: "< 0.0001"
+    },
+    {
+      when: 'when given 0',
+      should: 'should return "0"',
+      balance: 0,
+      expected: "0"
     }
   ].forEach(({ when, should, balance, expected }) => {
     describe(when, () => {
