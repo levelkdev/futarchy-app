@@ -1,11 +1,16 @@
 import React from 'react'
+import styled from 'styled-components'
 import PerformanceTotalsContainer from '../containers/PerformanceTotalsContainer'
 
 const Account = () => (
-  <div>
+  <ViewElem>
     Account Balances:
     <PerformanceTotalsContainer />
-  </div>
+  </ViewElem>
 )
+
+const ViewElem = styled.div`
+  width: 100%;
+`
 
 export default Account

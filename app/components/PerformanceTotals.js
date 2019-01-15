@@ -1,4 +1,11 @@
 import React from 'react'
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableCell,
+  Text
+} from '@aragon/ui'
 import formatBalance from '../util/formatBalance'
 
 const PerformanceTotals = ({
@@ -7,12 +14,37 @@ const PerformanceTotals = ({
   tokenBalance,
   tokenRisked
 }) => (
-  <div>
-    <div>CURRENT GAIN/LOSS: {formatBalance(currentGainLoss)} TKN</div>
-    <div>REALIZED GAIN/LOSS: {formatBalance(realizedGainLoss)} TKN</div>
-    <div>TOKEN BALANCE: {formatBalance(tokenBalance)} TKN</div>
-    <div>TOKEN RISKED: {formatBalance(tokenRisked)} TKN</div>
-  </div>
+  <Table
+    header={
+      <TableRow>
+        <TableHeader title="Gain/Loss (Current)" />
+        <TableHeader title="Gain/Loss (Realized)" />
+        <TableHeader title="Balance" />
+        <TableHeader title="Risked" />
+      </TableRow>
+    }
+  >
+    <TableRow>
+      <TableCell>
+        <Text size="xxlarge">
+          {formatBalance(currentGainLoss)}
+          <Text size="large">&nbsp;TKN</Text>
+        </Text>
+      </TableCell>
+      <TableCell>
+        <Text size="xxlarge">{formatBalance(realizedGainLoss)} 
+          <Text size="large">&nbsp;TKN</Text></Text>
+      </TableCell>
+      <TableCell>
+        <Text size="xxlarge">{formatBalance(tokenBalance)} 
+          <Text size="large">&nbsp;TKN</Text></Text>
+      </TableCell>
+      <TableCell>
+        <Text size="xxlarge">{formatBalance(tokenRisked)} 
+          <Text size="large">&nbsp;TKN</Text></Text>
+      </TableCell>
+    </TableRow>
+  </Table>
 )
 
 export default PerformanceTotals
