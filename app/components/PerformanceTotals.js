@@ -8,10 +8,10 @@ const PerformanceTotals = ({
   tokenRisked
 }) => (
   <div>
-    <div>CURRENT GAIN/LOSS: {formatBalance(currentGainLoss)}</div>
-    <div>REALIZED GAIN/LOSS: {formatBalance(realizedGainLoss)}</div>
-    <div>TOKEN BALANCE: {formatBalance(tokenBalance)}</div>
-    <div>TOKEN RISKED: {formatBalance(tokenRisked)}</div>
+    <div>CURRENT GAIN/LOSS: {formatBalance(currentGainLoss)} TKN</div>
+    <div>REALIZED GAIN/LOSS: {formatBalance(realizedGainLoss)} TKN</div>
+    <div>TOKEN BALANCE: {formatBalance(tokenBalance)} TKN</div>
+    <div>TOKEN RISKED: {formatBalance(tokenRisked)} TKN</div>
   </div>
 )
 

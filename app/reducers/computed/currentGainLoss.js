@@ -1,13 +1,7 @@
-import _ from 'lodash'
+import sumPerformanceCalc from './sumPerformanceCalc'
 
 const currentGainLoss = (trader, performance) => {
-  return _.reduce(
-    _.filter(performance, { trader }),
-    (result, performanceTotals) => {
-      return result + performanceTotals.totalGainLoss
-    },
-    0
-  )
+  return sumPerformanceCalc('totalGainLoss', trader, performance)
 }
 
 export default currentGainLoss
