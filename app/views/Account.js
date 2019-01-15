@@ -1,9 +1,10 @@
 import React from 'react'
-import PerformanceSummaryContainer from '../containers/PerformanceSummaryContainer'
+import PerformanceTotalsContainer from '../containers/PerformanceTotalsContainer'
 
 const Account = () => (
   <div>
-    <PerformanceSummaryContainer />
+    Account Balances:
+    <PerformanceTotalsContainer />
   </div>
 )
 
