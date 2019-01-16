@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Button } from '@aragon/ui'
 import MarketCircles from './MarketCircles'
+import ShowPanelButtonContainer from '../containers/ShowPanelButtonContainer'
 
 // TODO: deal with the `decision.pending = true` state
 
@@ -26,7 +27,12 @@ const DecisionCard = ({ decision }) => (
         >
           <ViewDetailsButton mode="text">View details</ViewDetailsButton>
         </LinkStyled>
-        <PredictButton mode="secondary">Predict</PredictButton>
+        <ShowPanelButtonContainer
+          panelName="makePrediction"
+          panelContext={{ decisionId: decision.id }}
+        >
+          Predict
+        </ShowPanelButtonContainer>
       </ButtonsContainer>
     </ContentContainer>
   </CardContainer>

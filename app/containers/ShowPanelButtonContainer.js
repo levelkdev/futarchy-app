@@ -4,7 +4,7 @@ import { showPanel } from '../actions'
 import { Button } from '@aragon/ui'
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  showPanel: () => dispatch(showPanel({ panelName: ownProps.panelName }))
+  showPanel: () => dispatch(showPanel({ panelName: ownProps.panelName, panelContext: ownProps.panelContext}))
 })
 
 const ShowPanelButton = ({ showPanel, children }) => (
