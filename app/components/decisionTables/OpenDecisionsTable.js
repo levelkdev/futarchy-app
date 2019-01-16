@@ -9,6 +9,7 @@ import {
 } from '@aragon/ui'
 import DecisionsTableRows from './DecisionsTableRows'
 import DecisionQuestionContainer from '../../containers/DecisionQuestionContainer'
+import DecisionPredictedPricesContainer from '../../containers/DecisionPredictedPricesContainer'
 
 const OpenDecisionsTable = ({ decisionIds }) => (
   <Table
@@ -32,13 +33,13 @@ const OpenDecisionsTable = ({ decisionIds }) => (
             <DecisionQuestionContainer decisionId={decisionId} />
           </TableCell>
           <TableCell>
-            <Text>TODO</Text>
+            <Text>...</Text>
           </TableCell>
           <TableCell>
-            <Text>TODO</Text>
+            <Text>...</Text>
           </TableCell>
-          <TableCell>
-            <Text>TODO</Text>
+          <TableCell width="150">
+            <DecisionPredictedPricesContainer decisionId={decisionId} />
           </TableCell>
           <TableCell>
             <Text>TODO</Text>
