@@ -7,7 +7,12 @@ const SEVENTY_FIVE_PERCENT = (ONE * 0.75) + ''
 const FIFTY_PERCENT = (ONE * 0.50) + ''
 
 const mockDecision = (n, pending = false) => {
-  return { id: `mock_decision_id_${n}`, question: `mock_question_${n}`, pending }
+  return {
+    id: `mock_decision_id_${n}`,
+    question: `mock_question_${n}`,
+    pending,
+    status: "OPEN"
+  }
 }
 
 describe('decisionMarkets', () => {
@@ -70,7 +75,8 @@ describe('decisionMarkets', () => {
             question: 'mock_question',
             lowerBound: '0',
             upperBound: '1000',
-            pending: false
+            pending: false,
+            status: "OPEN"
           }
         ]
       },
@@ -94,7 +100,8 @@ describe('decisionMarkets', () => {
             question: 'mock_question_123',
             lowerBound: '0',
             upperBound: '1000',
-            pending: false
+            pending: false,
+            status: "OPEN"
           }
         ]
       },
@@ -117,7 +124,8 @@ describe('decisionMarkets', () => {
             question: 'mock_question_88',
             lowerBound: '0',
             upperBound: '1000',
-            pending: false
+            pending: false,
+            status: "OPEN"
           }
         ]
       },
@@ -141,7 +149,8 @@ describe('decisionMarkets', () => {
             question: 'mock_question_88',
             lowerBound: '0',
             upperBound: '1000',
-            pending: false
+            pending: false,
+            status: "OPEN"
           }
         ]
       }

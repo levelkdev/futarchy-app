@@ -1,7 +1,7 @@
 import React from 'react'
 import _ from 'lodash'
 import styled from 'styled-components'
-import decisionStates from '../constants/decisionStates'
+import decisionStatuses from '../constants/decisionStatuses'
 import PerformanceTotalsContainer from '../containers/PerformanceTotalsContainer'
 import MyDecisionsBadgeContainer from '../containers/MyDecisionsBadgeContainer'
 import OpenDecisionsTable from '../components/decisionTables/OpenDecisionsTable'
@@ -16,11 +16,11 @@ const decisionStateMap = {
 
 const Account = () => (
   <ViewElem>
-    <TableTitle>Account Balances</TableTitle>
+    <TableTitle>My Totals</TableTitle>
     <PerformanceTotalsContainer />
     <br /><br />
 
-    {_.values(decisionStates).map(decisionState => {
+    {_.values(decisionStatuses).map(decisionState => {
       const { label, component: DecisionTableComponent } = decisionStateMap[decisionState]
       return (
         <DecisionSummarySection>
@@ -28,7 +28,7 @@ const Account = () => (
             <TableTitle>
               {label}
               <DecisionsCountBadge>
-                <MyDecisionsBadgeContainer filter={decisionState} />
+                <MyDecisionsBadgeContainer statusFilter={decisionState} />
               </DecisionsCountBadge>
             </TableTitle>
           </div>

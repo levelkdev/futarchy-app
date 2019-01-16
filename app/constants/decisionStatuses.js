@@ -1,7 +1,7 @@
-const decisionStates = {
+const decisionStatuses = {
   OPEN: 'OPEN',
   RESOLVED: 'RESOLVED',
   CLOSE: 'CLOSED'
 }
 
-export default decisionStates
+export default decisionStatuses
