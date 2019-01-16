@@ -7,6 +7,7 @@ import {
   Text
 } from '@aragon/ui'
 import formatBalance from '../util/formatBalance'
+import negativePositiveColor from '../util/negativePositiveColor'
 import TokenSymbolDisplay from './TokenSymbolDisplay'
 
 const PerformanceTotals = ({
@@ -27,22 +28,32 @@ const PerformanceTotals = ({
   >
     <TableRow>
       <TableCell>
-        <Text size="xxlarge">
+        <Text
+          size="xxlarge"
+          color={negativePositiveColor(currentGainLoss)}
+        >
           {formatBalance(currentGainLoss)}
           <Text size="large">&nbsp;<TokenSymbolDisplay /></Text>
         </Text>
       </TableCell>
       <TableCell>
-        <Text size="xxlarge">{formatBalance(realizedGainLoss)} 
-          <Text size="large">&nbsp;<TokenSymbolDisplay /></Text></Text>
+        <Text
+          size="xxlarge"
+          color={negativePositiveColor(realizedGainLoss)}
+        >
+          {formatBalance(realizedGainLoss)} 
+          <Text size="large">&nbsp;<TokenSymbolDisplay /></Text>
+        </Text>
       </TableCell>
       <TableCell>
         <Text size="xxlarge">{formatBalance(tokenBalance)} 
-          <Text size="large">&nbsp;<TokenSymbolDisplay /></Text></Text>
+          <Text size="large">&nbsp;<TokenSymbolDisplay /></Text>
+        </Text>
       </TableCell>
       <TableCell>
         <Text size="xxlarge">{formatBalance(tokenRisked)} 
-          <Text size="large">&nbsp;<TokenSymbolDisplay /></Text></Text>
+          <Text size="large">&nbsp;<TokenSymbolDisplay /></Text>
+        </Text>
       </TableCell>
     </TableRow>
   </Table>
