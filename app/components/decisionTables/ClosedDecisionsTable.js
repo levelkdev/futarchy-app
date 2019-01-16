@@ -6,8 +6,9 @@ import {
   TableCell,
   Text
 } from '@aragon/ui'
+import TableEmptyRow from './TableEmptyRow'
 
-const OpenDecisionsTable = () => (
+const ClosedDecisionsTable = ({ decisions }) => (
   <Table
     header={
       <TableRow>
@@ -21,30 +22,8 @@ const OpenDecisionsTable = () => (
       </TableRow>
     }
   >
-    <TableRow>
-      <TableCell>
-        <Text>...</Text>
-      </TableCell>
-      <TableCell>
-        <Text>...</Text>
-      </TableCell>
-      <TableCell>
-        <Text>...</Text>
-      </TableCell>
-      <TableCell>
-        <Text>...</Text>
-      </TableCell>
-      <TableCell>
-        <Text>...</Text>
-      </TableCell>
-      <TableCell>
-        <Text>...</Text>
-      </TableCell>
-      <TableCell>
-        <Text>...</Text>
-      </TableCell>
-    </TableRow>
+    <TableEmptyRow columnCount={7} />
   </Table>
 )
 
-export default OpenDecisionsTable
+export default ClosedDecisionsTable

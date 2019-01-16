@@ -4,14 +4,12 @@ import styled from 'styled-components'
 import decisionStatuses from '../constants/decisionStatuses'
 import PerformanceTotalsContainer from '../containers/PerformanceTotalsContainer'
 import MyDecisionsBadgeContainer from '../containers/MyDecisionsBadgeContainer'
-import OpenDecisionsTable from '../components/decisionTables/OpenDecisionsTable'
-import ResolvedDecisionsTable from '../components/decisionTables/ResolvedDecisionsTable'
-import ClosedDecisionsTable from '../components/decisionTables/ClosedDecisionsTable'
+import DecisionsTableContainer from '../containers/DecisionsTableContainer'
 
-const decisionStateMap = {
-  OPEN: { label: 'My Open Decisions', component: OpenDecisionsTable },
-  RESOLVED: { label: 'My Resolved Decisions', component: ResolvedDecisionsTable },
-  CLOSED: { label: 'My Closed Decisions', component: ClosedDecisionsTable }
+const decisionLabelsMap = {
+  OPEN: 'My Open Decisions',
+  RESOLVED: 'My Resolved Decisions',
+  CLOSED: 'My Closed Decisions'
 }
 
 const Account = () => (
@@ -20,22 +18,19 @@ const Account = () => (
     <PerformanceTotalsContainer />
     <br /><br />
 
-    {_.values(decisionStatuses).map(decisionState => {
-      const { label, component: DecisionTableComponent } = decisionStateMap[decisionState]
-      return (
-        <DecisionSummarySection>
-          <div>
-            <TableTitle>
-              {label}
-              <DecisionsCountBadge>
-                <MyDecisionsBadgeContainer statusFilter={decisionState} />
-              </DecisionsCountBadge>
-            </TableTitle>
-          </div>
-          {<DecisionTableComponent />}
-        </DecisionSummarySection>
-      )
-    })}
+    {_.values(decisionStatuses).map(decisionState => (
+      <DecisionSummarySection key={decisionState}>
+        <div>
+          <TableTitle>
+            {decisionLabelsMap[decisionState]}
+            <DecisionsCountBadge>
+              <MyDecisionsBadgeContainer statusFilter={decisionState} />
+            </DecisionsCountBadge>
+          </TableTitle>
+        </div>
+        <DecisionsTableContainer statusFilter={decisionState} />
+      </DecisionSummarySection>
+    ))}
 
   </ViewElem>
 )

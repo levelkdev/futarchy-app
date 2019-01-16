@@ -1,5 +1,5 @@
 import assert from 'assert'
-import decisionsCount from './decisionsCount'
+import filterDecisions from './filterDecisions'
 
 const mockPerformanceData = (trader, decisionId) => ({ trader, decisionId })
 const mockDecisionMarketData = (id, status) => ({ id, status })
@@ -19,22 +19,26 @@ const decisionMarketArray = [
   mockDecisionMarketData(3, 'CLOSED')
 ]
 
-describe('decisionsCount', () => {
+describe('filterDecisions', () => {
   describe('when given data with matching traders and statuses', () => {
-    it('returns the correct decisions count', () => {
-      assert.equal(decisionsCount(decisionMarketArray, performanceArray, 'trader_0', 'OPEN'), 3)
+    it('returns the correct decisions', () => {
+      const decisions = filterDecisions(decisionMarketArray, performanceArray, 'trader_0', 'OPEN')
+      assert.equal(decisions.length, 3)
+      assert.deepEqual(decisions[0], mockDecisionMarketData(0, 'OPEN'))
+      assert.deepEqual(decisions[1], mockDecisionMarketData(1, 'OPEN'))
+      assert.deepEqual(decisions[2], mockDecisionMarketData(2, 'OPEN'))
     })
   })
 
   describe('when given performance data with no matching statuses', () => {
-    it('returns 0', () => {
-      assert.equal(decisionsCount(decisionMarketArray, performanceArray, 'trader_0', 'RESOLVED'), 0)
+    it('returns an empty array', () => {
+      assert.deepEqual(filterDecisions(decisionMarketArray, performanceArray, 'trader_0', 'RESOLVED'), [])
     })
   })
 
   describe('when given performance data with no matching traders', () => {
-    it('returns 0', () => {
-      assert.equal(decisionsCount(decisionMarketArray, performanceArray, 'trader_5', 'OPEN'), 0)
+    it('returns an empty array', () => {
+      assert.deepEqual(filterDecisions(decisionMarketArray, performanceArray, 'trader_5', 'OPEN'), [])
     })
   })
 })

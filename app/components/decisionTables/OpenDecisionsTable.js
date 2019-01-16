@@ -1,4 +1,5 @@
 import React from 'react'
+import _ from 'lodash'
 import {
   Table,
   TableHeader,
@@ -6,8 +7,10 @@ import {
   TableCell,
   Text
 } from '@aragon/ui'
+import DecisionsTableRows from './DecisionsTableRows'
+import DecisionQuestionContainer from '../../containers/DecisionQuestionContainer'
 
-const OpenDecisionsTable = () => (
+const OpenDecisionsTable = ({ decisionIds }) => (
   <Table
     header={
       <TableRow>
@@ -22,32 +25,36 @@ const OpenDecisionsTable = () => (
       </TableRow>
     }
   >
-    <TableRow>
-      <TableCell>
-        <Text>...</Text>
-      </TableCell>
-      <TableCell>
-        <Text>...</Text>
-      </TableCell>
-      <TableCell>
-        <Text>...</Text>
-      </TableCell>
-      <TableCell>
-        <Text>...</Text>
-      </TableCell>
-      <TableCell>
-        <Text>...</Text>
-      </TableCell>
-      <TableCell>
-        <Text>...</Text>
-      </TableCell>
-      <TableCell>
-        <Text>...</Text>
-      </TableCell>
-      <TableCell>
-        <Text>...</Text>
-      </TableCell>
-    </TableRow>
+    <DecisionsTableRows columnCount={8}>
+      {decisionIds.map(decisionId => (
+        <TableRow key={decisionId}>
+          <TableCell>
+            <DecisionQuestionContainer decisionId={decisionId} />
+          </TableCell>
+          <TableCell>
+            <Text>TODO</Text>
+          </TableCell>
+          <TableCell>
+            <Text>TODO</Text>
+          </TableCell>
+          <TableCell>
+            <Text>TODO</Text>
+          </TableCell>
+          <TableCell>
+            <Text>TODO</Text>
+          </TableCell>
+          <TableCell>
+            <Text>TODO</Text>
+          </TableCell>
+          <TableCell>
+            <Text>TODO</Text>
+          </TableCell>
+          <TableCell>
+            <Text>TODO</Text>
+          </TableCell>
+        </TableRow>
+      ))}
+    </DecisionsTableRows>
   </Table>
 )
 
