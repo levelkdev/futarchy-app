@@ -90,6 +90,29 @@ export const newDecision = async (script, question, lowerBound, upperBound) => {
   )
 }
 
+export const buyMarketPositions = async (
+  decisionId,
+  collateralAmount,
+  yesPurchaseAmounts,
+  noPurchaseAmounts
+) => {
+  const address = await call('token')
+  const transactionOptions = {
+    token: { address, value: collateralAmount }
+  }
+
+  return contractFn(
+    window.aragonClient,
+    'client',
+    'buyMarketPositions',
+    decisionId,
+    collateralAmount,
+    yesPurchaseAmounts,
+    noPurchaseAmounts,
+    transactionOptions
+  )
+}
+
 export const call = async (functionName, ...params) => {
   return contractCall(window.aragonClient, 'client', functionName, ...params)
 }
@@ -110,5 +133,6 @@ export default {
   calcCosts,
   calcProfits,
   newDecision,
+  buyMarketPositions,
   sendTransaction
 }

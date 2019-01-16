@@ -7,6 +7,11 @@ export const newDecisionTxPending = ({ question, txHash }) => ({
   txHash
 })
 
+export const buyMarketPositionsTxPending = ({ txHash }) => ({
+  type: 'BUY_MARKET_POSITIONS_TX_PENDING',
+  txHash
+})
+
 export const avgDecisionMarketPricesLoaded = ({ decisionId, yesMarketPrice, noMarketPrice }) => ({
   type: 'AVG_DECISION_MARKET_PRICES_LOADED',
   decisionId,
@@ -31,9 +36,10 @@ export const potentialProfitDataLoaded = ({
   noLong
 })
 
-export const showPanel = ({ panelName }) => ({
+export const showPanel = ({ panelName, panelContext }) => ({
   type: 'SHOW_PANEL',
-  panelName
+  panelName,
+  panelContext
 })
 
 export const hidePanel = () => ({
@@ -50,7 +56,7 @@ export const propValueLoaded = ({ prop, value }) => ({
 // error loading property value from the Futarchy smart contract
 export const propValueLoadingError = ({ prop, errorMessage }) => ({
   type: 'PROP_VALUE_LOADING_ERROR',
-  prop, 
+  prop,
   errorMessage
 })
 
@@ -64,6 +70,20 @@ export const newDecision = ({
     dispatch(newDecisionTxPending({ question, txHash }))
   }, err => {
     console.error(`newDecision: ${err}`)
+    // TODO: dispatch error action, to show something to the user
+  })
+}
+
+export const buyMarketPositions = ({
+  decisionId,
+  collateralAmount,
+  yesPurchaseAmounts,
+  noPurchaseAmounts
+}) => dispatch => {
+  return client.buyMarketPositions(decisionId, collateralAmount, yesPurchaseAmounts, noPurchaseAmounts).then(txHash => {
+    dispatch(buyMarketPositionsTxPending({ txHash }))
+  }, err => {
+    console.error(`buyMarketPositions: ${err}`)
     // TODO: dispatch error action, to show something to the user
   })
 }

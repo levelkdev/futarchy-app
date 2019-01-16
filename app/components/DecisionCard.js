@@ -27,7 +27,10 @@ const DecisionCard = ({ decision }) => (
         >
           <ViewDetailsButton mode="text">View details</ViewDetailsButton>
         </LinkStyled>
-        <ShowPanelButtonContainer panelName="makePrediction">
+        <ShowPanelButtonContainer
+          panelName="makePrediction"
+          panelContext={{ decisionId: decision.id }}
+        >
           Predict
         </ShowPanelButtonContainer>
       </ButtonsContainer>

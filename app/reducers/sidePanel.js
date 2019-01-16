@@ -1,9 +1,13 @@
-const sidePanel = (state = null, action) => {
+const sidePanel = (state = {}, action) => {
   switch (action.type) {
     case 'SHOW_PANEL':
-      return action.panelName
+      return {
+        panelName: action.panelName,
+        panelContext: action.panelContext
+      }
+      // return action.panelName
     case 'HIDE_PANEL':
-      return null
+      return {}
     default:
       return state
   }

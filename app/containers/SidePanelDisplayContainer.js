@@ -4,7 +4,7 @@ import SidePanelDisplay from '../components/SidePanelDisplay'
 import { hidePanel } from '../actions';
 
 const mapStateToProps = state => ({
-  panelName: state.sidePanel
+  panelName: state.sidePanel.panelName
 })
 
 const mapDispatchToProps = dispatch => ({

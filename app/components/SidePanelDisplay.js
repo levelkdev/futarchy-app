@@ -11,7 +11,7 @@ const titles = {
 const SidePanelDisplay = ({ panelName, closePanel }) => (
   <SidePanel
     title={titles[panelName] || ''}
-    opened={panelName !== null}
+    opened={typeof(panelName) !== 'undefined'}
     onClose={closePanel}
   >
     {(() => {
