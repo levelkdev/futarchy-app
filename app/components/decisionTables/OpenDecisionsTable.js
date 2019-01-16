@@ -1,5 +1,6 @@
 import React from 'react'
 import _ from 'lodash'
+import styled from 'styled-components'
 import {
   Table,
   TableHeader,
@@ -10,6 +11,8 @@ import {
 import DecisionsTableRows from './DecisionsTableRows'
 import DecisionQuestionContainer from '../../containers/DecisionQuestionContainer'
 import DecisionPredictedPricesContainer from '../../containers/DecisionPredictedPricesContainer'
+import DecisionAmountRiskedContainer from '../../containers/DecisionAmountRiskedContainer'
+import DecisionPotentialValuesContainer from '../../containers/DecisionPotentialValuesContainer'
 
 const OpenDecisionsTable = ({ decisionIds }) => (
   <Table
@@ -29,34 +32,38 @@ const OpenDecisionsTable = ({ decisionIds }) => (
     <DecisionsTableRows columnCount={8}>
       {decisionIds.map(decisionId => (
         <TableRow key={decisionId}>
-          <TableCell>
+          <TopAlignedCell>
             <DecisionQuestionContainer decisionId={decisionId} />
-          </TableCell>
-          <TableCell>
+          </TopAlignedCell>
+          <TopAlignedCell>
             <Text>...</Text>
-          </TableCell>
-          <TableCell>
+          </TopAlignedCell>
+          <TopAlignedCell>
             <Text>...</Text>
-          </TableCell>
-          <TableCell width="150">
+          </TopAlignedCell>
+          <TopAlignedCell width="150">
             <DecisionPredictedPricesContainer decisionId={decisionId} />
-          </TableCell>
-          <TableCell>
+          </TopAlignedCell>
+          <TopAlignedCell>
+            <DecisionAmountRiskedContainer decisionId={decisionId} />
+          </TopAlignedCell>
+          <TopAlignedCell width="150">
+            <DecisionPotentialValuesContainer decisionId={decisionId} />
+          </TopAlignedCell>
+          <TopAlignedCell>
             <Text>TODO</Text>
-          </TableCell>
-          <TableCell>
-            <Text>TODO</Text>
-          </TableCell>
-          <TableCell>
-            <Text>TODO</Text>
-          </TableCell>
-          <TableCell>
-            <Text>TODO</Text>
-          </TableCell>
+          </TopAlignedCell>
+          <TopAlignedCell>
+            <Text>...</Text>
+          </TopAlignedCell>
         </TableRow>
       ))}
     </DecisionsTableRows>
   </Table>
 )
+
+const TopAlignedCell = styled(TableCell)`
+  vertical-align: top;
+`
 
 export default OpenDecisionsTable

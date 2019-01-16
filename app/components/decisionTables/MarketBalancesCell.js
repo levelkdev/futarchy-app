@@ -1,31 +1,33 @@
 import React from 'react'
 import styled from 'styled-components'
 import { Text, theme } from '@aragon/ui'
-import formatPrice from '../util/formatPrice'
+import SingleBalanceCell from './SingleBalanceCell'
 
-const PredictedPricesCell = ({
-  yesMarketPredictedPrice,
-  noMarketPredictedPrice
+const MarketBalancesCell = ({
+  yesBalance,
+  noBalance
 }) => (
-  <PredictedPricesCellStyled>
-    <PredictedPrice
+  <MarketBalancesCellStyled>
+    <MarketBalance
       marketName="YES"
       color={theme.gradientStartActive}
-      price={yesMarketPredictedPrice} />
-    <PredictedPrice
+      balance={yesBalance} />
+    <MarketBalance
       marketName="NO"
       color={theme.gradientEndActive}
-      price={noMarketPredictedPrice} />
-  </PredictedPricesCellStyled>
+      balance={noBalance} />
+  </MarketBalancesCellStyled>
 )
 
-const PredictedPrice = ({ marketName, color, price }) => (
+const MarketBalance = ({ marketName, color, balance }) => (
   <div>
     <Text size="xsmall">
       <MarketNameOuter>
         <Text color={color}>{marketName}</Text>
       </MarketNameOuter>
-      <PriceStyled>{formatPrice(price)}</PriceStyled>
+      <BalanceStyled>
+        <SingleBalanceCell balance={balance} />
+      </BalanceStyled>
     </Text>
   </div>
 )
@@ -36,12 +38,12 @@ const MarketNameOuter = styled.div`
   text-align: right;
 `
 
-const PredictedPricesCellStyled = styled(Text)`
+const MarketBalancesCellStyled = styled(Text)`
   font-weight: bold;
 `
 
-const PriceStyled = styled.span`
+const BalanceStyled = styled.span`
   margin-left: 10px
 `
 
-export default PredictedPricesCell
+export default MarketBalancesCell

@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import decisionById from '../reducers/computed/decisionById'
-import PredictedPricesCell from '../components/PredictedPricesCell'
+import PredictedPricesCell from '../components/decisionTables/PredictedPricesCell'
 
 const mapStateToProps = (state, ownProps) => {
   const decision = decisionById(state.decisionMarkets, ownProps.decisionId)
