@@ -5,7 +5,6 @@ const sidePanel = (state = {}, action) => {
         panelName: action.panelName,
         panelContext: action.panelContext
       }
-      // return action.panelName
     case 'HIDE_PANEL':
       return {}
     default:

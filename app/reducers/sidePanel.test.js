@@ -5,30 +5,48 @@ import sidePanel from './sidePanel'
 describe('sidePanel', () => {
   [
     {
-      when: 'when given null state and hidePanel action',
-      should: 'should return null state',
-      state: null,
+      when: 'when given existing state and hidePanel action',
+      should: 'should return empty object',
+      state: {
+        panelName: 'mock_panel_name',
+        panelContext:'mock_panel_ctx'
+      },
       action: hidePanel(),
-      expected: null
+      expected: {}
     },
     {
-      when: 'when given null state and showPanel action',
-      should: 'should return panelName',
-      state: null,
-      action: showPanel({ panelName: 'mock_panel_name' }),
-      expected: 'mock_panel_name'
+      when: 'when given undefined state and showPanel action',
+      should: 'should return object with panelName and panelContext',
+      state: undefined,
+      action: showPanel({
+        panelName: 'mock_panel_name',
+        panelContext:'mock_panel_ctx'
+      }),
+      expected: {
+        panelName: 'mock_panel_name',
+        panelContext:'mock_panel_ctx'
+      }
     },
     {
-      when: 'when given panelName as state and showPanel action',
-      should: 'should return the new panelName',
-      state: 'mock_old_panel_name',
-      action: showPanel({ panelName: 'mock_panel_name' }),
-      expected: 'mock_panel_name'
+      when: 'when given panelName and panelContext with showPanel action',
+      should: 'should return object with panelName and panelContext',
+      state: {
+        panelName: 'mock_old_panel_name',
+        panelContext: 'mock_old_panel_ctx'
+      },
+      action: showPanel({
+        panelName: 'mock_panel_name',
+        panelContext: 'mock_panel_ctx'
+      }),
+      expected: {
+        panelName: 'mock_panel_name',
+        panelContext:'mock_panel_ctx'
+      }
     }
   ].forEach(({ when, should, state, action, expected }) => {
     describe(when, () => {
       it(should, () => {
-        assert.equal(sidePanel(state, action), expected)
+        assert.deepEqual(sidePanel(state, action), expected)
       })
     })
   })
