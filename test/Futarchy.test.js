@@ -7,8 +7,8 @@ const MiniMeToken = artifacts.require('MiniMeToken')
 
 // gnosis-pm futarchy contracts
 const LMSRMarketMaker = artifacts.require('LMSRMarketMaker')
-const CentralizedOracle = artifacts.require('CentralizedOracle')
-const CentralizedOracleFactory = artifacts.require('CentralizedOracleFactory')
+const CentralizedTimedOracle = artifacts.require('CentralizedTimedOracle')
+const CentralizedTimedOracleFactory = artifacts.require('CentralizedTimedOracleFactory')
 const FutarchyOracleFull = artifacts.require('FutarchyOracle.sol')
 const FutarchyOracleFactoryFull = artifacts.require('FutarchyOracleFactory.sol')
 const FutarchyOracleMock = artifacts.require('FutarchyOracleMock.sol')
@@ -66,11 +66,11 @@ contract('Futarchy', (accounts) => {
 
     const fixed192x64Math = await Fixed192x64Math.new()
     await LMSRMarketMaker.link('Fixed192x64Math', fixed192x64Math.address)
-    const centralizedOracleMaster = await CentralizedOracle.new()
     fee = 2000
     tradingPeriod = 60 * 60 * 24 * 7
+    timeToPriceResolution = tradingPeriod * 2
     marketFundAmount = 10 * 10 ** 18
-    priceOracleFactory = await CentralizedOracleFactory.new(centralizedOracleMaster.address)
+    priceOracleFactory = await CentralizedTimedOracleFactory.new()
     lmsrMarketMaker = await LMSRMarketMaker.new()
     futarchyOracleFactoryFull = await deployFutarchyMasterCopies()
     futarchyOracleFactoryMock = await FutarchyOracleFactoryMock.new()
@@ -331,13 +331,23 @@ contract('Futarchy', (accounts) => {
       futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
       scalarMarket = StandardMarket.at(await futarchyOracle.markets(0))
       scalarEvent = Event.at(await scalarMarket.eventContract())
-      priceOracle = CentralizedOracle.at(await scalarEvent.oracle())
-
-      await futarchy.setPriceOutcome(0, price)
+      priceOracle = CentralizedTimedOracle.at(await scalarEvent.oracle())
     })
 
-    it('sets the correct price on the price oracle', async () => {
-      expect((await priceOracle.getOutcome()).toNumber()).to.equal(price)
+    describe('when resolutionDate has passed', () => {
+      it('sets the correct price on the price oracle', async () => {
+        await timeTravel(timeToPriceResolution + 1)
+        await futarchy.setPriceOutcome(0, price)
+        expect((await priceOracle.getOutcome()).toNumber()).to.equal(price)
+      })
+    })
+
+    describe('when resolutionDate has not passed', () => {
+      it('reverts', async () => {
+        return assertRevert(async () => {
+          await futarchy.setPriceOutcome(0, price)
+        })
+      })
     })
   })
 
@@ -685,25 +695,25 @@ contract('Futarchy', (accounts) => {
       script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
       metadata = 'Give voting rights to all kitties in the world'
       await token.approve(futarchy.address, marketFundAmount +  (40 * 10 ** 18), {from: root})
-      await futarchy.newDecision(script, metadata)
+      await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
       futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
       yesMarketAddr = await futarchyOracle.markets(0)
       noMarketAddr = await futarchyOracle.markets(1)
     })
 
-    it('returns outcomeToken costs for YES and NO markets', async () => { 
+    it('returns outcomeToken costs for YES and NO markets', async () => {
       await futarchy.buyMarketPositions(0, twenty, [five + three, 0], [0, five + three], {from: root})
       await timeTravel(1800)
 
       const costs = await futarchy.calcCosts(0, [three, three, three, three])
-      
+
       const costsFromLMSR = [
         (await lmsrMarketMaker.calcCost(yesMarketAddr, 0, three)).toNumber(),
         (await lmsrMarketMaker.calcCost(yesMarketAddr, 1, three)).toNumber(),
         (await lmsrMarketMaker.calcCost(noMarketAddr, 0, three)).toNumber(),
         (await lmsrMarketMaker.calcCost(noMarketAddr, 1, three)).toNumber()
       ]
-      
+
       for(var i in costs) {
         const costVal = costs[i].toNumber()
         expect(costVal).to.equal(costsFromLMSR[i])
@@ -723,25 +733,25 @@ contract('Futarchy', (accounts) => {
       script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
       metadata = 'Give voting rights to all kitties in the world'
       await token.approve(futarchy.address, marketFundAmount +  (40 * 10 ** 18), {from: root})
-      await futarchy.newDecision(script, metadata)
+      await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
       futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
       yesMarketAddr = await futarchyOracle.markets(0)
       noMarketAddr = await futarchyOracle.markets(1)
     })
 
-    it('returns collateralToken profits for YES and NO markets', async () => { 
+    it('returns collateralToken profits for YES and NO markets', async () => {
       await futarchy.buyMarketPositions(0, twenty, [five + three, 0], [0, five + three], {from: root})
       await timeTravel(1800)
 
       const profits = await futarchy.calcProfits(0, [three, three, three, three])
-      
+
       const profitsFromLMSR = [
         (await lmsrMarketMaker.calcProfit(yesMarketAddr, 0, three)).toNumber(),
         (await lmsrMarketMaker.calcProfit(yesMarketAddr, 1, three)).toNumber(),
         (await lmsrMarketMaker.calcProfit(noMarketAddr, 0, three)).toNumber(),
         (await lmsrMarketMaker.calcProfit(noMarketAddr, 1, three)).toNumber()
       ]
-      
+
       for(var i in profits) {
         const costVal = profits[i].toNumber()
         expect(costVal).to.equal(profitsFromLMSR[i])
@@ -791,6 +801,7 @@ contract('Futarchy', (accounts) => {
     const {
       _fee = fee,
       _tradingPeriod = tradingPeriod,
+      _timeToPriceResolution = timeToPriceResolution,
       _marketFundAmount = marketFundAmount,
       _tokenAddr = token.address,
       _futarchyOracleFactoryAddr = futarchyOracleFactoryMock.address,
@@ -801,6 +812,7 @@ contract('Futarchy', (accounts) => {
     await futarchy.initialize(
       _fee,
       _tradingPeriod,
+      _timeToPriceResolution,
       _marketFundAmount,
       _tokenAddr,
       _futarchyOracleFactoryAddr,
