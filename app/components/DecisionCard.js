@@ -46,6 +46,8 @@ const CardContainer = styled.div`
   border: 1px solid #dadada;
   box-shadow: 0px 0px 6px #00000012;
   border-radius: 3px;
+  
+  margin-bottom: 20px;
 `
 
 const CirclesContainer = styled.div`
@@ -63,7 +65,8 @@ const ContentContainer = styled.div`
 `
 
 const Question = styled.div`
-  padding-bottom: 20px;
+  padding-bottom: 10px;
+  min-height: 65px;
 `
 
 const ButtonsContainer = styled.div``

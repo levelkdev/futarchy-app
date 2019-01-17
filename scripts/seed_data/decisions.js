@@ -1,4 +1,4 @@
-const getFutarchyContract = require('./getFutarchyContract')
+const getFutarchyContract = require('../utilities/getFutarchyContract')
 
 module.exports = async callback => {
   const ERC20 = artifacts.require('ERC20')
@@ -6,7 +6,7 @@ module.exports = async callback => {
   try {
     const daoAddress = process.argv[6]
     if (!daoAddress) {
-      throw new Error('DAO address was not provided. Script expects `npm run seed:trades <DAO_ADDRESS>`. The DAO address can be copied from the `aragon run` output.')
+      throw new Error('DAO address was not provided. Script expects `npm run seed:decisions <DAO_ADDRESS>`. The DAO address can be copied from the `aragon run` output.')
     }
 
     console.log('creating some decisions...')
@@ -22,7 +22,10 @@ module.exports = async callback => {
     const decisions = [
       { executionScript: '', metadata: 'Execute a transfer of 1,000 ETH to 0xa1b2c3...?' },
       { executionScript: '', metadata: 'Increase the minimum funding parameter to 45 TKN?' },
-      { executionScript: '', metadata: 'Change the timeframe for future futarchy decisions to 30 days?' }
+      { executionScript: '', metadata: 'Change the timeframe for future futarchy decisions to 30 days?' },
+      { executionScript: '', metadata: 'Approve AGP proposal number 7...?' },
+      { executionScript: '', metadata: 'Reject XRP from registry?' },
+      { executionScript: '', metadata: 'Approve inclusion of centralized front end?' }
     ]
 
     for(var i = 0; i < decisions.length; i++) {

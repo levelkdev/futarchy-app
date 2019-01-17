@@ -1,4 +1,4 @@
-const getFutarchyContract = require('../seed_data/getFutarchyContract')
+const getFutarchyContract = require('../utilities/getFutarchyContract')
 
 module.exports = async callback => {
   const FutarchyOracle = artifacts.require('FutarchyOracle')
