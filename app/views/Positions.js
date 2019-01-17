@@ -12,7 +12,7 @@ const decisionLabelsMap = {
   CLOSED: 'My Closed Decisions'
 }
 
-const Account = () => (
+const Positions = () => (
   <ViewElem>
     <TableTitle>My Totals</TableTitle>
     <PerformanceTotalsContainer />
@@ -52,4 +52,4 @@ const TableTitle = styled.div`
   margin-bottom: 10px;
 `
 
-export default Account
+export default Positions

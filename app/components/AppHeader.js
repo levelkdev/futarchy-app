@@ -30,7 +30,7 @@ const TabsContainer = () => (
     <TabsContainterStyled>
       <NavLinkStyled exact to="/">Open Questions</NavLinkStyled>
       <NavLinkStyled exact to="/closed-questions">Closed Questions</NavLinkStyled>
-      <NavLinkStyled exact to="/account">My Account</NavLinkStyled>
+      <NavLinkStyled exact to="/positions">My Positions</NavLinkStyled>
     </TabsContainterStyled>
   </div>
 )
