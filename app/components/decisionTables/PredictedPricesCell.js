@@ -3,45 +3,40 @@ import styled from 'styled-components'
 import { Text } from '@aragon/ui'
 import decisionMarketTypes from '../../constants/decisionMarketTypes'
 import formatPrice from '../../util/formatPrice'
-import DecisionMarketName from '../DecisionMarketName'
+import EtherDisplaySymbol from '../EtherDisplaySymbol'
+import MarketNameStyled from './MarketNameStyled'
 
 const PredictedPricesCell = ({
   yesMarketPredictedPrice,
   noMarketPredictedPrice
 }) => (
-  <PredictedPricesCellStyled>
+  <div>
     <PredictedPrice
       decisionMarketType={decisionMarketTypes.YES}
       price={yesMarketPredictedPrice} />
     <PredictedPrice
       decisionMarketType={decisionMarketTypes.NO}
       price={noMarketPredictedPrice} />
-  </PredictedPricesCellStyled>
+  </div>
 )
 
 const PredictedPrice = ({ decisionMarketType, price }) => (
   <div>
     <Text size="xsmall">
-      <DecisionMarketNameOuter>
-        <DecisionMarketName type={decisionMarketType} />
-      </DecisionMarketNameOuter>
-      <PriceStyled>{formatPrice(price)}</PriceStyled>
+      <MarketNameStyled type={decisionMarketType} />
+      <PriceStyled>
+        <Bold>{formatPrice(price)}</Bold>&nbsp;<EtherDisplaySymbol />
+      </PriceStyled>
     </Text>
   </div>
 )
 
-const DecisionMarketNameOuter = styled.div`
-  display: inline-block;
-  width: 25px;
-  text-align: right;
-`
-
-const PredictedPricesCellStyled = styled(Text)`
-  font-weight: bold;
-`
-
 const PriceStyled = styled.span`
-  margin-left: 10px
+  margin-left: 10px;
+`
+
+const Bold = styled.span`
+  font-weight: bold;
 `
 
 export default PredictedPricesCell

@@ -7,7 +7,7 @@ import formatBalance from '../../util/formatBalance'
 const SingleBalanceCell = ({ balance }) => (
   <span>
     <Text size="xsmall">
-      <b>{formatBalance(balance)}</b>
+      <Bold>{formatBalance(balance)}</Bold>
     </Text>
     &nbsp;
     <Text size="xxsmall">
@@ -15,5 +15,9 @@ const SingleBalanceCell = ({ balance }) => (
     </Text>
   </span>
 )
+
+const Bold = styled.span`
+  font-weight: bold;
+`
 
 export default SingleBalanceCell
