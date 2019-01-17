@@ -13,6 +13,7 @@ import DecisionQuestionContainer from '../../containers/DecisionQuestionContaine
 import DecisionPredictedPricesContainer from '../../containers/DecisionPredictedPricesContainer'
 import DecisionAmountRiskedContainer from '../../containers/DecisionAmountRiskedContainer'
 import DecisionPotentialValuesContainer from '../../containers/DecisionPotentialValuesContainer'
+import DecisionPotentialGainLossContainer from '../../containers/DecisionPotentialGainLossContainer'
 
 const OpenDecisionsTable = ({ decisionIds }) => (
   <Table
@@ -50,8 +51,8 @@ const OpenDecisionsTable = ({ decisionIds }) => (
           <TopAlignedCell width="150">
             <DecisionPotentialValuesContainer decisionId={decisionId} />
           </TopAlignedCell>
-          <TopAlignedCell>
-            <Text>TODO</Text>
+          <TopAlignedCell width="150">
+            <DecisionPotentialGainLossContainer decisionId={decisionId} />
           </TopAlignedCell>
           <TopAlignedCell>
             <Text>...</Text>

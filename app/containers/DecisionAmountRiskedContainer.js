@@ -10,7 +10,7 @@ const mapStateToProps = (state, ownProps) => {
     state.accounts[0]
   )
   return {
-    balance: perfTotal.yesCostBasis + perfTotal.noCostBasis
+    balance: perfTotal.yesCostBasis
   }
 }
 
