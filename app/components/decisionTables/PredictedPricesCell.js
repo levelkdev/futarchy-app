@@ -1,7 +1,9 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Text, theme } from '@aragon/ui'
+import { Text } from '@aragon/ui'
+import decisionMarketTypes from '../../constants/decisionMarketTypes'
 import formatPrice from '../../util/formatPrice'
+import DecisionMarketName from '../DecisionMarketName'
 
 const PredictedPricesCell = ({
   yesMarketPredictedPrice,
@@ -9,28 +11,26 @@ const PredictedPricesCell = ({
 }) => (
   <PredictedPricesCellStyled>
     <PredictedPrice
-      marketName="YES"
-      color={theme.gradientStartActive}
+      decisionMarketType={decisionMarketTypes.YES}
       price={yesMarketPredictedPrice} />
     <PredictedPrice
-      marketName="NO"
-      color={theme.gradientEndActive}
+      decisionMarketType={decisionMarketTypes.NO}
       price={noMarketPredictedPrice} />
   </PredictedPricesCellStyled>
 )
 
-const PredictedPrice = ({ marketName, color, price }) => (
+const PredictedPrice = ({ decisionMarketType, price }) => (
   <div>
     <Text size="xsmall">
-      <MarketNameOuter>
-        <Text color={color}>{marketName}</Text>
-      </MarketNameOuter>
+      <DecisionMarketNameOuter>
+        <DecisionMarketName type={decisionMarketType} />
+      </DecisionMarketNameOuter>
       <PriceStyled>{formatPrice(price)}</PriceStyled>
     </Text>
   </div>
 )
 
-const MarketNameOuter = styled.div`
+const DecisionMarketNameOuter = styled.div`
   display: inline-block;
   width: 25px;
   text-align: right;

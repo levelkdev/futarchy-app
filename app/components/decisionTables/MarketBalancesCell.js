@@ -1,6 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Text, theme } from '@aragon/ui'
+import { Text } from '@aragon/ui'
+import decisionMarketTypes from '../../constants/decisionMarketTypes'
+import DecisionMarketName from '../DecisionMarketName'
 import SingleBalanceCell from './SingleBalanceCell'
 
 const MarketBalancesCell = ({
@@ -9,21 +11,19 @@ const MarketBalancesCell = ({
 }) => (
   <MarketBalancesCellStyled>
     <MarketBalance
-      marketName="YES"
-      color={theme.gradientStartActive}
+      decisionMarketType={decisionMarketTypes.YES}
       balance={yesBalance} />
     <MarketBalance
-      marketName="NO"
-      color={theme.gradientEndActive}
+      decisionMarketType={decisionMarketTypes.NO}
       balance={noBalance} />
   </MarketBalancesCellStyled>
 )
 
-const MarketBalance = ({ marketName, color, balance }) => (
+const MarketBalance = ({ decisionMarketType, balance }) => (
   <div>
     <Text size="xsmall">
       <MarketNameOuter>
-        <Text color={color}>{marketName}</Text>
+        <DecisionMarketName type={decisionMarketType} />
       </MarketNameOuter>
       <BalanceStyled>
         <SingleBalanceCell balance={balance} />
