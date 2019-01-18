@@ -1,9 +1,13 @@
 import React from 'react'
 import { Field, reduxForm } from 'redux-form'
 import { Button, Info, Text } from '@aragon/ui'
+import { ProgressBar, Step } from "react-step-progress-bar"
 
 import formatBalance from '../util/formatBalance'
 import styled from 'styled-components'
+import StepProgressBar from './StepProgressBar'
+
+
 
 const createReduxForm = reduxForm({ form: 'makePrediction' })
 
@@ -21,6 +25,22 @@ const MakePredictionForm = createReduxForm(({
     <StyledInfo>
       Make Prediction...
     </StyledInfo>
+    <StepProgressBar progress={.25}>
+      <Step>
+        {({ accomplished, index }) => (
+          <StyledStep>
+            {index + 1}
+          </StyledStep>
+        )}
+      </Step> 
+      <Step>
+        {({ accomplished, index }) => (
+          <StyledStep>
+            {index + 1}
+          </StyledStep>
+        )}
+      </Step> 
+    </StepProgressBar>
     <StyledLabel htmlFor="collateralAmount">
       Collateral Amount
     </StyledLabel>
@@ -106,5 +126,18 @@ const StyledLabel = styled.div`
   padding-bottom: 8px;
   text-transform: uppercase;
 `
+
+const StyledStep  = styled.div`
+  color: white;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  background-color: rgba(211, 211, 211, 0.8);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`
+
 
 export default MakePredictionForm

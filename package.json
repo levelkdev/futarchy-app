@@ -26,7 +26,8 @@
     "redux": "^4.0.1",
     "redux-form": "^7.4.2",
     "redux-thunk": "^2.3.0",
-    "styled-components": "^4.0.0"
+    "styled-components": "^4.0.0",
+    "react-step-progress-bar": "1.0.3"
   },
   "devDependencies": {
     "@aragon/cli": "^5.0.0",
