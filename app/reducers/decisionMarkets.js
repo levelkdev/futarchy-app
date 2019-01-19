@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import decisionStatuses from '../constants/decisionStatuses'
 
 const ONE = 0x10000000000000000
 
@@ -28,7 +29,12 @@ const decisionMarkets = (state = [], action) => {
           id: returnValues.decisionId,
           question: returnValues.metadata,
           lowerBound: returnValues.marketLowerBound,
-          upperBound: returnValues.marketUpperBound
+          upperBound: returnValues.marketUpperBound,
+
+          // TODO: get the actual status based on time until the trading period is over.
+          //       and the oracle's resolution date. We need to add the resolution period
+          //       in addition to the trading period to the Futarchy.sol contract
+          status: decisionStatuses.OPEN
         }
       ]
     case 'AVG_DECISION_MARKET_PRICES_LOADED':
