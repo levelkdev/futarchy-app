@@ -15,7 +15,7 @@ contract Futarchy is AragonApp, IForwarder {
   using SafeMath for uint;
   using SafeMath64 for uint64;
 
-  event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle, int marketLowerBound, int marketUpperBound, uint priceResolutionDate);
+  event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle, int marketLowerBound, int marketUpperBound, uint64 startDate, uint tradingPeriod, uint priceResolutionDate);
   event ExecuteDecision(uint decisionId);
   event BuyMarketPositions(address trader, uint decisionId, uint tradeTime, uint collateralAmount, uint[2] yesPurchaseAmounts, uint[2] noPurchaseAmounts, uint[2] yesCosts, uint[2] noCosts);
   event SellMarketPositions(address trader, uint decisionId, uint tradeTime, int[] yesMarketPositions, int[] noMarketPositions, uint yesCollateralReceived, uint noCollateralReceived);
@@ -139,7 +139,7 @@ contract Futarchy is AragonApp, IForwarder {
       require(token.approve(futarchyOracle, marketFundAmount));
       futarchyOracle.fund(marketFundAmount);
 
-      emit StartDecision(decisionId, msg.sender, metadata, decisions[decisionId].futarchyOracle, lowerBound, upperBound, priceResolutionDate);
+      emit StartDecision(decisionId, msg.sender, metadata, decisions[decisionId].futarchyOracle, lowerBound, upperBound, startDate, tradingPeriod, priceResolutionDate);
     }
 
     /**
