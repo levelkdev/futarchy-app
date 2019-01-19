@@ -4,7 +4,7 @@ module.exports = async callback => {
   const FutarchyOracle = artifacts.require('FutarchyOracle')
   const StandardMarket = artifacts.require('StandardMarket')
   const Event = artifacts.require('Event')
-  const CentralizedOracle = artifacts.require('CentralizedOracle')
+  const CentralizedTimedOracle = artifacts.require('CentralizedTimedOracle')
 
   try {
     const script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
@@ -25,17 +25,17 @@ module.exports = async callback => {
 
     //  Grab futarchy oracle
     const futarchyOracle = FutarchyOracle.at((await app.decisions(decisionID))[0])
-    
+
     // Grab first scalar market.  Either works since they both use the same price oracle.
     const scalarMarket = StandardMarket.at(await futarchyOracle.markets(0))
-    
+
     // Get scalar event
     const scalarEvent = Event.at(await scalarMarket.eventContract())
     console.log('got scalarEvent: ', scalarEvent.address)
     console.log('scalarEvent isOutcomeSet: ', await scalarEvent.isOutcomeSet())
-    
+
     // Get and check price oracle
-    const priceOracle = CentralizedOracle.at(await scalarEvent.oracle())
+    const priceOracle = CentralizedTimedOracle.at(await scalarEvent.oracle())
     const priceOracleSet = await priceOracle.isOutcomeSet()
     console.log('Price Oracle address: ', priceOracle.address)
     console.log('Price Oracle isOutcomeSet: ', await priceOracle.isOutcomeSet())
@@ -47,11 +47,11 @@ module.exports = async callback => {
       await app.setPriceOutcome(decisionID, price)
 
       // Get and check price oracle again
-      const priceOracleSecondCheck = CentralizedOracle.at(await scalarEvent.oracle())
+      const priceOracleSecondCheck = CentralizedTimedOracle.at(await scalarEvent.oracle())
       console.log('Price Oracle isOutcomeSet: ', await priceOracleSecondCheck.isOutcomeSet())
-      console.log('outcome that was set:', (await priceOracleSecondCheck.getOutcome()).toNumber())      
+      console.log('outcome that was set:', (await priceOracleSecondCheck.getOutcome()).toNumber())
     } else {
-     console.log('Price Oracle has already been set! The price is:', (await priceOracle.getOutcome()).toNumber()) 
+     console.log('Price Oracle has already been set! The price is:', (await priceOracle.getOutcome()).toNumber())
     }
   } catch (err) {
     console.log('Error in scripts/set_data/price.js: ', err)

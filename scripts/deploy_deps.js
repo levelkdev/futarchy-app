@@ -12,8 +12,8 @@ module.exports = async (
     console.log('')
 
     const MiniMeToken = artifacts.require('MiniMeToken')
-    const CentralizedOracle = artifacts.require('CentralizedOracle')
-    const CentralizedOracleFactory = artifacts.require('CentralizedOracleFactory')
+    const CentralizedTimedOracle = artifacts.require('CentralizedTimedOracle')
+    const CentralizedTimedOracleFactory = artifacts.require('CentralizedTimedOracleFactory')
     const Fixed192x64Math = artifacts.require('Fixed192x64Math')
     const LMSRMarketMaker = artifacts.require('LMSRMarketMaker')
     const CategoricalEvent = artifacts.require('CategoricalEvent')
@@ -36,13 +36,8 @@ module.exports = async (
     )
     console.log(`MiniMeToken instance: ${miniMeToken.address}`)
 
-    const centralizedOracleMaster = await CentralizedOracle.new()
-    console.log(`CentralizedOracle master: ${centralizedOracleMaster.address}`)
-
-    const centralizedOracleFactory = await CentralizedOracleFactory.new(
-      centralizedOracleMaster.address
-    )
-    console.log(`CentralizedOracleFactory instance: ${centralizedOracleFactory.address}`)
+    const centralizedTimedOracleFactory = await CentralizedTimedOracleFactory.new()
+    console.log(`CentralizedTimedOracleFactory instance: ${centralizedTimedOracleFactory.address}`)
 
     const fixed192x64Math = await Fixed192x64Math.new()
     console.log(`Fixed192x64Math instance: ${fixed192x64Math.address}`)
@@ -50,7 +45,7 @@ module.exports = async (
     await LMSRMarketMaker.link('Fixed192x64Math', fixed192x64Math.address)
     const lmsrMarketMaker = await LMSRMarketMaker.new()
     console.log(`LMSRMarketMaker instance: ${lmsrMarketMaker.address}`)
-    
+
     const categoricalEventMaster = await CategoricalEvent.new()
     console.log(`CategoricalEvent master: ${categoricalEventMaster.address}`)
 
@@ -92,7 +87,7 @@ module.exports = async (
     } else {
       return {
         miniMeTokenAddress: miniMeToken.address,
-        centralizedOracleFactoryAddress: centralizedOracleFactory.address,
+        centralizedTimedOracleFactoryAddress: centralizedTimedOracleFactory.address,
         lmsrMarketMakerAddress: lmsrMarketMaker.address,
         eventFactoryAddress: eventFactory.address,
         standardMarketWithPriceLoggerFactoryAddress: standardMarketWithPriceLoggerFactory.address,

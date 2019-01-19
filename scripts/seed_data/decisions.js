@@ -30,6 +30,8 @@ module.exports = async callback => {
 
     for(var i = 0; i < decisions.length; i++) {
       let decision = decisions[i]
+      console.log(`token.approve(${app.address}, 0)`)
+      await token.approve(app.address, 0)
       console.log(`token.approve(${app.address}, ${marketFundAmount})`)
       await token.approve(app.address, marketFundAmount)
       console.log(`app.newDecision(${decision.executionScript}, ${decision.metadata}, ${lowerBound}, ${upperBound})`)
