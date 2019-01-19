@@ -822,6 +822,44 @@ contract('Futarchy', (accounts) => {
 
   })
 
+  describe('calcMarginalPrices()', () => {
+    let script, metadata, twenty, five, three, yesMarketAddr, noMarketAddr
+
+    beforeEach(async () => {
+      twenty = 20 * 10 ** 18
+      five = 5 * 10 ** 18
+      three = 3 * 10 ** 18
+      initializeFutarchy({_futarchyOracleFactoryAddr: futarchyOracleFactoryFull.address})
+      script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
+      metadata = 'Give voting rights to all kitties in the world'
+      await token.approve(futarchy.address, MARKET_FUND_AMOUNT +  (40 * 10 ** 18), {from: root})
+      await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
+      futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
+      yesMarketAddr = await futarchyOracle.markets(0)
+      noMarketAddr = await futarchyOracle.markets(1)
+    })
+
+    it('returns marginal prices for outcome tokens on YES and NO markets', async () => {
+      await futarchy.buyMarketPositions(0, twenty, [five + three, 0], [0, five + three], {from: root})
+      await timeTravel(1800)
+
+      const marginalPrices = await futarchy.calcMarginalPrices(0)
+
+      const marginalPricesFromLMSR = [
+        (await lmsrMarketMaker.calcMarginalPrice(yesMarketAddr, 0)).toNumber(),
+        (await lmsrMarketMaker.calcMarginalPrice(yesMarketAddr, 1)).toNumber(),
+        (await lmsrMarketMaker.calcMarginalPrice(noMarketAddr, 0)).toNumber(),
+        (await lmsrMarketMaker.calcMarginalPrice(noMarketAddr, 1)).toNumber()
+      ]
+
+      for(var i in marginalPrices) {
+        const marginalPriceVal = marginalPrices[i].toNumber()
+        expect(marginalPriceVal).to.equal(marginalPricesFromLMSR[i])
+      }
+    })
+
+  })
+
   describe('getAvgPricesForDecisionMarkets()', () => {
     let script, metadata, twenty, five, three
 

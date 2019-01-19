@@ -389,6 +389,38 @@ contract Futarchy is AragonApp, IForwarder {
     }
 
     /**
+    * @notice calculates the marginal prices of outcomes tokens on the YES and NO markets
+    *         for the given decision
+    * @param decisionId unique identifier for the decision
+    * @return array of marginal prices for 0: YES-SHORT, 1: YES-LONG, 2: NO-SHORT, and
+    *         3: NO-LONG outcomes
+    */
+    function calcMarginalPrices(
+      uint decisionId
+    )
+      public
+      view
+      returns (uint[4] marginalPrices)
+    {
+      for(uint8 i = 0; i < 4; i++) {
+        uint8 yesOrNo = i < 2 ? 0 : 1;
+        marginalPrices[i] = lmsrMarketMaker.calcMarginalPrice(
+          decisions[decisionId].futarchyOracle.markets(yesOrNo),
+          i % 2
+        );
+      }
+    }
+
+    /**
+    * @notice returns true if the trading period before making the decision has passed
+    * @param decisionId decision unique identifier
+    */
+    function tradingPeriodEnded(uint decisionId) public view returns(bool) {
+      Decision storage decision = decisions[decisionId];
+      return now > decision.decisionDate;
+    }
+
+    /**
     * @notice gets average prices from YES and NO decision markets
     * @param decisionId decision to get average prices for
     * @return uint array with YES and NO market average price
