@@ -9,7 +9,6 @@ const mapStateToProps = (state, ownProps) => {
     ownProps.decisionId,
     state.accounts[0]
   )
-  console.log('PERF TOTAL: ', perfTotal)
   return {
     yesGainLossPercentage: calcGainLossPercentage(
       perfTotal.yesCostBasis,
