@@ -15,7 +15,7 @@ contract Futarchy is AragonApp, IForwarder {
   using SafeMath for uint;
   using SafeMath64 for uint64;
 
-  event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle, int marketLowerBound, int marketUpperBound, uint startDate, uint tradingPeriod, uint priceResolutionDate);
+  event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle, int marketLowerBound, int marketUpperBound, uint startDate, uint decisionResolutionDate, uint priceResolutionDate);
   event ExecuteDecision(uint decisionId);
   event BuyMarketPositions(address trader, uint decisionId, uint tradeTime, uint collateralAmount, uint[2] yesPurchaseAmounts, uint[2] noPurchaseAmounts, uint[2] yesCosts, uint[2] noCosts, uint[4] marginalPrices);
   event SellMarketPositions(address trader, uint decisionId, uint tradeTime, int[] yesMarketPositions, int[] noMarketPositions, uint yesCollateralReceived, uint noCollateralReceived, uint[4] marginalPrices);
@@ -35,7 +35,8 @@ contract Futarchy is AragonApp, IForwarder {
   struct Decision {
     FutarchyOracle futarchyOracle;
     uint startDate;
-    uint decisionDate;
+    uint decisionResolutionDate;
+    uint priceResolutionDate;
     bool resolved;
     bool passed;
     uint64 snapshotBlock;
@@ -116,10 +117,14 @@ contract Futarchy is AragonApp, IForwarder {
       returns (uint decisionId)
     {
       decisionId = decisionLength++;
+
       uint startDate = now;
+      uint decisionResolutionDate = startDate.add(tradingPeriod);
       uint priceResolutionDate = startDate.add(timeToPriceResolution);
+
       decisions[decisionId].startDate = startDate;
-      decisions[decisionId].decisionDate = startDate.add(tradingPeriod);
+      decisions[decisionId].decisionResolutionDate = decisionResolutionDate;
+      decisions[decisionId].priceResolutionDate = priceResolutionDate;
       decisions[decisionId].metadata = metadata;
       decisions[decisionId].snapshotBlock = getBlockNumber64() - 1;
       decisions[decisionId].executionScript = executionScript;
@@ -141,7 +146,7 @@ contract Futarchy is AragonApp, IForwarder {
       require(token.approve(futarchyOracle, marketFundAmount));
       futarchyOracle.fund(marketFundAmount);
 
-      emit StartDecision(decisionId, msg.sender, metadata, decisions[decisionId].futarchyOracle, lowerBound, upperBound, startDate, tradingPeriod, priceResolutionDate);
+      emit StartDecision(decisionId, msg.sender, metadata, futarchyOracle, lowerBound, upperBound, startDate, decisionResolutionDate, priceResolutionDate);
     }
 
     /**
@@ -181,7 +186,7 @@ contract Futarchy is AragonApp, IForwarder {
       Decision storage decision = decisions[decisionId];
 
       require(!decision.executed);
-      require(decision.decisionDate < now);
+      require(decision.decisionResolutionDate < now);
       if (!decision.futarchyOracle.isOutcomeSet()) {
         decision.futarchyOracle.setOutcome();
       }
@@ -306,7 +311,7 @@ contract Futarchy is AragonApp, IForwarder {
      * @param decisionId unique identifier for the decision
      */
     function redeemTokenWinnings(uint decisionId) public {
-      require(decisions[decisionId].decisionDate < now);
+      require(decisions[decisionId].decisionResolutionDate < now);
 
       FutarchyOracle futarchyOracle = decisions[decisionId].futarchyOracle;
 
@@ -421,7 +426,7 @@ contract Futarchy is AragonApp, IForwarder {
     */
     function tradingPeriodEnded(uint decisionId) public view returns(bool) {
       Decision storage decision = decisions[decisionId];
-      return now > decision.decisionDate;
+      return now > decision.decisionResolutionDate;
     }
 
     /**
