@@ -18,6 +18,11 @@ export const accounts = async () => {
   })
 }
 
+export const blocktime = async () => {
+  const blocktime = await call('blocktime')
+  return blocktime
+}
+
 export const tokenContract = async () => {
   const tokenAddress = await call('token')
   const token = MiniMeToken(window.aragonClient, tokenAddress)
@@ -152,6 +157,7 @@ export const sendTransaction = async (functionName, ...params) => {
 export default {
   accounts,
   decisions,
+  blocktime,
   tokenContract,
   tokenBalance,
   futarchyAddress,

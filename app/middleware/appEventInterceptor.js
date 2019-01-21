@@ -17,6 +17,10 @@ const appEventInterceptor = store => next => action => {
       })
       break
     case 'START_DECISION_EVENT':
+      action = {
+        ...action,
+        blocktime: state.blocktime || null
+      }
       store.dispatch(
         fetchAvgPricesForDecisionMarkets(action.returnValues.decisionId)
       )

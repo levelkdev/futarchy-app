@@ -21,6 +21,10 @@ const DecisionCard = ({ decision }) => (
       <Question>
         {decision.question}
       </Question>
+      <div>
+        STATUS: {decision.status}
+        <br /><br />
+      </div>
       <ButtonsContainer>
         <LinkStyled
           to={`/decision/${decision.decisionId}`}

@@ -4,6 +4,10 @@ export default [
     defaultValue: []
   },
   {
+    prop: 'blocktime',
+    defaultValue: null
+  },
+  {
     prop: 'tokenBalance',
     defaultValue: null
   },

@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { ONE } from '../constants/values'
 import decisionStatuses from '../constants/decisionStatuses'
+import decisionMarketTypes from '../constants/decisionMarketTypes';
 
 const decisionMarkets = (state = [], action) => {
   switch (action.type) {
@@ -17,7 +18,7 @@ const decisionMarkets = (state = [], action) => {
         )
       ]
     case 'START_DECISION_EVENT':
-      const { returnValues } = action
+      const { returnValues, blocktime } = action
       return [
         ..._.filter(
           state,
@@ -29,11 +30,18 @@ const decisionMarkets = (state = [], action) => {
           question: returnValues.metadata,
           lowerBound: returnValues.marketLowerBound,
           upperBound: returnValues.marketUpperBound,
+          startDate: returnValues.startDate,
+          decisionResolutionDate: returnValues.decisionResolutionDate,
+          priceResolutionDate: returnValues.priceResolutionDate,
 
           // TODO: get the actual status based on time until the trading period is over.
           //       and the oracle's resolution date. We need to add the resolution period
           //       in addition to the trading period to the Futarchy.sol contract
-          status: decisionStatuses.OPEN
+          status: getStatus({
+            blocktime,
+            decisionResolutionDate: returnValues.decisionResolutionDate,
+            priceResolutionDate: returnValues.priceResolutionDate
+          })
         }
       ]
     case 'DECISION_DATA_LOADED':
@@ -64,8 +72,44 @@ const decisionMarkets = (state = [], action) => {
         }
         return decision
       })
+    case 'PROP_VALUE_LOADED':
+      if (action.prop == 'blocktime') {
+        return state.map(decision => {
+          decision.status = getStatus({
+            blocktime: action.value,
+            decisionResolutionDate: decision.decisionResolutionDate,
+            priceResolutionDate: decision.priceResolutionDate
+          })
+          return decision
+        })
+      } else {
+        return state
+      }
     default:
       return state
+  }
+}
+
+function getStatus ({
+  blocktime,
+  decisionResolutionDate,
+  priceResolutionDate
+}) {
+  if (!blocktime) {
+    return null
+  }
+  const blocktimeInt = parseInt(blocktime)
+  const decisionResolutionDateInt = parseInt(decisionResolutionDate)
+  const priceResolutionDateInt = parseInt(priceResolutionDate)
+  if (blocktimeInt < decisionResolutionDateInt)
+  {
+    return decisionStatuses.OPEN
+  } else if (blocktimeInt >= decisionResolutionDateInt && 
+             blocktimeInt < priceResolutionDateInt)
+  {
+    return decisionStatuses.RESOLVED
+  } else if (blocktimeInt >= priceResolutionDate) {
+    return decisionStatuses.CLOSED
   }
 }
 

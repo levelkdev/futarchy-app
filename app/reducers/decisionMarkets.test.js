@@ -6,12 +6,20 @@ const ONE = 0x10000000000000000
 const SEVENTY_FIVE_PERCENT = (ONE * 0.75) + ''
 const FIFTY_PERCENT = (ONE * 0.50) + ''
 
-const mockDecision = (n, pending = false) => {
+const mockDecision = (
+  n,
+  pending = false,
+  status = null,
+  decisionResolutionDate = '100',
+  priceResolutionDate = '200'
+) => {
   return {
     decisionId: `mock_decision_id_${n}`,
     question: `mock_question_${n}`,
     pending,
-    status: "OPEN"
+    status,
+    decisionResolutionDate,
+    priceResolutionDate
   }
 }
 
@@ -71,12 +79,8 @@ describe('decisionMarkets', () => {
         },
         expected: [
           {
-            decisionId: '123',
-            question: 'mock_question',
-            lowerBound: '0',
-            upperBound: '1000',
-            pending: false,
-            status: "OPEN"
+            index: 0,
+            props: { decisionId: '123', question: 'mock_question' }
           }
         ]
       },
@@ -94,15 +98,8 @@ describe('decisionMarkets', () => {
           }
         },
         expected: [
-          mockDecision(0),
-          {
-            decisionId: '123',
-            question: 'mock_question_123',
-            lowerBound: '0',
-            upperBound: '1000',
-            pending: false,
-            status: "OPEN"
-          }
+          { index: 0, props: { decisionId: 'mock_decision_id_0' } },
+          { index: 1, props: { decisionId: '123' } }
         ]
       },
       {
@@ -119,14 +116,7 @@ describe('decisionMarkets', () => {
           }
         },
         expected: [
-          {
-            decisionId: '123',
-            question: 'mock_question_88',
-            lowerBound: '0',
-            upperBound: '1000',
-            pending: false,
-            status: "OPEN"
-          }
+          { index: 0, props: { decisionId: '123', pending: false } }
         ]
       },
       {
@@ -143,21 +133,94 @@ describe('decisionMarkets', () => {
           }
         },
         expected: [
-          mockDecision(99, true),
-          {
+          { index: 0, props: { decisionId: 'mock_decision_id_99', pending: true } },
+          { index: 1, props: { decisionId: '123', pending: false }}
+        ]
+      },
+      {
+        when: 'when the decision action blocktime is less than decisionResolutionDate',
+        should: 'should set status to OPEN',
+        state: [],
+        action: { 
+          type: 'START_DECISION_EVENT',
+          blocktime: '1500000001',
+          returnValues: {
             decisionId: '123',
-            question: 'mock_question_88',
-            lowerBound: '0',
-            upperBound: '1000',
-            pending: false,
-            status: "OPEN"
+            startDate: '150000000',
+            decisionResolutionDate: '1500000002',
+            priceResolutionDate: '1500000003'
           }
+        },
+        expected: [
+          { index: 0, props: { status: 'OPEN' } }
+        ]
+      },
+      {
+        when: 'when the decision action blocktime is greater than decisionResolutionDate but less than priceResolutionDate',
+        should: 'should set status to RESOLVEd',
+        state: [],
+        action: { 
+          type: 'START_DECISION_EVENT',
+          blocktime: '1500000003',
+          returnValues: {
+            decisionId: '123',
+            startDate: '150000000',
+            decisionResolutionDate: '1500000002',
+            priceResolutionDate: '1500000004'
+          }
+        },
+        expected: [
+          { index: 0, props: { status: 'RESOLVED' } }
+        ]
+      },
+      {
+        when: 'when the decision action blocktime is greater than priceResolutionDate',
+        should: 'should set status to CLOSED',
+        state: [],
+        action: { 
+          type: 'START_DECISION_EVENT',
+          blocktime: '1500000006',
+          returnValues: {
+            decisionId: '123',
+            startDate: '150000000',
+            decisionResolutionDate: '1500000002',
+            priceResolutionDate: '1500000004'
+          }
+        },
+        expected: [
+          { index: 0, props: { status: 'CLOSED' } }
+        ]
+      },
+      {
+        when: 'when the decision action blocktime is null',
+        should: 'should set status to null',
+        state: [],
+        action: { 
+          type: 'START_DECISION_EVENT',
+          blocktime: null,
+          returnValues: {
+            decisionId: '123',
+            startDate: '150000000',
+            decisionResolutionDate: '1500000002',
+            priceResolutionDate: '1500000004'
+          }
+        },
+        expected: [
+          { index: 0, props: { status: null } }
         ]
       }
     ].forEach(({ when, should, state, action, expected }) => {
       describe(when, () => {
         it(should, () => {
-          assert.deepEqual(decisionMarkets(state, action), expected)
+          const actualState = decisionMarkets(state, action)
+          expected.forEach(expectedCondition => {
+            const index = expectedCondition.index
+            for (let propName in expectedCondition.props) {
+              const expectedVal = expectedCondition.props[propName]
+              const actualVal = actualState[index][propName]
+              assert.equal(actualVal, expectedVal) 
+            }
+          })
         })
       })
     })
@@ -297,6 +360,25 @@ describe('decisionMarkets', () => {
           }
         })
       })
+    })
+  })
+
+  describe('when blocktime value is loaded', () => {
+    it('should update statuses for existing decisions', () => {
+      const state = [
+        mockDecision(0, false, null, '500', '600'),
+        mockDecision(1, false, null, '700', '800'),
+        mockDecision(1, false, null, '900', '1000')
+      ]
+      const action = {
+        type: 'PROP_VALUE_LOADED',
+        prop: 'blocktime',
+        value: '750'
+      }
+      const actualState = decisionMarkets(state, action)
+      assert.equal(actualState[0].status, 'CLOSED')
+      assert.equal(actualState[1].status, 'RESOLVED')
+      assert.equal(actualState[2].status, 'OPEN')
     })
   })
 })
