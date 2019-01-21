@@ -17,8 +17,8 @@ contract Futarchy is AragonApp, IForwarder {
 
   event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle, int marketLowerBound, int marketUpperBound, uint startDate, uint tradingPeriod, uint priceResolutionDate);
   event ExecuteDecision(uint decisionId);
-  event BuyMarketPositions(address trader, uint decisionId, uint tradeTime, uint collateralAmount, uint[2] yesPurchaseAmounts, uint[2] noPurchaseAmounts, uint[2] yesCosts, uint[2] noCosts);
-  event SellMarketPositions(address trader, uint decisionId, uint tradeTime, int[] yesMarketPositions, int[] noMarketPositions, uint yesCollateralReceived, uint noCollateralReceived);
+  event BuyMarketPositions(address trader, uint decisionId, uint tradeTime, uint collateralAmount, uint[2] yesPurchaseAmounts, uint[2] noPurchaseAmounts, uint[2] yesCosts, uint[2] noCosts, uint[4] marginalPrices);
+  event SellMarketPositions(address trader, uint decisionId, uint tradeTime, int[] yesMarketPositions, int[] noMarketPositions, uint yesCollateralReceived, uint noCollateralReceived, uint[4] marginalPrices);
   event RedeemWinnings(address trader, uint decisionId, int winningIndex, uint winningsAmount);
 
   bytes32 public constant CREATE_DECISION_ROLE = keccak256("CREATE_DECISION_ROLE");
@@ -256,7 +256,9 @@ contract Futarchy is AragonApp, IForwarder {
         noPurchaseAmounts
       );
 
-      emit BuyMarketPositions(msg.sender, decisionId, now, collateralAmount, yesPurchaseAmounts, noPurchaseAmounts, yesCosts, noCosts);
+      uint[4] memory marginalPrices = calcMarginalPrices(decisionId);
+
+      emit BuyMarketPositions(msg.sender, decisionId, now, collateralAmount, yesPurchaseAmounts, noPurchaseAmounts, yesCosts, noCosts, marginalPrices);
     }
 
     /* @notice sells all price prediction positions and adds rewarded collateral tokens to trader's yesCollateral and noCollateral balances
@@ -295,7 +297,9 @@ contract Futarchy is AragonApp, IForwarder {
       outcomeTokenBalances.noLong = 0;
       outcomeTokenBalances.noShort = 0;
 
-      emit SellMarketPositions(msg.sender, decisionId, now, yesSellPositions, noSellPositions, yesCollateralReceived, noCollateralReceived);
+      uint[4] memory marginalPrices = calcMarginalPrices(decisionId);
+
+      emit SellMarketPositions(msg.sender, decisionId, now, yesSellPositions, noSellPositions, yesCollateralReceived, noCollateralReceived, marginalPrices);
     }
 
     /* @notice allocates token back to the sender based on their balance of the winning outcome collateralToken
