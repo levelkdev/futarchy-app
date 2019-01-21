@@ -17,6 +17,8 @@ const TradeList = ({ trades }) => (
           <DataHeaderCell>NO Price</DataHeaderCell>
           <DataHeaderCell>Lower Bound</DataHeaderCell>
           <DataHeaderCell>Upper Bound</DataHeaderCell>
+          <DataHeaderCell>YES-LONG Marginal Price</DataHeaderCell>
+          <DataHeaderCell>NO-LONG Marginal Price</DataHeaderCell>
         </tr>
         {trades.map((trade, i) => (
           <tr key={i}>
@@ -30,6 +32,8 @@ const TradeList = ({ trades }) => (
             <DataCell>{trade.noTokenPrice} TKN</DataCell>
             <DataCell>{trade.lowerBound}</DataCell>
             <DataCell>{trade.upperBound}</DataCell>
+            <DataCell>{trade.yesLongMarginalPrice}</DataCell>
+            <DataCell>{trade.noLongMarginalPrice}</DataCell>
           </tr>
         ))}
       </tbody>

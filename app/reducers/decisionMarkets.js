@@ -1,7 +1,6 @@
 import _ from 'lodash'
+import { ONE } from '../constants/values'
 import decisionStatuses from '../constants/decisionStatuses'
-
-const ONE = 0x10000000000000000
 
 const decisionMarkets = (state = [], action) => {
   switch (action.type) {
