@@ -2,6 +2,7 @@ import React from 'react'
 import { SidePanel } from '@aragon/ui'
 import CreateDecisionMarket from '../views/CreateDecisionMarket'
 import MakePrediction from '../views/MakePrediction'
+import RedeemRewards from '../views/RedeemRewards'
 
 const titles = {
   createDecisionMarket: 'Create a New Decision',
@@ -20,6 +21,8 @@ const SidePanelDisplay = ({ panelName, closePanel }) => (
           return <CreateDecisionMarket />
         case 'makePrediction':
           return <MakePrediction />
+        case 'redeemRewards':
+          return <RedeemRewards />
         default:
           return null
       }
