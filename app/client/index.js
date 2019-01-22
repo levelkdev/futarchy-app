@@ -1,6 +1,7 @@
 import contractCall from './contractCall'
 import contractFn from './contractFn'
 import MiniMeToken from './MiniMeToken'
+import traderDecisionHash from '../util/traderDecisionHash'
 
 export const accounts = async () => {
   return new Promise((resolve, reject) => {
@@ -68,6 +69,19 @@ export const calcProfits = async (decisionId, outcomeTokenAmounts) => {
   return { yesShort, yesLong, noShort, noLong }
 }
 
+export const traderDecisionBalances = async (decisionId, trader) => {
+  const hash = traderDecisionHash(trader, decisionId)
+  const balances = await call('traderDecisionBalances', hash)
+  return {
+    yesCollateral: balances.yesCollateral,
+    noCollateral: balances.noCollateral,
+    yesShort: balances.yesShort,
+    yesLong: balances.yesLong,
+    noShort: balances.noShort,
+    noLong: balances.noLong
+  }
+}
+
 // this function includes a "pretransaction" to approve marketing funding
 // token transfer. Aragon client uses the `token` property in transaction
 // options to send a token approval transaction before the requested
@@ -132,6 +146,7 @@ export default {
   avgPricesForDecisionMarkets,
   calcCosts,
   calcProfits,
+  traderDecisionBalances,
   newDecision,
   buyMarketPositions,
   sendTransaction
