@@ -6,9 +6,17 @@ const findDecisionById = (decisions, decisionId) => _.find(
   { id: decisionId }
 )
 
+const getRewardAmount = (trader, decision) => (
+  100
+)
+
 const mapStateToProps = state => ({
   decision: findDecisionById(
     state.decisionMarkets,
+    state.sidePanel.panelContext.decisionId
+  ),
+  rewardAmount: getRewardAmount(
+    state.accounts[0],
     state.sidePanel.panelContext.decisionId
   )
 })
