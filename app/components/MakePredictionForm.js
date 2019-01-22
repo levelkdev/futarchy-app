@@ -1,11 +1,14 @@
 import React from 'react'
 import { Field, reduxForm } from 'redux-form'
-import { Button, Info, Text } from '@aragon/ui'
-
+import { Button, Info, Text, Badge, DropDown, TextInput } from '@aragon/ui'
 import formatBalance from '../util/formatBalance'
 import styled from 'styled-components'
 
 const createReduxForm = reduxForm({ form: 'makePrediction' })
+const dropDownItems = [
+  'less than',
+  'more than',
+]
 
 const MakePredictionForm = createReduxForm(({
   decision,
@@ -18,67 +21,112 @@ const MakePredictionForm = createReduxForm(({
       ...values
     })
   })}>
+    <StyledDivider />
+    <StyledRow>
+      <StyledSmallCaps>question</StyledSmallCaps>
+      <br />
+      <StyledText size="large">{decision.question}</StyledText>
+      <br />
+      <br />
+    </StyledRow>
+    <StyledDivider />
+    <StyledRow>
+    <br />
+    <StyledSmallCaps>Allocate your tokens</StyledSmallCaps>
+      <StyledField
+        name="collateralAmount"
+        component="input"
+        type="text"
+        placeholder="Enter Amount to Risk"
+      />
+      <StyledAccountBalance>XXXX ETH Available</StyledAccountBalance>
+    </StyledRow>
+    <StyledRow>
+      <StyledYesBadge>YES</StyledYesBadge>
+      <StyledSmallCaps>price will be:</StyledSmallCaps>
+      <br />
+      <StyledFlexContainer>
+        <StyledDropDown items={dropDownItems}/>
+        <div>
+        <TextInput readonly value={decision.yesMarketPredictedPrice} /><br />
+        <StyledSmallCaps>Current <StyledMarketSpan>YES</StyledMarketSpan> price</StyledSmallCaps>
+        </div>
+      </StyledFlexContainer>
+      </StyledRow>
+      <StyledRow>
+        <StyledNoBadge>NO</StyledNoBadge>
+        <StyledSmallCaps>price will be:</StyledSmallCaps>
+        <br />
+        <StyledFlexContainer>
+          <StyledDropDown items={dropDownItems}/>
+          <div>
+          <TextInput readonly value={decision.noMarketPredictedPrice} /><br />
+          <StyledSmallCaps>Current <StyledMarketSpan>NO</StyledMarketSpan> price</StyledSmallCaps>
+          </div>
+        </StyledFlexContainer>
+      </StyledRow>
+      <br />
+    <StyledDivider />
+    <br /><br />
     <StyledInfo>
-      Make Prediction...
+      This will use XXXX of your XXXX ETH
     </StyledInfo>
-    <StyledLabel htmlFor="collateralAmount">
-      Collateral Amount
-    </StyledLabel>
-    <StyledField
-      name="collateralAmount"
-      component="input"
-      type="text"
-      placeholder="Collateral Amount"
-    />
-    <br /><br />
-
-    <StyledLabel htmlFor="yesShortAmount">
-      YES-SHORT Amount
-    </StyledLabel>
-    <StyledField
-      name="yesShortAmount"
-      component="input"
-      type="text"
-      placeholder="YES-SHORT Amount"
-    />
-    <br /><br />
-
-    <StyledLabel htmlFor="yesLongAmount">
-      YES-LONG Amount
-    </StyledLabel>
-    <StyledField
-      name="yesLongAmount"
-      component="input"
-      type="text"
-      placeholder="YES-LONG Amount"
-    />
-    <br /><br />
-
-    <StyledLabel htmlFor="noShortAmount">
-      NO-SHORT Amount
-    </StyledLabel>
-    <StyledField
-      name="noShortAmount"
-      component="input"
-      type="text"
-      placeholder="NO-SHORT Amount"
-    />
-    <br /><br />
-
-    <StyledLabel htmlFor="noLongAmount">
-      NO-LONG Amount
-    </StyledLabel>
-    <StyledField
-      name="noLongAmount"
-      component="input"
-      type="text"
-      placeholder="NO-LONG Amount"
-    />
-    <br /><br />
-
     <Button mode="strong" type="submit" wide>Make Prediction</Button>
   </form>
 ))
+
+const StyledDropDown = styled(DropDown)`
+  margin-right: 0px;
+`
+
+const StyledAccountBalance = styled.div`
+  width: 100%;
+  text-align: right;
+  color: #43A047;
+  font-size: 12px;
+  text-transform: uppercase;
+  padding: 5px 0px;
+`
+
+const StyledYesBadge = styled(Badge) `
+  background-color: #80AEDC;
+  color: white !important;
+  font-weight: 400;
+  margin-right: 6px;
+`
+
+const StyledNoBadge = styled(Badge) `
+  background-color: #39CAD0;
+  color: white !important;
+  font-weight: 400;
+  margin-right: 6px;
+`
+
+const StyledFlexContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+`
+
+const StyledMarketSpan = styled.span`
+  font-weight: bold;
+`
+
+const StyledMarketPrice = styled(Text) `
+  font-size: 14px;
+  margin: 0px 18px;
+  background-color: #E8E8E8;
+  padding: 5px 20px;
+  border-radius: 25px;
+`
+
+const StyledSmallCaps = styled(Text)`
+  text-transform: uppercase;
+  font-weight: 500;
+  color: #98A0A2;
+  font-size: 12px;
+  line-height: 36px;
+`
 
 const StyledField = styled(Field)`
   padding: 8px;
@@ -91,6 +139,21 @@ const StyledField = styled(Field)`
   ::placeholder { opacity: .5; }
 `
 
+const StyledText = styled(Text)`
+  vertical-align: middle;
+  font-weight: bold;
+`
+const StyledProgressContainer = styled.div`
+  height: auto;
+  padding: 65px 0px 36px 0px;
+`
+const StyledRow = styled.div`
+  padding: 5px 0px;
+`
+const StyledDivider = styled.div`
+  border-bottom: 1px solid #E8E8E8;
+  margin: 0 -30px;
+`
 const StyledInfo = styled(Info.Action)`
   margin: 16px 0;
 `
@@ -98,13 +161,13 @@ const StyledInfo = styled(Info.Action)`
 const StyledPermissions = styled(Info.Permissions)`
   margin: 16px 0;
 `
-
-const StyledLabel = styled.div`
+const StyledLabel = styled.label`
   font-size: 12px;
   color: #6D777B;
   opacity: .6;
   padding-bottom: 8px;
   text-transform: uppercase;
+  display: block;
 `
 
 export default MakePredictionForm
