@@ -60,6 +60,33 @@ export const propValueLoadingError = ({ prop, errorMessage }) => ({
   errorMessage
 })
 
+export const fetchTraderDecisionBalancesPending = ({ decisionId, trader }) => ({
+  type: 'FETCH_TRADER_DECISION_BALANCES_PENDING',
+  decisionId,
+  trader
+})
+
+export const fetchTraderDecisionBalancesSuccess = ({
+  decisionId,
+  trader, 
+  yesCollateral,
+  noCollateral,
+  yesShort,
+  yesLong,
+  noShort,
+  noLong
+}) => ({
+  type: 'FETCH_TRADER_DECISION_BALANCES_SUCCESS',
+  decisionId,
+  trader, 
+  yesCollateral,
+  noCollateral,
+  yesShort,
+  yesLong,
+  noShort,
+  noLong
+})
+
 export const newDecision = ({
   bytes32Script,
   question,
@@ -113,6 +140,23 @@ export const fetchAvgPricesForDecisionMarkets = (decisionId) => dispatch => {
     })),
     errorMessage => {
       console.error(`fetchAvgPricesForDecisionMarkets: ${errorMessage}`)
+      // TODO: dispatch error action, to show something to the user
+    }
+  )
+}
+
+export const fetchTraderDecisionBalances = ({ decisionId, trader }) => dispatch => {
+  dispatch(fetchTraderDecisionBalancesPending({ decisionId, trader }))
+  return client.traderDecisionBalances(decisionId, trader).then(
+    balances => {
+      dispatch(fetchTraderDecisionBalancesSuccess({
+        decisionId,
+        trader,
+        ...balances
+      }))
+    },
+    errorMessage => {
+      console.error(`fetchTraderDecisionBalances: ${errorMessage}`)
       // TODO: dispatch error action, to show something to the user
     }
   )

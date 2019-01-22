@@ -2,6 +2,7 @@ import { combineReducers } from 'redux'
 import { reducer as form } from 'redux-form'
 import { appEvents } from '../aragonRedux/aragonRedux'
 import decisionMarkets from './decisionMarkets'
+import decisionBalances from './decisionBalances'
 import sidePanel from './sidePanel'
 import propValue from './propValue'
 import initDataLoadStates from './initDataLoadStates'
@@ -12,6 +13,7 @@ import trades from './trades'
 let reducers = {
   appEvents,
   decisionMarkets,
+  decisionBalances,
   form,
   sidePanel,
   initDataLoadStates,
