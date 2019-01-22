@@ -127,6 +127,15 @@ export const buyMarketPositions = async (
   )
 }
 
+export const redeemRewards = async (decisionId) => {
+  return contractFn(
+    window.aragonClient,
+    'client',
+    'redeemRewards',
+    decisionId
+  )
+}
+
 export const call = async (functionName, ...params) => {
   return contractCall(window.aragonClient, 'client', functionName, ...params)
 }

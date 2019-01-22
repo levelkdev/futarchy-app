@@ -12,6 +12,11 @@ export const buyMarketPositionsTxPending = ({ txHash }) => ({
   txHash
 })
 
+export const redeemRewardsTxPending = ({ txHash }) => ({
+  type: 'REDEEM_REWARDS_TX_PENDING',
+  txHash
+})
+
 export const avgDecisionMarketPricesLoaded = ({ decisionId, yesMarketPrice, noMarketPrice }) => ({
   type: 'AVG_DECISION_MARKET_PRICES_LOADED',
   decisionId,
@@ -111,6 +116,17 @@ export const buyMarketPositions = ({
     dispatch(buyMarketPositionsTxPending({ txHash }))
   }, err => {
     console.error(`buyMarketPositions: ${err}`)
+    // TODO: dispatch error action, to show something to the user
+  })
+}
+
+export const redeemRewards = ({
+  decisionId
+}) => dispatch => {
+  return client.redeemRewards(decisionId).then(txHash => {
+    dispatch(redeemRewardsTxPending({txHash}))
+  }, err => {
+    console.error(`redeemRewards: ${err}`)
     // TODO: dispatch error action, to show something to the user
   })
 }
