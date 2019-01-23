@@ -7,7 +7,12 @@ const findDecisionById = (decisions, decisionId) => _.find(
 )
 
 const getRewardAmount = (trader, decision) => (
-  100
+
+  0
+)
+
+const getWinningMarket = (decisionId) => (
+  0
 )
 
 const mapStateToProps = state => ({
@@ -18,11 +23,12 @@ const mapStateToProps = state => ({
   rewardAmount: getRewardAmount(
     state.accounts[0],
     state.sidePanel.panelContext.decisionId
-  )
+  ),
+  winningMarket: state.decisionMarkets
 })
 
-const RedeemRewards = () => (
+const RedeemWinnings = () => (
   <h1> HELLO WORLD </h1>
 )
 
-export default connect()(RedeemRewards)
+export default connect()(RedeemWinnings)
