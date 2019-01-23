@@ -66,21 +66,25 @@ const appEventInterceptor = store => next => action => {
       //       loaded. Since this isn't very efficient, we could do the "calcProfit" from
       //       LMSR calcs client side based on the current marginal price of outcome tokens,
       //       then we'd only need to fetch marginal prices once. But for now, this is simpler.
-      const { decisionId } = action.returnValues
-      const totalsForDecision = _.filter(newState.performance, { decisionId })
-      for (var i in totalsForDecision) {
-        const total = totalsForDecision[i]
-        store.dispatch(fetchPotentialProfitData({
-          decisionId: total.decisionId,
-          trader: total.trader,
-          balances: [
-            total.yesShortBalance,
-            total.yesLongBalance,
-            total.noShortBalance,
-            total.noLongBalance
-          ]
-        }))
-      }
+
+      // TEMPORARILY REMOVING BECAUSE IT TAKES TOO LONG TO LOAD THIS DATA AND BLOCKS
+      // THE APP FROM LOADING EVERYTHING ELSE
+      //
+      // const { decisionId } = action.returnValues
+      // const totalsForDecision = _.filter(newState.performance, { decisionId })
+      // for (var i in totalsForDecision) {
+      //   const total = totalsForDecision[i]
+      //   store.dispatch(fetchPotentialProfitData({
+      //     decisionId: total.decisionId,
+      //     trader: total.trader,
+      //     balances: [
+      //       total.yesShortBalance,
+      //       total.yesLongBalance,
+      //       total.noShortBalance,
+      //       total.noLongBalance
+      //     ]
+      //   }))
+      // }
       break
   }
   return result
