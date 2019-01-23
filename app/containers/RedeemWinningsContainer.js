@@ -6,9 +6,10 @@ const findDecisionById = (decisions, decisionId) => _.find(
   { id: decisionId }
 )
 
-const getRewardAmount = (decisionBalances, ) => (
- 0
-)
+const getRewardAmount = (decisionBalances, decisionId, passed) => {
+  let targetDecisionBalances = _.find(decisionBalances, decisionId)
+  return passed ? targetDecisionBalances.yesCollateral : targetDecisionBalances.noCollateral
+}
 
 const didDecisionPass = (decision) => (
   decision.passed
@@ -24,7 +25,8 @@ const mapStateToProps = state => {
     decision: targetDecision,
     rewardAmount: getRewardAmount(
       state.decisionBalances,
-      state.sidePanel.panelContext.decisionId
+      state.sidePanel.panelContext.decisionId,
+      targetDecision.passed
     ),
     decisionPassed: didDecisionPass(
       targetDecision
