@@ -12,39 +12,61 @@ module.exports = async (callback) => {
 
   try {
     const daoAddress = process.argv[6]
-    const arg7 = process.argv[7]
+    const dataFileId = process.argv[7] || 0
 
-    if (!daoAddress || !arg7) {
-      throw new Error('The correct arguments were not provided. Script expects `npm run seed:trades <DAO_ADDRESS> <DATAFILE_ID, DATAFILE_ID, . . . >`. The DAO address can be copied from the `aragon run` output. Provide the data files at the index of the decision you want them run on.  For example, if you want to run file 3 on decision 0, and file 7 on decision 1, pass in 3,7')
+    if (!daoAddress) {
+      throw new Error('The correct arguments were not provided. Script expects `npm run seed <DAO_ADDRESS> [DATAFILE_ID, default=0]`. The DAO address can be copied from the `aragon run` output.')
     }
 
-    const dataFileIds = arg7.split(',')
     const { accounts } = web3.eth
 
-    console.log('executing some trades...')
+    console.log('seeding data...')
     console.log('')
 
     const app = await getFutarchyContract(artifacts, daoAddress)
     const token = ERC20.at(await app.token())
+    const marketFundAmount = await app.marketFundAmount()
+  
+    const lowerBound = 0
+    const upperBound = 1000
 
-    for (var i=0; i< dataFileIds.length; i++) {
-      const decisionId = i
-      const tradesData = require('./data/tradesData00' + dataFileIds[i] + '.json')
+    const tradesData = require('./data/data_' + dataFileId + '.json')
+    let yesMarket, noMarket
 
-      const futarchyOracle = FutarchyOracle.at((await app.decisions(decisionId))[0])
-      const yesMarket = Market.at(await futarchyOracle.markets(0))
-      const noMarket = Market.at(await futarchyOracle.markets(1))
-
-      for (var j = 0; j < tradesData.length; j++) {
-        const data = tradesData[j]
-        if (data.type == 'buy') {
-          const { tokenAmount, from, yesPrediction, noPrediction } = data
+    for (var j = 0; j < tradesData.length; j++) {
+      const data = tradesData[j]
+      const {
+        decisionId,
+        tokenAmount,
+        from,
+        yesPrediction,
+        noPrediction,
+        executionScript,
+        metadata,
+      } = data
+      if (typeof(decisionId) !== 'undefined') {
+        const futarchyOracle = FutarchyOracle.at((await app.decisions(decisionId))[0])
+        yesMarket = Market.at(await futarchyOracle.markets(0))
+        noMarket = Market.at(await futarchyOracle.markets(1))
+      }
+      switch(data.type) {
+        case 'newDecision':
+          console.log(`token.approve(${app.address}, 0)`)
+          await token.approve(app.address, 0)
+          console.log(`token.approve(${app.address}, ${marketFundAmount})`)
+          await token.approve(app.address, marketFundAmount)
+          console.log(`app.newDecision(${executionScript}, ${metadata}, ${lowerBound}, ${upperBound})`)
+          await app.newDecision(executionScript, metadata, lowerBound, upperBound)
+          console.log('')
+          break
+        case 'buy':
           const yesOutcomeIndex = yesPrediction == 'SHORT' ? 0 : 1
           const noOutcomeIndex = noPrediction == 'SHORT' ? 0 : 1
           const buyer = accounts[from]
 
           console.log(
             `Buying YES-${yesPrediction} / NO-${noPrediction} ` +
+            `on Decision ${decisionId} ` +
             `for ${tokenAmount / 10 ** 18} TKN ` +
             `+ ${tokenAmountAdjustment} extra ` +
             `from ${buyer}`
@@ -72,8 +94,8 @@ module.exports = async (callback) => {
             noOutcomeTokenAmounts,
             { from: buyer }
           )
-        } else if (data.type == 'sell') {
-          const { from } = data
+          break
+        case 'sell':
           const seller = accounts[from]
 
           console.log(
@@ -83,17 +105,17 @@ module.exports = async (callback) => {
 
           await app.sellMarketPositions(decisionId, { from: seller })
           console.log('sold positions')
-        } else if (data.type == 'advanceTime') {
+          break
+        case 'advanceTime':
           await advanceTime(web3, data.seconds)
-        } else {
+          break
+        default:
           throw new Error(`${data.type} is not a valid type`)
-        }
-        console.log('')
       }
+      console.log('')
     }
-
   } catch (err) {
-    console.log('Error in scripts/seed_data/trades.js: ', err)
+    console.log('Error in scripts/seed_data/seed.js: ', err)
   }
 
   callback()
