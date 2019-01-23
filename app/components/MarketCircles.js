@@ -16,6 +16,9 @@ const MarketCircles = ({
 }) => {
   let y = yesPercentage
   let n = noPercentage
+  
+  if (typeof(y) == 'undefined') y = 0.5
+  if (typeof(n) == 'undefined') n = 0.5
 
   const { yes: yesDiam, no: noDiam } = calcCircleDiameters(y, n)
 
@@ -39,7 +42,7 @@ const MarketCircles = ({
           cy={OUTER_CIRCLE_RADIUS}
           r={OUTER_CIRCLE_RADIUS}
           stroke="#e8e8e8"
-          stroke-width="2"
+          strokeWidth="2"
           fill="transparent"
         />
         <Circle
@@ -82,15 +85,23 @@ const Circle = ({ angle, diameter, color, nameText, priceText, isYes }) => {
     <g>
       <circle cx={xOffset} cy={yOffset} r={radius} fill={color} />
       <text x={xOffset} y={yOffset}
-        font-family="sans-serif"
-        font-size={`${nameFontSize}px`}
-        text-anchor="middle"
+        fontFamily="sans-serif"
+        fontSize={`${nameFontSize}px`}
+        textAnchor="middle"
         fill="white">{nameText}</text>
-      <text x={xOffset} y={yOffset + priceTextOffset}
-        font-family="sans-serif"
-        font-size={`${priceFontSize}px`}
-        text-anchor="middle"
-        fill="#ffffffab">{`${formatPrice(priceText)} ETH`}</text>
+      {
+        priceText ? (
+          <text x={xOffset} y={yOffset + priceTextOffset}
+            fontFamily="sans-serif"
+            fontSize={`${priceFontSize}px`}
+            textAnchor="middle"
+            fill="#ffffffab">{`${formatPrice(priceText)} ETH`}</text>
+        ): <text x={xOffset} y={yOffset + priceTextOffset}
+          fontFamily="sans-serif"
+          fontSize={`${priceFontSize}px`}
+          textAnchor="middle"
+          fill="#ffffffab">Loading...</text>
+      }
     </g>
   )
 }
