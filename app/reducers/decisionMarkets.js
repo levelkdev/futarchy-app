@@ -19,7 +19,7 @@ const decisionMarkets = (state = [], action) => {
       ]
     case 'START_DECISION_EVENT':
       const { returnValues, blocktime } = action
-      return [
+      return _.sortBy([
         ..._.filter(
           state,
           decision => !(decision.pending && decision.question == returnValues.metadata)
@@ -43,7 +43,7 @@ const decisionMarkets = (state = [], action) => {
             priceResolutionDate: returnValues.priceResolutionDate
           })
         }
-      ]
+      ], decision => decision.startDate ? parseInt(decision.startDate) * -1 : 0)
     case 'DECISION_DATA_LOADED':
       const { decisionId, decisionData } = action
       return state.map(decision => {

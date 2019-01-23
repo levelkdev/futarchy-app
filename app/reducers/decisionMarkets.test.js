@@ -11,7 +11,8 @@ const mockDecision = (
   pending = false,
   status = null,
   decisionResolutionDate = '100',
-  priceResolutionDate = '200'
+  priceResolutionDate = '200',
+  startDate = '1000'
 ) => {
   return {
     decisionId: `mock_decision_id_${n}`,
@@ -19,7 +20,8 @@ const mockDecision = (
     pending,
     status,
     decisionResolutionDate,
-    priceResolutionDate
+    priceResolutionDate,
+    startDate
   }
 }
 
@@ -207,6 +209,26 @@ describe('decisionMarkets', () => {
         },
         expected: [
           { index: 0, props: { status: null } }
+        ]
+      },
+      {
+        when: 'when decision start time is greater than existing decisions',
+        should: 'should add the decision at the start of the array',
+        state: [mockDecision(98), mockDecision(99)],
+        action: { 
+          type: 'START_DECISION_EVENT',
+          blocktime: null,
+          returnValues: {
+            decisionId: '123',
+            startDate: '150000000',
+            decisionResolutionDate: '1500000002',
+            priceResolutionDate: '1500000004'
+          }
+        },
+        expected: [
+          { index: 0, props: { decisionId: '123' } },
+          { index: 1, props: { decisionId: 'mock_decision_id_98' } },
+          { index: 2, props: { decisionId: 'mock_decision_id_99' } }
         ]
       }
     ].forEach(({ when, should, state, action, expected }) => {
