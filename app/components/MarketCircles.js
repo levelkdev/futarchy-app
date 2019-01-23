@@ -1,5 +1,6 @@
 import React from 'react'
 import formatPrice from '../util/formatPrice'
+import { Text } from '@aragon/ui'
 
 const OUTER_CIRCLE_DIAMETER = 200
 const OUTER_CIRCLE_RADIUS = OUTER_CIRCLE_DIAMETER / 2
