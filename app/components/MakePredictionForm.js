@@ -81,14 +81,14 @@ const StyledAccountBalance = styled.div`
 
 const StyledYesBadge = styled(Badge) `
   background-color: #80AEDC;
-  color: white !important;
+  color: white;
   font-weight: 400;
   margin-right: 6px;
 `
 
 const StyledNoBadge = styled(Badge) `
   background-color: #39CAD0;
-  color: white !important;
+  color: white;
   font-weight: 400;
   margin-right: 6px;
 `
