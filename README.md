@@ -43,11 +43,11 @@ Open DAO [completed]
     Opening http://localhost:3000/#/0x5b48408a77645bd31e5eBaa460E84B588eaae1d4 to view your DAO
 ```
 
-2. Run `npm run seed:decisions <DAO_ADDRESS>`. Replace `<DAO_ADDRESS>` with your copied address
-
-3. Run `npm run seed:trades <DAO_ADDRESS>`
+2. Run `npm run seed <DAO_ADDRESS>`. Replace `<DAO_ADDRESS>` with your copied address
 
 When these succeed, you will see 3 decisions in the UI. If you click on the first decision, you will see a series of trades.
+
+To run a specific seed file, use `npm run seed <DAO_ADDRESS> [DATA_FILE_ID]`. The file ID can be found in the file name `scripts/data/data_<DATA_FILE_ID>.json`. If no ID is specified, the seed script defaults to running with the `scripts/data/data_0.json` file.
 
 ### `npm run devchain:reset`
 
