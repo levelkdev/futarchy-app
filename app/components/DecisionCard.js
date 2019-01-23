@@ -51,7 +51,7 @@ const CardContainer = styled.div`
 `
 
 const CirclesContainer = styled.div`
-  padding: 20px 25px 25px 25px;;
+  padding: 10px;
   background: #F7FBFD;
   border-bottom: 1px solid #e8e8e8;
   border-radius: 3px 3px 0 0;
@@ -60,7 +60,7 @@ const CirclesContainer = styled.div`
 
 const ContentContainer = styled.div`
   background: white;
-  padding: 20px 25px 25px 25px;;
+  padding: 16px 28px;
   border-radius: 0 0 3px 3px;
 `
 
@@ -69,7 +69,10 @@ const Question = styled.div`
   min-height: 65px;
 `
 
-const ButtonsContainer = styled.div``
+const ButtonsContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+`
 
 const LinkStyled = styled(Link)`
   text-decoration: none;

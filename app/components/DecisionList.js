@@ -27,7 +27,7 @@ const CardGroup = styled.div`
 `
 
 const Card = styled.div`
-  width: 300px;
+  width: 340px;
   margin-right: 20px;
 `
 
