@@ -3,7 +3,7 @@ const advanceTime = require('../utilities/advanceTime')
 const getFutarchyContract = require('../utilities/getFutarchyContract')
 const calcOutcomeTokenCount = require('../utilities/calcOutcomeTokenCount')
 
-const tokenAmountAdjustment = 1000
+const tokenAmountAdjustment = 10000
 
 module.exports = async (callback) => {
   const ERC20 = artifacts.require('ERC20')
@@ -71,6 +71,10 @@ module.exports = async (callback) => {
             `+ ${tokenAmountAdjustment} extra ` +
             `from ${buyer}`
           )
+
+          // set approval balance to 0 in case there's some approval allowance
+          // hanging around
+          await token.approve(app.address, 0, { from: buyer })
 
           // Adding some tokens to the submitted amount to account for innacuracy of calcOutcomeTokenCount.js
           // compared to the smart contracts
