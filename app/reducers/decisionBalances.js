@@ -6,7 +6,7 @@ const decisionBalances = (state = [], action) => {
       const existingBalance = _.find(
         state,
         balance => (
-          balance.decisionId == action.decisionId &&
+          balance.id == action.id &&
             balance.trader == action.trader &&
             balance.pending == false
         )
@@ -18,23 +18,23 @@ const decisionBalances = (state = [], action) => {
         ..._.filter(
           state,
           balance => (
-            !(balance.decisionId == action.decisionId &&
+            !(balance.id == action.id &&
               balance.trader == action.trader)
           )
         ),
-        ...[initDecisionBalances(action.decisionId, action.trader)]
+        ...[initDecisionBalances(action.id, action.trader)]
       ]
     case 'FETCH_TRADER_DECISION_BALANCES_SUCCESS':
       return [
         ..._.filter(
           state,
           balance => (
-            !(balance.decisionId == action.decisionId &&
+            !(balance.id == action.id &&
               balance.trader == action.trader)
           )
         ),
         ...[{
-          decisionId: action.decisionId,
+          id: action.id,
           trader: action.trader,
           pending: false,
           yesCollateral: action.yesCollateral,
@@ -50,8 +50,8 @@ const decisionBalances = (state = [], action) => {
   }
 }
 
-const initDecisionBalances = (decisionId, trader) => ({
-  decisionId,
+const initDecisionBalances = (id, trader) => ({
+  id,
   trader,
   pending: true,
   yesCollateral: 0,

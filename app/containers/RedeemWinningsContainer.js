@@ -6,26 +6,31 @@ const findDecisionById = (decisions, decisionId) => _.find(
   { id: decisionId }
 )
 
-const getRewardAmount = (trader, decision) => (
-
-  0
+const getRewardAmount = (decisionBalances, ) => (
+ 0
 )
 
-const getWinningMarket = (decisionId) => (
-  0
+const didDecisionPass = (decision) => (
+  decision.passed
 )
 
-const mapStateToProps = state => ({
-  decision: findDecisionById(
+const mapStateToProps = state => {
+  let targetDecision = findDecisionById(
     state.decisionMarkets,
     state.sidePanel.panelContext.decisionId
-  ),
-  rewardAmount: getRewardAmount(
-    state.accounts[0],
-    state.sidePanel.panelContext.decisionId
-  ),
-  winningMarket: state.decisionMarkets
-})
+  )
+
+  return {
+    decision: targetDecision,
+    rewardAmount: getRewardAmount(
+      state.decisionBalances,
+      state.sidePanel.panelContext.decisionId
+    ),
+    decisionPassed: didDecisionPass(
+      targetDecision
+    )
+  }
+}
 
 const RedeemWinnings = () => (
   <h1> HELLO WORLD </h1>
