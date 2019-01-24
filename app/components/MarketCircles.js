@@ -18,6 +18,9 @@ const MarketCircles = ({
 }) => {
   let y = yesPercentage
   let n = noPercentage
+  
+  if (typeof(y) == 'undefined') y = 0.5
+  if (typeof(n) == 'undefined') n = 0.5
 
   const { yes: yesDiam, no: noDiam } = calcCircleDiameters(y, n)
 
@@ -41,7 +44,7 @@ const MarketCircles = ({
           cy={OUTER_CIRCLE_RADIUS}
           r={OUTER_CIRCLE_RADIUS}
           stroke="#e8e8e8"
-          stroke-width="2"
+          strokeWidth="2"
           fill="transparent"
         />
         <Circle
