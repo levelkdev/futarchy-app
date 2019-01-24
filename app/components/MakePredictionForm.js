@@ -21,16 +21,12 @@ const MakePredictionForm = createReduxForm(({
       ...values
     })
   })}>
-    <StyledDivider />
     <StyledRow>
-      <br />
       <StyledSmallCaps>question</StyledSmallCaps>
       <br />
       <StyledText size="large">{decision.question}</StyledText>
       <br />
-      <br />
     </StyledRow>
-    <StyledDivider />
     <StyledRow>
     <br />
     <StyledSmallCaps>Allocate your tokens</StyledSmallCaps>
@@ -53,8 +49,6 @@ const MakePredictionForm = createReduxForm(({
         <StyledSmallCaps>Current <StyledMarketSpan>YES</StyledMarketSpan> price</StyledSmallCaps>
         </div>
       </StyledFlexContainer>
-    </StyledRow>
-    <StyledRow>
       <StyledNoBadge>NO</StyledNoBadge>
       <StyledSmallCaps>price will be:</StyledSmallCaps>
       <br />
@@ -66,13 +60,13 @@ const MakePredictionForm = createReduxForm(({
         </div>
       </StyledFlexContainer>
     </StyledRow>
-    <br />
-    <StyledDivider />
-    <br />
-    <Button mode="strong" type="submit" wide>Make Prediction</Button>
-    <StyledInfo>
-      This will use XXXX of your XXXX ETH
-    </StyledInfo>
+    <StyledRow>
+      <br />
+      <Button mode="strong" type="submit" wide>Make Prediction</Button>
+      <StyledInfo>
+        This will use XXXX of your XXXX ETH
+      </StyledInfo>
+    </StyledRow>
   </form>
 ))
 
@@ -147,12 +141,7 @@ const StyledProgressContainer = styled.div`
 `
 
 const StyledRow = styled.div`
-  padding: 3px 0px;
-`
-
-const StyledDivider = styled.div`
-  border-bottom: 1px solid #E8E8E8;
-  margin: 0 -30px;
+  padding: 6px 0px;
 `
 
 const StyledInfo = styled(Info.Action)`
