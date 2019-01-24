@@ -6,6 +6,7 @@ import MarketCircles from './MarketCircles'
 import ShowPanelButtonContainer from '../containers/ShowPanelButtonContainer'
 
 // TODO: deal with the `decision.pending = true` state
+// TODO: show time remaining in the market using the <Countdown> aragon component 
 
 const DecisionCard = ({ decision }) => (
   <CardContainer>
@@ -25,7 +26,7 @@ const DecisionCard = ({ decision }) => (
           to={`/decision/${decision.id}`}
           key={decision.id}
         >
-          <ViewDetailsButton mode="text">View details</ViewDetailsButton>
+        <Button>View details</Button>
         </LinkStyled>
         <ShowPanelButtonContainer
           panelName="makePrediction"
@@ -51,7 +52,7 @@ const CardContainer = styled.div`
 `
 
 const CirclesContainer = styled.div`
-  padding: 20px 25px 25px 25px;;
+  padding: 5px;
   background: #F7FBFD;
   border-bottom: 1px solid #e8e8e8;
   border-radius: 3px 3px 0 0;
@@ -60,31 +61,22 @@ const CirclesContainer = styled.div`
 
 const ContentContainer = styled.div`
   background: white;
-  padding: 20px 25px 25px 25px;;
+  padding: 24px 32px;
   border-radius: 0 0 3px 3px;
 `
 
 const Question = styled.div`
-  padding-bottom: 10px;
-  min-height: 65px;
+  padding-bottom: 18px;
+  min-height: 44px;
 `
 
-const ButtonsContainer = styled.div``
+const ButtonsContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+`
 
 const LinkStyled = styled(Link)`
   text-decoration: none;
-`
-
-const ButtonStyled = styled(Button)`
-  padding: 5px 30px;
-`
-
-const PredictButton = styled(ButtonStyled)`
-  float: right;
-`
-
-const ViewDetailsButton = styled(ButtonStyled)`
-  margin-left: -25px;
 `
 
 export default DecisionCard

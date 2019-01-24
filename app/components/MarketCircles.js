@@ -1,12 +1,14 @@
 import React from 'react'
 import formatPrice from '../util/formatPrice'
+import { Text } from '@aragon/ui'
 
-const OUTER_CIRCLE_DIAMETER = 200
+const OUTER_CIRCLE_DIAMETER = 180
 const OUTER_CIRCLE_RADIUS = OUTER_CIRCLE_DIAMETER / 2
 const CIRCLE_MIN_RELATIVE_PERCENTAGE = 0.32
-const CIRCLE_NAME_MAX_FONT_SIZE = 35
-const CIRCLE_PRICE_MAX_FONT_SIZE = 28
-const MIN_FONT_SIZE = 8
+const CIRCLE_NAME_MAX_FONT_SIZE = 48
+const CIRCLE_PRICE_MAX_FONT_SIZE = 21
+const MIN_FONT_SIZE = 10
+const TEXT_BOTTOM_MARGIN = 3
 
 const MarketCircles = ({
   yesDisplayPrice,
@@ -76,21 +78,29 @@ const Circle = ({ angle, diameter, color, nameText, priceText, isYes }) => {
   let priceFontSize = Math.round(CIRCLE_PRICE_MAX_FONT_SIZE * (radius / OUTER_CIRCLE_RADIUS))
   if (priceFontSize < MIN_FONT_SIZE) priceFontSize = MIN_FONT_SIZE
 
-  let priceTextOffset = nameFontSize
+  let priceTextOffset = (priceFontSize + TEXT_BOTTOM_MARGIN)
 
   return (
     <g>
       <circle cx={xOffset} cy={yOffset} r={radius} fill={color} />
       <text x={xOffset} y={yOffset}
-        font-family="sans-serif"
-        font-size={`${nameFontSize}px`}
-        text-anchor="middle"
+        fontFamily="overpass,sans-serif"
+        fontSize={`${nameFontSize}px`}
+        textAnchor="middle"
         fill="white">{nameText}</text>
-      <text x={xOffset} y={yOffset + priceTextOffset}
-        font-family="sans-serif"
-        font-size={`${priceFontSize}px`}
-        text-anchor="middle"
-        fill="#ffffffab">{`${formatPrice(priceText)} ETH`}</text>
+      {
+        priceText ? (
+          <text x={xOffset} y={yOffset + priceTextOffset}
+            fontFamily="overpass,sans-serif"
+            fontSize={`${priceFontSize}px`}
+            textAnchor="middle"
+            fill="#ffffffab">{`${formatPrice(priceText)} ETH`}</text>
+        ): <text x={xOffset} y={yOffset + priceTextOffset}
+          fontFamily="overpass,sans-serif"
+          fontSize={`${priceFontSize}px`}
+          textAnchor="middle"
+          fill="#ffffffab">Loading...</text>
+      }
     </g>
   )
 }
