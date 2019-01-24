@@ -21,15 +21,12 @@ const MakePredictionForm = createReduxForm(({
       ...values
     })
   })}>
-    <StyledDivider />
     <StyledRow>
       <StyledSmallCaps>question</StyledSmallCaps>
       <br />
       <StyledText size="large">{decision.question}</StyledText>
       <br />
-      <br />
     </StyledRow>
-    <StyledDivider />
     <StyledRow>
     <br />
     <StyledSmallCaps>Allocate your tokens</StyledSmallCaps>
@@ -46,38 +43,32 @@ const MakePredictionForm = createReduxForm(({
       <StyledSmallCaps>price will be:</StyledSmallCaps>
       <br />
       <StyledFlexContainer>
-        <StyledDropDown items={dropDownItems}/>
+        <DropDown items={dropDownItems}/>
         <div>
         <TextInput readonly value={decision.yesMarketPredictedPrice} /><br />
         <StyledSmallCaps>Current <StyledMarketSpan>YES</StyledMarketSpan> price</StyledSmallCaps>
         </div>
       </StyledFlexContainer>
-      </StyledRow>
-      <StyledRow>
-        <StyledNoBadge>NO</StyledNoBadge>
-        <StyledSmallCaps>price will be:</StyledSmallCaps>
-        <br />
-        <StyledFlexContainer>
-          <StyledDropDown items={dropDownItems}/>
-          <div>
-          <TextInput readonly value={decision.noMarketPredictedPrice} /><br />
-          <StyledSmallCaps>Current <StyledMarketSpan>NO</StyledMarketSpan> price</StyledSmallCaps>
-          </div>
-        </StyledFlexContainer>
-      </StyledRow>
+      <StyledNoBadge>NO</StyledNoBadge>
+      <StyledSmallCaps>price will be:</StyledSmallCaps>
       <br />
-    <StyledDivider />
-    <br /><br />
-    <StyledInfo>
-      This will use XXXX of your XXXX ETH
-    </StyledInfo>
-    <Button mode="strong" type="submit" wide>Make Prediction</Button>
+      <StyledFlexContainer>
+        <DropDown items={dropDownItems}/>
+        <div>
+        <TextInput readonly value={decision.noMarketPredictedPrice} /><br />
+        <StyledSmallCaps>Current <StyledMarketSpan>NO</StyledMarketSpan> price</StyledSmallCaps>
+        </div>
+      </StyledFlexContainer>
+    </StyledRow>
+    <StyledRow>
+      <br />
+      <Button mode="strong" type="submit" wide>Make Prediction</Button>
+      <StyledInfo>
+        This will use XXXX of your XXXX ETH
+      </StyledInfo>
+    </StyledRow>
   </form>
 ))
-
-const StyledDropDown = styled(DropDown)`
-  margin-right: 0px;
-`
 
 const StyledAccountBalance = styled.div`
   width: 100%;
@@ -125,7 +116,7 @@ const StyledSmallCaps = styled(Text)`
   font-weight: 500;
   color: #98A0A2;
   font-size: 12px;
-  line-height: 36px;
+  line-height: 28px;
 `
 
 const StyledField = styled(Field)`
@@ -143,17 +134,16 @@ const StyledText = styled(Text)`
   vertical-align: middle;
   font-weight: bold;
 `
+
 const StyledProgressContainer = styled.div`
   height: auto;
   padding: 65px 0px 36px 0px;
 `
+
 const StyledRow = styled.div`
-  padding: 5px 0px;
+  padding: 6px 0px;
 `
-const StyledDivider = styled.div`
-  border-bottom: 1px solid #E8E8E8;
-  margin: 0 -30px;
-`
+
 const StyledInfo = styled(Info.Action)`
   margin: 16px 0;
 `
@@ -161,6 +151,7 @@ const StyledInfo = styled(Info.Action)`
 const StyledPermissions = styled(Info.Permissions)`
   margin: 16px 0;
 `
+
 const StyledLabel = styled.label`
   font-size: 12px;
   color: #6D777B;
