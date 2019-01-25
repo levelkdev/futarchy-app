@@ -27,7 +27,8 @@ const trades = (state = [], action) => {
       const netYesCost = sumTokenValueArray(yesCosts)
       const netNoCost = sumTokenValueArray(noCosts)
       const idx = state.length
-      return [
+
+      return _.sortBy([
         ...state,
         {
           tradeId: idx,
@@ -48,7 +49,7 @@ const trades = (state = [], action) => {
           lowerBound,
           upperBound
         }
-      ]
+      ], trade => trade.tradeTime ? parseInt(trade.tradeTime) : 0)
     default:
       return state
   }

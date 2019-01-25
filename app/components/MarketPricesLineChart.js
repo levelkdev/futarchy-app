@@ -1,21 +1,11 @@
-/*
-(2) [Array(5), Array(5)]0: (5) [0.5629566878807915, 0.9130231907512192, 0.5021917020631972, 0.16318307776150176, 0.6827961892052268]0: 0.56295668788079151: 0.91302319075121922: 0.50219170206319723: 0.163183077761501764: 0.6827961892052268length: 5__proto__: Array(0)1: (5) [0.866274254124233, 0.23980176873096393, 0.46224985072760183, 0.07888582890461371, 0.308673853984182]length: 2__proto__: Array(0)
-
-*/
-
 import React from 'react'
 import { LineChart } from '@aragon/ui'
 
-const lines = [
-  [0.5629566878807915, 0.9130231907512192, 0.5021917020631972, 0.16318307776150176, 0.6827961892052268],
-  [0.866274254124233, 0.23980176873096393, 0.46224985072760183, 0.07888582890461371, 0.308673853984182]
-]
-
-const MarketPricesLineChart = () => (
-  <div>
-    LINE CHART:
-    <LineChart lines={lines} total={5} />
-  </div>
-)
+const MarketPricesLineChart = ({ yesPrices, noPrices}) => {
+  const lines = [yesPrices, noPrices]
+  return (
+    <LineChart lines={lines} />
+  )
+}
 
 export default MarketPricesLineChart

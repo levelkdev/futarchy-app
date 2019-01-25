@@ -2,12 +2,12 @@ import React from 'react'
 import styled from 'styled-components'
 import DecisionSummaryContainer from '../containers/DecisionSummaryContainer'
 import DecisionTradeListContainer from '../containers/DecisionTradeListContainer'
-import MarketPricesLineChart from '../components/MarketPricesLineChart'
+import MarketPricesLineChartContainer from '../containers/MarketPricesLineChartContainer'
 
 const DecisionDetail = ({ match }) => (
   <div>
     <ChartOuter>
-      <MarketPricesLineChart />
+      <MarketPricesLineChartContainer decisionId={match.params.decisionId} />
     </ChartOuter>
     <DecisionSummaryContainer decisionId={match.params.decisionId} />
     <DecisionTradeListContainer decisionId={match.params.decisionId} />

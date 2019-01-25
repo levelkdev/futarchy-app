@@ -106,5 +106,17 @@ describe('trades', () => {
     it('should set incremental tradeId on new trades', () => {
       assert.equal(trades(['mock_trade'], mockLongTradesAction)[1].tradeId, 1)
     })
+
+    it('should sort trades by tradeTime from oldest to newest', () => {
+      const initialState = [
+        {
+          decisionId: '0',
+          tradeTime: '1546469213'
+        }
+      ]
+      const newState = trades(initialState, mockLongTradesAction)
+      assert.equal(newState[0].tradeTime, '1546469212')
+      assert.equal(newState[1].tradeTime, '1546469213')
+    })
   })
 })
