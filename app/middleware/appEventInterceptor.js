@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import {
   fetchAvgPricesForDecisionMarkets,
+  fetchDecisionData,
   fetchPotentialProfitData,
   fetchTraderDecisionBalances
 } from '../actions'
@@ -18,6 +19,9 @@ const appEventInterceptor = store => next => action => {
     case 'START_DECISION_EVENT':
       store.dispatch(
         fetchAvgPricesForDecisionMarkets(action.returnValues.decisionId)
+      )
+      store.dispatch(
+        fetchDecisionData(action.returnValues.decisionId)
       )
       if (state.accounts[0]) {
         // TODO: check to see if the decision balances are already pending
@@ -87,4 +91,4 @@ export const addDecisionBoundsToAction = ({ decisions, decisionId, action }) => 
   }
 }
 
-export default appEventInterceptor 
+export default appEventInterceptor

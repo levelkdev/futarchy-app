@@ -73,7 +73,7 @@ export const fetchTraderDecisionBalancesPending = ({ decisionId, trader }) => ({
 
 export const fetchTraderDecisionBalancesSuccess = ({
   decisionId,
-  trader, 
+  trader,
   yesCollateral,
   noCollateral,
   yesShort,
@@ -83,7 +83,7 @@ export const fetchTraderDecisionBalancesSuccess = ({
 }) => ({
   type: 'FETCH_TRADER_DECISION_BALANCES_SUCCESS',
   decisionId,
-  trader, 
+  trader,
   yesCollateral,
   noCollateral,
   yesShort,
@@ -159,6 +159,10 @@ export const fetchAvgPricesForDecisionMarkets = (decisionId) => dispatch => {
       // TODO: dispatch error action, to show something to the user
     }
   )
+}
+
+export const fetchDecisionData = (decisionId) => dispatch => {
+  return client.decisions(decisionId)
 }
 
 export const fetchTraderDecisionBalances = ({ decisionId, trader }) => dispatch => {
