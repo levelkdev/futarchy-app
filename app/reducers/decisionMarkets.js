@@ -39,14 +39,15 @@ const decisionMarkets = (state = [], action) => {
       ]
     case 'DECISION_DATA_LOADED':
       const { decisionData } = action
-      return []
-      // return [
-      //   ..._.filter(
-      //     state,
-      //     decision => !(decision.pending && decision.decisionId == decisionData.decisionId)
-      //   ),
 
-
+      return state.map(decision => {
+          if  (decision.question == decisionData.metadata) {
+            decision.passed = decisionData.passed
+            decision.resolved = decisionData.resolved
+            decision.decisionDate = decisionData.decisionDate
+          }
+          return decision
+      })
     case 'AVG_DECISION_MARKET_PRICES_LOADED':
       return state.map(decision => {
         if (decision.decisionId == action.decisionId) {

@@ -8,13 +8,20 @@ const findDecisionById = (decisions, decisionId) => _.find(
 )
 
 const getRewardAmount = (decisionBalances, decisionId, passed) => {
-  let targetDecisionBalances = _.find(decisionBalances, decisionId)
+  let targetDecisionBalances = _.find(decisionBalances, { decisionId })
   return passed ? targetDecisionBalances.yesCollateral : targetDecisionBalances.noCollateral
 }
 
-const didDecisionPass = (decision) => (
-  decision.passed
-)
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  redeemWinnings: (decisionId) => dispatch(redeemWinnings(decisionId))
+})
+
+const decisionStateText = (decision) => {
+    const resolvedDecisionText = (decisionPassed) => {
+      return decisionPassed ? 'Passed' : 'Failed'
+    }
+    return !decision.resolved ? 'Unresolved' : resolvedDecisionText(decision.passed)
+}
 
 const mapStateToProps = state => {
   let targetDecision = findDecisionById(
@@ -29,14 +36,21 @@ const mapStateToProps = state => {
       state.sidePanel.panelContext.decisionId,
       targetDecision.passed
     ),
-    decisionPassed: didDecisionPass(
-      targetDecision
-    )
+    decisionPassed: targetDecision.passed
   }
 }
 
-const RedeemWinnings = () => (
-  <h1> HELLO WORLD </h1>
+const RedeemWinnings = ({ decision, rewardAmount, winningIndex}) => (
+  <div>
+    <h1> Decision {decisionStateText(decision)} </h1>
+    <h1> Winnings: {rewardAmount} TKN </h1>
+    <Button
+      mode='strong'
+      onClick={ () => redeemWinnings(decision.decisionId) }
+    >
+      Redeem Winnings
+    </Button>
+  </div>
 )
 
-export default connect()(RedeemWinnings)
+export default connect(mapStateToProps)(RedeemWinnings)
