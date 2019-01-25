@@ -5,7 +5,7 @@ import DecisionSummary from '../components/DecisionSummary'
 
 const findDecisionById = (decisions, decisionId) => _.find(
   decisions,
-  { id: decisionId }
+  { decisionId }
 )
 
 const mapStateToProps = (state, ownProps) => ({

@@ -7,7 +7,7 @@ import MakePredictionForm from '../components/MakePredictionForm'
 
 const findDecisionById = (decisions, decisionId) => _.find(
   decisions,
-  { id: decisionId }
+  { decisionId }
 )
 
 const mapStateToProps = state => ({

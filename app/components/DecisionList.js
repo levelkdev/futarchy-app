@@ -16,7 +16,7 @@ const DecisionList = ({ decisions }) => (
 )
 
 const DecisionCards = ({ decisions }) => decisions.map(decision => (
-  <Card key={decision.id}>
+  <Card key={decision.decisionId}>
     <DecisionCard decision={decision} />
   </Card>
 ))

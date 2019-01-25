@@ -2,7 +2,7 @@ import assert from 'assert'
 import filterDecisions from './filterDecisions'
 
 const mockPerformanceData = (trader, decisionId) => ({ trader, decisionId })
-const mockDecisionMarketData = (id, status) => ({ id, status })
+const mockDecisionMarketData = (decisionId, status) => ({ decisionId, status })
 
 const performanceArray = [
   mockPerformanceData('trader_0', 0),

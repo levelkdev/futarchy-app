@@ -39,7 +39,7 @@ const appEventInterceptor = store => next => action => {
           // TODO: check to see if the decision balances are already pending
           store.dispatch(
             fetchTraderDecisionBalances({
-              decisionId: state.decisionMarkets[i].id,
+              decisionId: state.decisionMarkets[i].decisionId,
               trader: action.value[0]
             })
           )
@@ -83,7 +83,7 @@ const appEventInterceptor = store => next => action => {
 }
 
 export const addDecisionBoundsToAction = ({ decisions, decisionId, action }) => {
-  const decision = _.find(decisions, { id: decisionId })
+  const decision = _.find(decisions, { decisionId })
   return {
     ...action,
     lowerBound: decision ? decision.lowerBound : null,

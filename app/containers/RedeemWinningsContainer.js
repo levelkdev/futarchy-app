@@ -1,9 +1,10 @@
+import _ from 'lodash'
 import React from 'react'
 import { connect } from 'react-redux'
 
 const findDecisionById = (decisions, decisionId) => _.find(
   decisions,
-  { id: decisionId }
+  { decisionId }
 )
 
 const getRewardAmount = (decisionBalances, decisionId, passed) => {

@@ -11,7 +11,7 @@ const mapStateToProps = (state, ownProps) => ({
     state.performance,
     state.accounts[0],
     ownProps.statusFilter
-  ), decision => decision.id) || []
+  ), decision => decision.decisionId) || []
 })
 
 export default connect(

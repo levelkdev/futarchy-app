@@ -5,9 +5,9 @@ import {
 } from '../actions'
 import decisionBalances from './decisionBalances'
 
-const mockPendingBalance = (id, trader) => {
+const mockPendingBalance = (decisionId, trader) => {
   return {
-    id,
+    decisionId,
     trader,
     pending: true,
     yesCollateral: 0,
@@ -19,15 +19,15 @@ const mockPendingBalance = (id, trader) => {
   }
 }
 
-const mockEmptyBalance = (id, trader) => {
+const mockEmptyBalance = (decisionId, trader) => {
   return {
-    ...mockPendingBalance(id, trader),
+    ...mockPendingBalance(decisionId, trader),
     pending: false
   }
 }
 
 const mockBalance = (
-  id,
+  decisionId,
   trader,
   yesCollateral,
   noCollateral,
@@ -36,7 +36,7 @@ const mockBalance = (
   yesLong,
   yesShort
 ) => ({
-  id,
+  decisionId,
   trader,
   pending: false,
   yesCollateral,
@@ -53,7 +53,7 @@ describe('decisionBalances', () => {
       it('should add the pending balance data', () => {
         const state = [mockPendingBalance(1, 'mock_addr_0')]
         const actualState = decisionBalances(state, fetchTraderDecisionBalancesPending({
-          id: 1,
+          decisionId: 1,
           trader: 'mock_addr_1'
         }))
         assert.deepEqual(actualState[0], mockPendingBalance(1, 'mock_addr_0'))
@@ -66,7 +66,7 @@ describe('decisionBalances', () => {
       it('should not change state', () => {
         const state = [mockPendingBalance(1, 'mock_addr_0')]
         const actualState = decisionBalances(state, fetchTraderDecisionBalancesPending({
-          id: 1,
+          decisionId: 1,
           trader: 'mock_addr_0'
         }))
         assert.deepEqual(actualState[0], mockPendingBalance(1, 'mock_addr_0'))
@@ -78,7 +78,7 @@ describe('decisionBalances', () => {
       it('should not change state', () => {
         const state = [mockEmptyBalance(1, 'mock_addr_0')]
         const actualState = decisionBalances(state, fetchTraderDecisionBalancesPending({
-          id: 1,
+          decisionId: 1,
           trader: 'mock_addr_0'
         }))
         assert.deepEqual(actualState[0], mockEmptyBalance(1, 'mock_addr_0'))
@@ -92,7 +92,7 @@ describe('decisionBalances', () => {
       it('should add the balance data', () => {
         const state = [mockEmptyBalance(1, 'mock_addr_0')]
         const actualState = decisionBalances(state, fetchTraderDecisionBalancesSuccess({
-          id: 1,
+          decisionId: 1,
           trader: 'mock_addr_1',
           yesCollateral: 10,
           noCollateral: 11,
@@ -111,7 +111,7 @@ describe('decisionBalances', () => {
       it('should overwrite the pending balance', () => {
         const state = [mockPendingBalance(1, 'mock_addr_0')]
         const actualState = decisionBalances(state, fetchTraderDecisionBalancesSuccess({
-          id: 1,
+          decisionId: 1,
           trader: 'mock_addr_0',
           yesCollateral: 10,
           noCollateral: 11,
@@ -129,7 +129,7 @@ describe('decisionBalances', () => {
       it('should overwrite the balance', () => {
         const state = [mockBalance(1, 'mock_addr_0', 100, 101, 102, 103, 104, 105)]
         const actualState = decisionBalances(state, fetchTraderDecisionBalancesSuccess({
-          id: 1,
+          decisionId: 1,
           trader: 'mock_addr_0',
           yesCollateral: 10,
           noCollateral: 11,
