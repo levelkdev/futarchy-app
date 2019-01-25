@@ -1,16 +1,29 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { theme } from '@aragon/ui'
+import { Text, theme } from '@aragon/ui'
 import styled from 'styled-components'
 import DecisionQuestionContainer from '../containers/DecisionQuestionContainer'
 import MarketPricesLineChartContainer from '../containers/MarketPricesLineChartContainer'
+import MarketCirclesContainer from '../containers/MarketCirclesContainer'
 
 const DecisionDetail = ({ match }) => (
   <DecisionDetailOuter>
 
     <DecisionDetailInner>
       <DecisionLeftContent>
-        <DecisionQuestionContainer decisionId={match.params.decisionId} />
+        <QuestionHeader>
+          <Text size="xlarge">
+            <DecisionQuestionContainer decisionId={match.params.decisionId} />
+          </Text>
+        </QuestionHeader>
+        <CircleChartSection>
+          <SectionHeader>
+            <Text size="large" weight="bolder" smallcaps>
+              Decision Status
+            </Text>
+          </SectionHeader>
+          <MarketCirclesContainer decisionId={match.params.decisionId} />
+        </CircleChartSection>
       </DecisionLeftContent>
       <DecisionRightContent>
         <ChartOuter>
@@ -31,6 +44,7 @@ export default DecisionDetail
 const DecisionDetailOuter = styled.div`
   padding: 0 13px;
   width: 100%;
+  font-weight: 100;
 `
 
 const DecisionDetailInner = styled.div`
@@ -42,7 +56,11 @@ const DecisionLeftContent = styled.div`
   border: 1px solid ${theme.contentBorder};
   border-radius: 3px;
   flex-grow: 1;
-  padding: 15px;
+  padding: 15px 20px;
+`
+
+const QuestionHeader = styled.div`
+  margin-bottom: 20px;
 `
 
 const DecisionRightContent = styled.div`
@@ -51,4 +69,13 @@ const DecisionRightContent = styled.div`
 
 const ChartOuter = styled.div`
   width: 360px;
+`
+
+const CircleChartSection = styled.div`
+
+`
+
+const SectionHeader = styled.div`
+  margin-bottom: 10px;
+  color: ${theme.textTertiary}
 `
