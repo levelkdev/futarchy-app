@@ -20,6 +20,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   executeBuy: async values => {
     dispatch(hidePanel())
+    console.log(values)
     dispatch(buyMarketPositions({
       decisionId: values.decisionId,
       collateralAmount: values.collateralAmount,

@@ -10,6 +10,17 @@ const dropDownItems = [
   'more than',
 ]
 
+const state = {
+    activeItem: 1,
+  }
+
+const handleChange = (index) => {
+    console.log(state)
+    state.activeItem = index
+    console.log(state)
+    console.log(index)
+  }
+
 const MakePredictionForm = createReduxForm(({
   decision,
   handleSubmit,
@@ -43,7 +54,11 @@ const MakePredictionForm = createReduxForm(({
       <StyledSmallCaps>price will be:</StyledSmallCaps>
       <br />
       <StyledFlexContainer>
-        <DropDown items={dropDownItems}/>
+        <DropDown
+          items={dropDownItems}
+          onChange={handleChange}
+          active={state.activeItem}
+        />
         <div>
         <TextInput readonly value={decision.yesMarketPredictedPrice} /><br />
         <StyledSmallCaps>Current <StyledMarketSpan>YES</StyledMarketSpan> price</StyledSmallCaps>

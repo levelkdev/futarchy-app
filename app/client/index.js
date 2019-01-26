@@ -205,7 +205,7 @@ export default {
   tradingPeriod,
   marketFundAmount,
   avgPricesForDecisionMarkets,
-  getNetOutcomeTokensSoldForDecision,
+  netOutcomeTokensSoldForDecision,
   calcCosts,
   calcProfits,
   traderDecisionBalances,
