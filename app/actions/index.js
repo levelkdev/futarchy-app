@@ -212,6 +212,21 @@ export const fetchDecisionData = (decisionId) => dispatch => {
   )
 }
 
+export const fetchNetOutcomeTokensSoldForDecision = (decisionId, marketIndex) => dispatch => {
+  return client.netOutcomeTokensSoldForDecision(decisionId, marketIndex).then(
+    outcomeTokensSold => dispatch(netOutcomeTokensSoldForDecisionLoaded({
+      decisionId,
+      marketIndex,
+      shortOutcomeTokensSold: outcomeTokensSold.shortOutcomeTokensSold,
+      longOutcomeTokensSold: outcomeTokensSold.longOutcomeTokensSold
+    })),
+    errorMessage => {
+      console.error('fetchNetOutcomeTokensSoldForDecision: ${errorMessage}')
+      // TODO: dispatch error action, to show something to the user
+    }
+  )
+}
+
 export const fetchTraderDecisionBalances = ({ decisionId, trader }) => dispatch => {
   dispatch(fetchTraderDecisionBalancesPending({ decisionId, trader }))
   return client.traderDecisionBalances(decisionId, trader).then(
