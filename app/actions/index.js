@@ -12,8 +12,8 @@ export const buyMarketPositionsTxPending = ({ txHash }) => ({
   txHash
 })
 
-export const redeemRewardsTxPending = ({ txHash }) => ({
-  type: 'REDEEM_REWARDS_TX_PENDING',
+export const redeemWinningsTxPending = ({ txHash }) => ({
+  type: 'REDEEM_WINNINGS_TX_PENDING',
   txHash
 })
 
@@ -125,13 +125,13 @@ export const buyMarketPositions = ({
   })
 }
 
-export const redeemRewards = ({
+export const redeemWinnings = (
   decisionId
-}) => dispatch => {
-  return client.redeemRewards(decisionId).then(txHash => {
-    dispatch(redeemRewardsTxPending({txHash}))
+) => dispatch => {
+  return client.redeemWinnings(decisionId).then(txHash => {
+    dispatch(redeemWinningsTxPending({txHash}))
   }, err => {
-    console.error(`redeemRewards: ${err}`)
+    console.error(`redeemWinnings: ${err}`)
     // TODO: dispatch error action, to show something to the user
   })
 }

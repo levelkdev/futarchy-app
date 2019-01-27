@@ -132,11 +132,11 @@ export const buyMarketPositions = async (
   )
 }
 
-export const redeemRewards = async (decisionId) => {
+export const redeemWinnings = async (decisionId) => {
   return contractFn(
     window.aragonClient,
     'client',
-    'redeemRewards',
+    'redeemTokenWinnings',
     decisionId
   )
 }
@@ -164,5 +164,6 @@ export default {
   traderDecisionBalances,
   newDecision,
   buyMarketPositions,
-  sendTransaction
+  sendTransaction,
+  redeemWinnings
 }

@@ -6,10 +6,10 @@ const ShowActionButton = ({ decisionId }) => (
 
   <div>
     <ShowPanelButtonContainer
-      panelName="redeemRewards"
+      panelName="redeemWinnings"
       panelContext={{ decisionId }}
     >
-      Redeem Rewards
+      Redeem Winnings
     </ShowPanelButtonContainer >
   </div>
 )

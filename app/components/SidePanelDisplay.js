@@ -21,7 +21,7 @@ const SidePanelDisplay = ({ panelName, closePanel }) => (
           return <CreateDecisionMarket />
         case 'makePrediction':
           return <MakePrediction />
-        case 'redeemRewards':
+        case 'redeemWinnings':
           return <RedeemWinnings />
         default:
           return null

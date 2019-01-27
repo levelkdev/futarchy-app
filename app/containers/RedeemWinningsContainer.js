@@ -1,6 +1,9 @@
 import _ from 'lodash'
 import React from 'react'
 import { connect } from 'react-redux'
+import { Button } from '@aragon/ui'
+import { redeemWinnings } from '../actions'
+
 
 const findDecisionById = (decisions, decisionId) => _.find(
   decisions,
@@ -40,7 +43,7 @@ const mapStateToProps = state => {
   }
 }
 
-const RedeemWinnings = ({ decision, rewardAmount, winningIndex}) => (
+const RedeemWinnings = ({ decision, rewardAmount, winningIndex, redeemWinnings}) => (
   <div>
     <h1> Decision {decisionStateText(decision)} </h1>
     <h1> Winnings: {rewardAmount} TKN </h1>
@@ -53,4 +56,4 @@ const RedeemWinnings = ({ decision, rewardAmount, winningIndex}) => (
   </div>
 )
 
-export default connect(mapStateToProps)(RedeemWinnings)
+export default connect(mapStateToProps, mapDispatchToProps)(RedeemWinnings)
