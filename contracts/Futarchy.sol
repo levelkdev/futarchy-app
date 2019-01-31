@@ -305,7 +305,19 @@ contract Futarchy is AragonApp, IForwarder {
       require(decisions[decisionId].decisionDate < now);
 
       FutarchyOracle futarchyOracle = decisions[decisionId].futarchyOracle;
+
+      // set decision if not yet set
+      if(!futarchyOracle.categoricalEvent().isOutcomeSet()) {
+        if (!futarchyOracle.isOutcomeSet()) {
+          futarchyOracle.setOutcome();
+        }
+        futarchyOracle.categoricalEvent().setOutcome();
+      }
+
       int winningIndex = futarchyOracle.getOutcome();
+
+      decisions[decisionId].resolved = true;
+      decisions[decisionId].passed = winningIndex == 0 ? true : false;
       futarchyOracle.categoricalEvent().redeemWinnings();
 
       uint winnings;

@@ -692,6 +692,58 @@ contract('Futarchy', (accounts) => {
         expect((await rootDecisionBalances()).noCollateral).to.equal(0)
       })
     })
+
+    describe('when futarchyOracle is not yet set', () => {
+      describe('when outcome is YES', () => {
+        beforeEach(async () => {
+          await futarchy.buyMarketPositions(0, TWENTY, [0, TWO], [FIVE,0])
+          await timeTravel(TRADING_PERIOD + 1)
+        })
+
+        it('sets the outcome on FutarchyOracle', async () => {
+          expect(await futarchyOracle.isOutcomeSet()).to.equal(false)
+          await futarchy.redeemTokenWinnings(0, {from: root})
+          expect(await futarchyOracle.isOutcomeSet()).to.equal(true)
+        })
+
+        it('sets resolved to true in the decision struct', async () => {
+          expect((await futarchy.decisions(0))[3]).to.equal(false)
+          await futarchy.redeemTokenWinnings(0, {from: root})
+          expect((await futarchy.decisions(0))[3]).to.equal(true)
+        })
+
+        it('sets passed to true in the decision struct', async () => {
+          expect((await futarchy.decisions(0))[4]).to.equal(false)
+          await futarchy.redeemTokenWinnings(0, {from: root})
+          expect((await futarchy.decisions(0))[4]).to.equal(true)
+        })
+      })
+
+      describe('when outcome is NO', () => {
+        beforeEach(async () => {
+          await futarchy.buyMarketPositions(0, TWENTY, [TWO, 0], [0,FIVE])
+          await timeTravel(TRADING_PERIOD + 1)
+        })
+
+        it('sets the outcome on FutarchyOracle', async () => {
+          expect(await futarchyOracle.isOutcomeSet()).to.equal(false)
+          await futarchy.redeemTokenWinnings(0, {from: root})
+          expect(await futarchyOracle.isOutcomeSet()).to.equal(true)
+        })
+
+        it('sets resolved to true in the decision struct', async () => {
+          expect((await futarchy.decisions(0))[3]).to.equal(false)
+          await futarchy.redeemTokenWinnings(0, {from: root})
+          expect((await futarchy.decisions(0))[3]).to.equal(true)
+        })
+
+        it('keeps passed as false in the decision struct', async () => {
+          expect((await futarchy.decisions(0))[4]).to.equal(false)
+          await futarchy.redeemTokenWinnings(0, {from: root})
+          expect((await futarchy.decisions(0))[4]).to.equal(false)
+        })
+      })
+    })
   })
 
   describe('calcCosts()', () => {
