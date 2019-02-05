@@ -15,7 +15,7 @@ contract Futarchy is AragonApp, IForwarder {
   using SafeMath for uint;
   using SafeMath64 for uint64;
 
-  event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle, int marketLowerBound, int marketUpperBound, uint64 startDate, uint tradingPeriod, uint priceResolutionDate);
+  event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle, int marketLowerBound, int marketUpperBound, uint startDate, uint tradingPeriod, uint priceResolutionDate);
   event ExecuteDecision(uint decisionId);
   event BuyMarketPositions(address trader, uint decisionId, uint tradeTime, uint collateralAmount, uint[2] yesPurchaseAmounts, uint[2] noPurchaseAmounts, uint[2] yesCosts, uint[2] noCosts);
   event SellMarketPositions(address trader, uint decisionId, uint tradeTime, int[] yesMarketPositions, int[] noMarketPositions, uint yesCollateralReceived, uint noCollateralReceived);
@@ -34,8 +34,10 @@ contract Futarchy is AragonApp, IForwarder {
 
   struct Decision {
     FutarchyOracle futarchyOracle;
-    uint64 startDate;
-    uint tradingPeriod;
+    uint startDate;
+    uint decisionDate;
+    bool resolved;
+    bool passed;
     uint64 snapshotBlock;
     bool executed;
     string metadata;
@@ -114,10 +116,10 @@ contract Futarchy is AragonApp, IForwarder {
       returns (uint decisionId)
     {
       decisionId = decisionLength++;
-      uint64 startDate = getTimestamp64();
-      uint priceResolutionDate = uint(startDate).add(timeToPriceResolution);
+      uint startDate = now;
+      uint priceResolutionDate = startDate.add(timeToPriceResolution);
       decisions[decisionId].startDate = startDate;
-      decisions[decisionId].tradingPeriod = tradingPeriod; // set tradingPeriod to protect against future variable updates
+      decisions[decisionId].decisionDate = startDate.add(tradingPeriod);
       decisions[decisionId].metadata = metadata;
       decisions[decisionId].snapshotBlock = getBlockNumber64() - 1;
       decisions[decisionId].executionScript = executionScript;
@@ -153,7 +155,7 @@ contract Futarchy is AragonApp, IForwarder {
       returns (
         bool open,
         bool executed,
-        uint64 startDate,
+        uint startDate,
         uint64 snapshotBlock,
         uint marketPower,
         bytes script
@@ -179,7 +181,7 @@ contract Futarchy is AragonApp, IForwarder {
       Decision storage decision = decisions[decisionId];
 
       require(!decision.executed);
-      require(tradingPeriodEnded(decisionId));
+      require(decision.decisionDate < now);
       if (!decision.futarchyOracle.isOutcomeSet()) {
         decision.futarchyOracle.setOutcome();
       }
@@ -300,10 +302,22 @@ contract Futarchy is AragonApp, IForwarder {
      * @param decisionId unique identifier for the decision
      */
     function redeemTokenWinnings(uint decisionId) public {
-      require(tradingPeriodEnded(decisionId));
+      require(decisions[decisionId].decisionDate < now);
 
       FutarchyOracle futarchyOracle = decisions[decisionId].futarchyOracle;
+
+      // set decision if not yet set
+      if(!futarchyOracle.categoricalEvent().isOutcomeSet()) {
+        if (!futarchyOracle.isOutcomeSet()) {
+          futarchyOracle.setOutcome();
+        }
+        futarchyOracle.categoricalEvent().setOutcome();
+      }
+
       int winningIndex = futarchyOracle.getOutcome();
+
+      decisions[decisionId].resolved = true;
+      decisions[decisionId].passed = winningIndex == 0 ? true : false;
       futarchyOracle.categoricalEvent().redeemWinnings();
 
       uint winnings;
@@ -372,15 +386,6 @@ contract Futarchy is AragonApp, IForwarder {
           outcomeTokenAmounts[i]
         );
       }
-    }
-
-    /**
-    * @notice returns true if the trading period before making the decision has passed
-    * @param decisionId decision unique identifier
-    */
-    function tradingPeriodEnded(uint decisionId) public view returns(bool) {
-      Decision storage decision = decisions[decisionId];
-      return (now > decision.startDate.add(uint64(decision.tradingPeriod)));
     }
 
     /**
