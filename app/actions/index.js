@@ -24,9 +24,10 @@ export const avgDecisionMarketPricesLoaded = ({ decisionId, yesMarketPrice, noMa
   noMarketPrice
 })
 
-export const decisionDataLoaded = ( decisionData ) => ({
+export const decisionDataLoaded = ({ decisionId, decisionData }) => ({
   type: 'DECISION_DATA_LOADED',
-  decisionData
+  decisionData,
+  decisionId
 })
 
 export const potentialProfitDataLoaded = ({
@@ -169,7 +170,7 @@ export const fetchAvgPricesForDecisionMarkets = (decisionId) => dispatch => {
 export const fetchDecisionData = (decisionId) => dispatch => {
   return client.decisions(decisionId).then(
     decisionData => {
-      dispatch(decisionDataLoaded(decisionData))
+      dispatch(decisionDataLoaded({ decisionId, decisionData }))
     }
   )
 }

@@ -38,10 +38,9 @@ const decisionMarkets = (state = [], action) => {
         }
       ]
     case 'DECISION_DATA_LOADED':
-      const { decisionData } = action
-
+      const { decisionId, decisionData } = action
       return state.map(decision => {
-          if  (decision.question == decisionData.metadata) {
+          if  (decision.decisionId == decisionId) {
             decision.passed = decisionData.passed
             decision.resolved = decisionData.resolved
             decision.decisionDate = decisionData.decisionDate
