@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { newDecisionTxPending, avgDecisionMarketPricesLoaded } from '../actions'
+import { newDecisionTxPending, avgDecisionMarketPricesLoaded, decisionDataLoaded } from '../actions'
 import decisionMarkets from './decisionMarkets'
 
 const ONE = 0x10000000000000000
@@ -242,6 +242,60 @@ describe('decisionMarkets', () => {
           noMarketPrice: FIFTY_PERCENT
         })
         assert.deepEqual(decisionMarkets(state, action), state)
+      })
+    })
+  })
+
+  describe('decisionDataLoaded', () => {
+    [
+      {
+        when: 'when there is an existing decision with no decision struct data',
+        should: 'should return state with new struct data',
+        state: [mockDecision(0), mockDecision(123)],
+        action: decisionDataLoaded({
+          decisionId: 'mock_decision_id_123',
+          decisionData: {
+            resolved: true,
+            passed: true
+          }
+        }),
+        marketIndex: 1,
+        expectedProps: {
+          resolved: true,
+          passed: true
+        }
+      },
+      {
+        when: 'when there is an existing decision with struct data',
+        should: 'should return state with new struct data',
+        state: [mockDecision(0), {
+          ...mockDecision(123),
+          ...{
+            resolved: false,
+            passed: false
+          }
+        }],
+        action: decisionDataLoaded({
+          decisionId: 'mock_decision_id_123',
+          decisionData: {
+            resolved: true,
+            passed: true
+          }
+        }),
+        marketIndex: 1,
+        expectedProps: {
+          resolved: true,
+          passed: true
+        }
+      }
+    ].forEach(({ when, should, state, action, marketIndex, expectedProps }) => {
+      describe(when, () => {
+        it(should, () => {
+          for (var propName in expectedProps) {
+            const expectedPropVal = expectedProps[propName]
+            assert.equal(decisionMarkets(state, action)[marketIndex][propName], expectedPropVal)
+          }
+        })
       })
     })
   })
