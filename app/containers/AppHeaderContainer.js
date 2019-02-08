@@ -13,7 +13,7 @@ const getDecisionRouteParams = pathname => {
 
 const findDecisionById = (decisions, decisionId) => _.find(
   decisions,
-  { id: decisionId }
+  {  decisionId }
 )
 
 const mapStateToProps = (state, ownProps) => ({

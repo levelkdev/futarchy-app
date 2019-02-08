@@ -14,6 +14,7 @@ import DecisionPredictedPricesContainer from '../../containers/DecisionPredicted
 import DecisionAmountRiskedContainer from '../../containers/DecisionAmountRiskedContainer'
 import DecisionPotentialValuesContainer from '../../containers/DecisionPotentialValuesContainer'
 import DecisionPotentialGainLossContainer from '../../containers/DecisionPotentialGainLossContainer'
+import ShowPanelButtonContainer from '../../containers/ShowPanelButtonContainer'
 
 const OpenDecisionsTable = ({ decisionIds }) => (
   <Table
@@ -55,7 +56,12 @@ const OpenDecisionsTable = ({ decisionIds }) => (
             <DecisionPotentialGainLossContainer decisionId={decisionId} />
           </TopAlignedCell>
           <TopAlignedCell>
-            <Text>...</Text>
+            <ShowPanelButtonContainer
+              panelName="redeemWinnings"
+              panelContext={{ decisionId }}
+            >
+              Redeem Winnings
+            </ShowPanelButtonContainer >
           </TopAlignedCell>
         </TableRow>
       ))}

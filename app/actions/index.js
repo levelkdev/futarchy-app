@@ -12,11 +12,22 @@ export const buyMarketPositionsTxPending = ({ txHash }) => ({
   txHash
 })
 
+export const redeemWinningsTxPending = ({ txHash }) => ({
+  type: 'REDEEM_WINNINGS_TX_PENDING',
+  txHash
+})
+
 export const avgDecisionMarketPricesLoaded = ({ decisionId, yesMarketPrice, noMarketPrice }) => ({
   type: 'AVG_DECISION_MARKET_PRICES_LOADED',
   decisionId,
   yesMarketPrice,
   noMarketPrice
+})
+
+export const decisionDataLoaded = ({ decisionId, decisionData }) => ({
+  type: 'DECISION_DATA_LOADED',
+  decisionData,
+  decisionId
 })
 
 export const potentialProfitDataLoaded = ({
@@ -68,7 +79,7 @@ export const fetchTraderDecisionBalancesPending = ({ decisionId, trader }) => ({
 
 export const fetchTraderDecisionBalancesSuccess = ({
   decisionId,
-  trader, 
+  trader,
   yesCollateral,
   noCollateral,
   yesShort,
@@ -78,7 +89,7 @@ export const fetchTraderDecisionBalancesSuccess = ({
 }) => ({
   type: 'FETCH_TRADER_DECISION_BALANCES_SUCCESS',
   decisionId,
-  trader, 
+  trader,
   yesCollateral,
   noCollateral,
   yesShort,
@@ -115,6 +126,17 @@ export const buyMarketPositions = ({
   })
 }
 
+export const redeemWinnings = (
+  decisionId
+) => dispatch => {
+  return client.redeemWinnings(decisionId).then(txHash => {
+    dispatch(redeemWinningsTxPending({txHash}))
+  }, err => {
+    console.error(`redeemWinnings: ${err}`)
+    // TODO: dispatch error action, to show something to the user
+  })
+}
+
 export const fetchAccounts = propFetchDispatcher('accounts')
 export const fetchFutarchyAddress = propFetchDispatcher('futarchyAddress')
 export const fetchFee = propFetchDispatcher('fee')
@@ -141,6 +163,14 @@ export const fetchAvgPricesForDecisionMarkets = (decisionId) => dispatch => {
     errorMessage => {
       console.error(`fetchAvgPricesForDecisionMarkets: ${errorMessage}`)
       // TODO: dispatch error action, to show something to the user
+    }
+  )
+}
+
+export const fetchDecisionData = (decisionId) => dispatch => {
+  return client.decisions(decisionId).then(
+    decisionData => {
+      dispatch(decisionDataLoaded({ decisionId, decisionData }))
     }
   )
 }

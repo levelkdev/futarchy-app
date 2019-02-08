@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { newDecisionTxPending, avgDecisionMarketPricesLoaded } from '../actions'
+import { newDecisionTxPending, avgDecisionMarketPricesLoaded, decisionDataLoaded } from '../actions'
 import decisionMarkets from './decisionMarkets'
 
 const ONE = 0x10000000000000000
@@ -8,7 +8,7 @@ const FIFTY_PERCENT = (ONE * 0.50) + ''
 
 const mockDecision = (n, pending = false) => {
   return {
-    id: `mock_decision_id_${n}`,
+    decisionId: `mock_decision_id_${n}`,
     question: `mock_question_${n}`,
     pending,
     status: "OPEN"
@@ -24,7 +24,7 @@ describe('decisionMarkets', () => {
         state: [],
         action: newDecisionTxPending({ txHash: 'mock_tx_hash', question: 'mock_question'}),
         expected: [
-          { id: 'mock_tx_hash', question: 'mock_question', pending: true }
+          { decisionId: 'mock_tx_hash', question: 'mock_question', pending: true }
         ]
       },
       {
@@ -35,7 +35,7 @@ describe('decisionMarkets', () => {
         expected: [
           mockDecision(0),
           mockDecision(1),
-          { id: 'mock_tx_hash', question: 'mock_question', pending: true }
+          { decisionId: 'mock_tx_hash', question: 'mock_question', pending: true }
         ]
       },
       {
@@ -60,7 +60,7 @@ describe('decisionMarkets', () => {
         when: 'when there are no existing decisions',
         should: 'should add the new decision',
         state: [],
-        action: { 
+        action: {
           type: 'START_DECISION_EVENT',
           returnValues: {
             decisionId: '123',
@@ -71,7 +71,7 @@ describe('decisionMarkets', () => {
         },
         expected: [
           {
-            id: '123',
+            decisionId: '123',
             question: 'mock_question',
             lowerBound: '0',
             upperBound: '1000',
@@ -84,7 +84,7 @@ describe('decisionMarkets', () => {
         when: 'when there are existing decisions',
         should: 'should add the new decision without removing existing decisions',
         state: [mockDecision(0)],
-        action: { 
+        action: {
           type: 'START_DECISION_EVENT',
           returnValues: {
             decisionId: '123',
@@ -96,7 +96,7 @@ describe('decisionMarkets', () => {
         expected: [
           mockDecision(0),
           {
-            id: '123',
+            decisionId: '123',
             question: 'mock_question_123',
             lowerBound: '0',
             upperBound: '1000',
@@ -109,7 +109,7 @@ describe('decisionMarkets', () => {
         when: 'when there is a pending decision with the same question as the event metadata',
         should: 'should remove the pending decision and add the new decision',
         state: [mockDecision(88, true)],
-        action: { 
+        action: {
           type: 'START_DECISION_EVENT',
           returnValues: {
             decisionId: '123',
@@ -120,7 +120,7 @@ describe('decisionMarkets', () => {
         },
         expected: [
           {
-            id: '123',
+            decisionId: '123',
             question: 'mock_question_88',
             lowerBound: '0',
             upperBound: '1000',
@@ -133,7 +133,7 @@ describe('decisionMarkets', () => {
         when: 'when there is a pending decision with a different question from the event metadata',
         should: 'should not remove the pending decision, but should add the new decision',
         state: [mockDecision(99, true)],
-        action: { 
+        action: {
           type: 'START_DECISION_EVENT',
           returnValues: {
             decisionId: '123',
@@ -145,7 +145,7 @@ describe('decisionMarkets', () => {
         expected: [
           mockDecision(99, true),
           {
-            id: '123',
+            decisionId: '123',
             question: 'mock_question_88',
             lowerBound: '0',
             upperBound: '1000',
@@ -242,6 +242,60 @@ describe('decisionMarkets', () => {
           noMarketPrice: FIFTY_PERCENT
         })
         assert.deepEqual(decisionMarkets(state, action), state)
+      })
+    })
+  })
+
+  describe('decisionDataLoaded', () => {
+    [
+      {
+        when: 'when there is an existing decision with no decision struct data',
+        should: 'should return state with new struct data',
+        state: [mockDecision(0), mockDecision(123)],
+        action: decisionDataLoaded({
+          decisionId: 'mock_decision_id_123',
+          decisionData: {
+            resolved: true,
+            passed: true
+          }
+        }),
+        marketIndex: 1,
+        expectedProps: {
+          resolved: true,
+          passed: true
+        }
+      },
+      {
+        when: 'when there is an existing decision with struct data',
+        should: 'should return state with new struct data',
+        state: [mockDecision(0), {
+          ...mockDecision(123),
+          ...{
+            resolved: false,
+            passed: false
+          }
+        }],
+        action: decisionDataLoaded({
+          decisionId: 'mock_decision_id_123',
+          decisionData: {
+            resolved: true,
+            passed: true
+          }
+        }),
+        marketIndex: 1,
+        expectedProps: {
+          resolved: true,
+          passed: true
+        }
+      }
+    ].forEach(({ when, should, state, action, marketIndex, expectedProps }) => {
+      describe(when, () => {
+        it(should, () => {
+          for (var propName in expectedProps) {
+            const expectedPropVal = expectedProps[propName]
+            assert.equal(decisionMarkets(state, action)[marketIndex][propName], expectedPropVal)
+          }
+        })
       })
     })
   })

@@ -23,14 +23,14 @@ const DecisionCard = ({ decision }) => (
       </Question>
       <ButtonsContainer>
         <LinkStyled
-          to={`/decision/${decision.id}`}
-          key={decision.id}
+          to={`/decision/${decision.decisionId}`}
+          key={decision.decisionId}
         >
         <Button>View details</Button>
         </LinkStyled>
         <ShowPanelButtonContainer
           panelName="makePrediction"
-          panelContext={{ decisionId: decision.id }}
+          panelContext={{ decisionId: decision.decisionId }}
         >
           Predict
         </ShowPanelButtonContainer>

@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import {
   fetchAvgPricesForDecisionMarkets,
+  fetchDecisionData,
   fetchPotentialProfitData,
   fetchTraderDecisionBalances
 } from '../actions'
@@ -19,6 +20,9 @@ const appEventInterceptor = store => next => action => {
       store.dispatch(
         fetchAvgPricesForDecisionMarkets(action.returnValues.decisionId)
       )
+      store.dispatch(
+        fetchDecisionData(action.returnValues.decisionId)
+      )
       if (state.accounts[0]) {
         // TODO: check to see if the decision balances are already pending
         store.dispatch(
@@ -35,7 +39,7 @@ const appEventInterceptor = store => next => action => {
           // TODO: check to see if the decision balances are already pending
           store.dispatch(
             fetchTraderDecisionBalances({
-              decisionId: state.decisionMarkets[i].id,
+              decisionId: state.decisionMarkets[i].decisionId,
               trader: action.value[0]
             })
           )
@@ -79,7 +83,7 @@ const appEventInterceptor = store => next => action => {
 }
 
 export const addDecisionBoundsToAction = ({ decisions, decisionId, action }) => {
-  const decision = _.find(decisions, { id: decisionId })
+  const decision = _.find(decisions, { decisionId })
   return {
     ...action,
     lowerBound: decision ? decision.lowerBound : null,
@@ -87,4 +91,4 @@ export const addDecisionBoundsToAction = ({ decisions, decisionId, action }) => 
   }
 }
 
-export default appEventInterceptor 
+export default appEventInterceptor

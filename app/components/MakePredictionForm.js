@@ -17,7 +17,7 @@ const MakePredictionForm = createReduxForm(({
 }) => (
   <form onSubmit={handleSubmit(values => {
     executeBuy({
-      decisionId: decision.id,
+      decisionId: decision.decisionId,
       ...values
     })
   })}>

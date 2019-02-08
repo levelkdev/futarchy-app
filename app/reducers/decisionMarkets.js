@@ -12,7 +12,7 @@ const decisionMarkets = (state = [], action) => {
           _.find(state, { question: action.question }) ?
             [] : [{
               pending: true,
-              id: action.txHash,
+              decisionId: action.txHash,
               question: action.question
             }]
         )
@@ -26,7 +26,7 @@ const decisionMarkets = (state = [], action) => {
         ),
         {
           pending: false,
-          id: returnValues.decisionId,
+          decisionId: returnValues.decisionId,
           question: returnValues.metadata,
           lowerBound: returnValues.marketLowerBound,
           upperBound: returnValues.marketUpperBound,
@@ -37,9 +37,19 @@ const decisionMarkets = (state = [], action) => {
           status: decisionStatuses.OPEN
         }
       ]
+    case 'DECISION_DATA_LOADED':
+      const { decisionId, decisionData } = action
+      return state.map(decision => {
+          if  (decision.decisionId == decisionId) {
+            decision.passed = decisionData.passed
+            decision.resolved = decisionData.resolved
+            decision.decisionDate = decisionData.decisionDate
+          }
+          return decision
+      })
     case 'AVG_DECISION_MARKET_PRICES_LOADED':
       return state.map(decision => {
-        if (decision.id == action.decisionId) {
+        if (decision.decisionId == action.decisionId) {
           decision.yesMarketPrice = calcPriceAsPercentage(action.yesMarketPrice),
           decision.noMarketPrice = calcPriceAsPercentage(action.noMarketPrice),
           decision.yesMarketPredictedPrice = calcPredictedPrice(

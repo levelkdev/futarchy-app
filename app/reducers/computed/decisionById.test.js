@@ -1,7 +1,7 @@
 import assert from 'assert'
 import decisionById from './decisionById'
 
-const mockDecisionMarketData = (id, question ) => ({ id, question })
+const mockDecisionMarketData = (decisionId, question ) => ({ decisionId, question })
 
 const decision0 = mockDecisionMarketData(0, 'mock_question_0')
 const decision1 = mockDecisionMarketData(1, 'mock_question_1')

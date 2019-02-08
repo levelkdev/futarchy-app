@@ -50,6 +50,11 @@ export const marketFundAmount = async () => {
   return amount
 }
 
+export const decisions = async (decisionId) => {
+  const decision = await call('decisions', parseInt(decisionId))
+  return decision
+}
+
 export const avgPricesForDecisionMarkets = async (decisionId) => {
   const [ yesMarketPrice, noMarketPrice ] = await call('getAvgPricesForDecisionMarkets', decisionId)
   return { yesMarketPrice, noMarketPrice }
@@ -127,6 +132,15 @@ export const buyMarketPositions = async (
   )
 }
 
+export const redeemWinnings = async (decisionId) => {
+  return contractFn(
+    window.aragonClient,
+    'client',
+    'redeemTokenWinnings',
+    decisionId
+  )
+}
+
 export const call = async (functionName, ...params) => {
   return contractCall(window.aragonClient, 'client', functionName, ...params)
 }
@@ -137,6 +151,7 @@ export const sendTransaction = async (functionName, ...params) => {
 
 export default {
   accounts,
+  decisions,
   tokenContract,
   tokenBalance,
   futarchyAddress,
@@ -149,5 +164,6 @@ export default {
   traderDecisionBalances,
   newDecision,
   buyMarketPositions,
-  sendTransaction
+  sendTransaction,
+  redeemWinnings
 }
