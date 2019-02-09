@@ -42,6 +42,7 @@ contract Futarchy is AragonApp, IForwarder {
     bool executed;
     string metadata;
     bytes executionScript;
+    address decisionCreator;
   }
 
   struct OutcomeTokenBalances {
@@ -123,6 +124,7 @@ contract Futarchy is AragonApp, IForwarder {
       decisions[decisionId].metadata = metadata;
       decisions[decisionId].snapshotBlock = getBlockNumber64() - 1;
       decisions[decisionId].executionScript = executionScript;
+      decisions[decisionId].decisionCreator = msg.sender;
 
       FutarchyOracle futarchyOracle = futarchyOracleFactory.createFutarchyOracle(
         ERC20Gnosis(token),
@@ -170,6 +172,16 @@ contract Futarchy is AragonApp, IForwarder {
       snapshotBlock = decision.snapshotBlock;
       script = decision.executionScript;
     }
+
+    function closeDecisionMarkets(uint decisionId) public {
+      uint previousBalance = token.balanceOf(this);
+      decisions[decisionId].futarchyOracle.close();
+      uint newBalance = token.balanceOf(this);
+
+      uint creatorRefund = newBalance - previousBalance;
+      require(token.transfer(decisions[decisionId].decisionCreator, creatorRefund));
+    }
+
 
     /**
     * TODO: enable special permissions for executing decisions
