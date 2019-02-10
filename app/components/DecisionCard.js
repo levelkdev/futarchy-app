@@ -11,7 +11,7 @@ import ShowPanelButtonContainer from '../containers/ShowPanelButtonContainer'
 const DecisionCard = ({ decision }) => (
   <CardContainer>
     <CirclesContainer>
-      <MarketCirclesContainer decisionId={decision.id} />
+      <MarketCirclesContainer decisionId={decision.decisionId} />
     </CirclesContainer>
     <ContentContainer>
       <Question>
