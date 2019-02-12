@@ -16,14 +16,14 @@ const DecisionDetail = ({ match }) => (
             <DecisionQuestionContainer decisionId={match.params.decisionId} />
           </Text>
         </QuestionHeader>
-        <CircleChartSection>
+        <div>
           <SectionHeader>
             <Text size="large" weight="bolder" smallcaps>
               Decision Status
             </Text>
           </SectionHeader>
           <MarketCirclesContainer decisionId={match.params.decisionId} />
-        </CircleChartSection>
+        </div>
       </DecisionLeftContent>
       <DecisionRightContent>
         <ChartOuter>
@@ -69,10 +69,6 @@ const DecisionRightContent = styled.div`
 
 const ChartOuter = styled.div`
   width: 360px;
-`
-
-const CircleChartSection = styled.div`
-
 `
 
 const SectionHeader = styled.div`
