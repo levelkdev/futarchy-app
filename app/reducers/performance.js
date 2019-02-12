@@ -1,11 +1,12 @@
 import _ from 'lodash'
+import calcLMSRProfit from '../util/pmJS/calcLMSRProfit'
 
 const performance = (state = [], action) => {
   switch (action.type) {
     case 'BUY_MARKET_POSITIONS_EVENT':
       return buyMarketPositionsReducer(state, action)
-    case 'POTENTIAL_PROFIT_DATA_LOADED':
-      return potentialProfitDataLoadedReducer(state, action)
+    case 'YES_NO_MARKET_DATA_LOADED':
+      return yesNoMarketDataLoadedReducer(state, action)
     default:
       return state
   }
@@ -35,6 +36,11 @@ const buyMarketPositionsReducer = (state, action) => {
   totals.noShortBalance += parseInt(noPurchaseAmounts[0])
   totals.noLongBalance += parseInt(noPurchaseAmounts[1])
 
+  if (typeof(action.yesMarketFee) != 'undefined') {
+    // TODO: calc potential profits here the same way it's done in
+    //       the yesNoMarketDataLoadedReducer
+  }
+
   return state.map(t => {
     if (t.trader == trader && t.decisionId == decisionId) {
       return totals
@@ -44,42 +50,103 @@ const buyMarketPositionsReducer = (state, action) => {
   })
 }
 
-const potentialProfitDataLoadedReducer = (state, action) => {
-  let {
-    trader,
-    decisionId,
-    yesShort,
-    yesLong,
-    noShort,
-    noLong
-  } = action
-
-  yesShort = parseInt(yesShort)
-  yesLong = parseInt(yesLong)
-  noShort = parseInt(noShort)
-  noLong = parseInt(noLong)
-
-  let totals = _.find(state, { trader, decisionId })
-
-  totals.yesShortPotentialProfit = yesShort
-  totals.yesLongPotentialProfit = yesLong
-  totals.noShortPotentialProfit = noShort
-  totals.noLongPotentialProfit = noLong
-  totals.yesPotentialProfit = yesShort + yesLong
-  totals.noPotentialProfit = noShort + noLong
-  totals.yesGainLoss = totals.yesPotentialProfit - totals.yesCostBasis
-  totals.noGainLoss = totals.noPotentialProfit - totals.noCostBasis
-  totals.totalPotentialProfit = totals.yesPotentialProfit + totals.noPotentialProfit
-  totals.totalGainLoss =
-    totals.totalPotentialProfit - (totals.yesCostBasis + totals.noCostBasis)
-
-  return state.map(t => {
-    if (t.trader == trader && t.decisionId == decisionId) {
-      return totals
-    } else {
-      return t
+const yesNoMarketDataLoadedReducer = (state, action) => {
+  return state.map(totals => {
+    if (totals.decisionId == action.decisionId) {
+      const {
+        yesShort,
+        yesLong,
+        noShort,
+        noLong
+      } = calcProfits({
+        action,
+        totals
+      })
+      totals.yesShortPotentialProfit = yesShort
+      totals.yesLongPotentialProfit = yesLong
+      totals.noShortPotentialProfit = noShort
+      totals.noLongPotentialProfit = noLong
+      totals.yesPotentialProfit = yesShort + yesLong
+      totals.noPotentialProfit = noShort + noLong
+      totals.yesGainLoss = totals.yesPotentialProfit - totals.yesCostBasis
+      totals.noGainLoss = totals.noPotentialProfit - totals.noCostBasis
+      totals.totalPotentialProfit = totals.yesPotentialProfit + totals.noPotentialProfit
+      totals.totalGainLoss =
+        totals.totalPotentialProfit - (totals.yesCostBasis + totals.noCostBasis)
     }
+    return totals
   })
+}
+
+const calcProfits = ({ action, totals }) => {
+  const {
+    yesShortBalance,
+    yesLongBalance,
+    noShortBalance,
+    noLongBalance
+  } = totals
+  const {
+    yesShortOutcomeTokensSold,
+    yesLongOutcomeTokensSold,
+    noShortOutcomeTokensSold,
+    noLongOutcomeTokensSold,
+    yesMarketFunding,
+    noMarketFunding,
+    yesMarketFee,
+    noMarketFee
+  } = action
+  const yesProfits = calcProfitForMarket({
+    shortOutcomeTokensSold: yesShortOutcomeTokensSold,
+    longOutcomeTokensSold: yesLongOutcomeTokensSold,
+    funding: yesMarketFunding,
+    shortBalance: yesShortBalance,
+    longBalance: yesLongBalance,
+    feeFactor: yesMarketFee
+  })
+  const noProfits = calcProfitForMarket({
+    shortOutcomeTokensSold: noShortOutcomeTokensSold,
+    longOutcomeTokensSold: noLongOutcomeTokensSold,
+    funding: noMarketFunding,
+    shortBalance: noShortBalance,
+    longBalance: noLongBalance,
+    feeFactor: noMarketFee
+  })
+  return {
+    yesShort: yesProfits.short,
+    yesLong: yesProfits.long,
+    noShort: noProfits.short,
+    noLong: noProfits.long
+  }
+}
+
+const calcProfitForMarket = ({
+  shortOutcomeTokensSold,
+  longOutcomeTokensSold,
+  funding,
+  shortBalance,
+  longBalance,
+  feeFactor
+}) => {
+  const netOutcomeTokensSold = [
+    shortOutcomeTokensSold,
+    longOutcomeTokensSold
+  ]
+  return {
+    short: parseInt(calcLMSRProfit({
+      netOutcomeTokensSold,
+      funding,
+      outcomeTokenIndex: 0,
+      outcomeTokenCount: shortBalance,
+      feeFactor
+    })),
+    long: parseInt(calcLMSRProfit({
+      netOutcomeTokensSold,
+      funding,
+      outcomeTokenIndex: 1,
+      outcomeTokenCount: longBalance,
+      feeFactor
+    }))
+  }
 }
 
 const newTotals = (trader, decisionId) => ({

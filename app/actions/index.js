@@ -53,23 +53,6 @@ export const decisionDataLoaded = ({ decisionId, decisionData }) => ({
   decisionId
 })
 
-export const potentialProfitDataLoaded = ({
-  decisionId,
-  trader,
-  yesShort,
-  yesLong,
-  noShort,
-  noLong
-}) => ({
-  type: 'POTENTIAL_PROFIT_DATA_LOADED',
-  decisionId,
-  trader,
-  yesShort,
-  yesLong,
-  noShort,
-  noLong
-})
-
 export const showPanel = ({ panelName, panelContext }) => ({
   type: 'SHOW_PANEL',
   panelName,
@@ -241,26 +224,6 @@ export const fetchTraderDecisionBalances = ({ decisionId, trader }) => dispatch 
     },
     errorMessage => {
       console.error(`fetchTraderDecisionBalances: ${errorMessage}`)
-      // TODO: dispatch error action, to show something to the user
-    }
-  )
-}
-
-// fetches the amount of collateral token a trader would receive if they sold
-// outcome tokens for a given decision, and dispatches an action
-// `balances` expects an array: [yesShort, yesLong, noShort, noLong]
-export const fetchPotentialProfitData = ({ decisionId, trader, balances }) => dispatch => {
-  return client.calcProfits(decisionId, balances).then(
-    profits => dispatch(potentialProfitDataLoaded({
-      decisionId,
-      trader,
-      yesShort: profits.yesShort,
-      yesLong: profits.yesLong,
-      noShort: profits.noShort,
-      noLong: profits.noLong
-    })),
-    errorMessage => {
-      console.error(`fetchPotentialProfitData: ${errorMessage}`)
       // TODO: dispatch error action, to show something to the user
     }
   )
