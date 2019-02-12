@@ -72,6 +72,20 @@ const decisionMarkets = (state = [], action) => {
         }
         return decision
       })
+    case 'YES_NO_MARKET_DATA_LOADED':
+      return state.map(decision => {
+        if (decision.decisionId == action.decisionId) {
+          decision.yesMarketFee = action.yesMarketFee,
+          decision.noMarketFee = action.noMarketFee,
+          decision.yesMarketFunding = action.yesMarketFunding,
+          decision.noMarketFunding = action.noMarketFunding,
+          decision.yesShortOutcomeTokensSold = action.yesShortOutcomeTokensSold,
+          decision.yesLongOutcomeTokensSold = action.yesLongOutcomeTokensSold,
+          decision.noShortOutcomeTokensSold = action.noShortOutcomeTokensSold,
+          decision.noLongOutcomeTokensSold = action.noLongOutcomeTokensSold
+        }
+        return decision
+      })
     case 'PROP_VALUE_LOADED':
       if (action.prop == 'blocktime') {
         return state.map(decision => {

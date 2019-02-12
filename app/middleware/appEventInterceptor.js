@@ -1,8 +1,6 @@
 import _ from 'lodash'
 import {
-  fetchAvgPricesForDecisionMarkets,
   fetchDecisionData,
-  fetchPotentialProfitData,
   fetchTraderDecisionBalances
 } from '../actions'
 
@@ -21,9 +19,6 @@ const appEventInterceptor = store => next => action => {
         ...action,
         blocktime: state.blocktime || null
       }
-      store.dispatch(
-        fetchAvgPricesForDecisionMarkets(action.returnValues.decisionId)
-      )
       store.dispatch(
         fetchDecisionData(action.returnValues.decisionId)
       )

@@ -24,6 +24,29 @@ export const avgDecisionMarketPricesLoaded = ({ decisionId, yesMarketPrice, noMa
   noMarketPrice
 })
 
+export const yesNoMarketDataLoaded = ({
+  decisionId,
+  yesMarketFee,
+  noMarketFee,
+  yesMarketFunding,
+  noMarketFunding,
+  yesShortOutcomeTokensSold,
+  yesLongOutcomeTokensSold,
+  noShortOutcomeTokensSold,
+  noLongOutcomeTokensSold
+}) => ({
+  type: 'YES_NO_MARKET_DATA_LOADED',
+  decisionId,
+  yesMarketFee,
+  noMarketFee,
+  yesMarketFunding,
+  noMarketFunding,
+  yesShortOutcomeTokensSold,
+  yesLongOutcomeTokensSold,
+  noShortOutcomeTokensSold,
+  noLongOutcomeTokensSold
+})
+
 export const decisionDataLoaded = ({ decisionId, decisionData }) => ({
   type: 'DECISION_DATA_LOADED',
   decisionData,
@@ -154,23 +177,53 @@ export const fetchTokenBalance = (account) => dispatch => {
   )
 }
 
-export const fetchAvgPricesForDecisionMarkets = (decisionId) => dispatch => {
-  return client.avgPricesForDecisionMarkets(decisionId).then(
-    avgPrices => dispatch(avgDecisionMarketPricesLoaded({
+export const fetchYesNoMarketData = ({ decisionId, futarchyOracleAddress }) => dispatch => {
+  return client.yesNoMarketData(futarchyOracleAddress).then(marketData => {
+    const {
+      yesMarketFee,
+      noMarketFee,
+      yesMarketFunding,
+      noMarketFunding,
+      yesAveragePrice,
+      noAveragePrice,
+      yesShortOutcomeTokensSold,
+      yesLongOutcomeTokensSold,
+      noShortOutcomeTokensSold,
+      noLongOutcomeTokensSold
+    } = marketData
+    // TODO: these don't really need to be separate actions, but tests are already in
+    //       place and avgDecisionMarketPricesLoaded works to correctly render the values
+    //       in the market circles. could be refactored at some point.
+    dispatch(avgDecisionMarketPricesLoaded({
       decisionId,
-      yesMarketPrice: avgPrices.yesMarketPrice,
-      noMarketPrice: avgPrices.noMarketPrice
-    })),
-    errorMessage => {
-      console.error(`fetchAvgPricesForDecisionMarkets: ${errorMessage}`)
-      // TODO: dispatch error action, to show something to the user
-    }
-  )
+      yesMarketPrice: yesAveragePrice,
+      noMarketPrice: noAveragePrice
+    }))
+    dispatch(yesNoMarketDataLoaded({
+      decisionId,
+      yesMarketFee,
+      noMarketFee,
+      yesMarketFunding,
+      noMarketFunding,
+      yesShortOutcomeTokensSold,
+      yesLongOutcomeTokensSold,
+      noShortOutcomeTokensSold,
+      noLongOutcomeTokensSold
+    }))
+  },
+  errorMessage => {
+    console.error(`fetchYesNoMarketData: ${errorMessage}`)
+    // TODO: dispatch error action, to show something to the user
+  })
 }
 
 export const fetchDecisionData = (decisionId) => dispatch => {
   return client.decisions(decisionId).then(
     decisionData => {
+      dispatch(fetchYesNoMarketData({
+        decisionId,
+        futarchyOracleAddress: decisionData.futarchyOracle
+      }))
       dispatch(decisionDataLoaded({ decisionId, decisionData }))
     }
   )

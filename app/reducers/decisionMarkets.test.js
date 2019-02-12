@@ -1,5 +1,10 @@
 import assert from 'assert'
-import { newDecisionTxPending, avgDecisionMarketPricesLoaded, decisionDataLoaded } from '../actions'
+import {
+  newDecisionTxPending,
+  avgDecisionMarketPricesLoaded,
+  yesNoMarketDataLoaded,
+  decisionDataLoaded
+} from '../actions'
 import decisionMarkets from './decisionMarkets'
 
 const ONE = 0x10000000000000000
@@ -327,6 +332,47 @@ describe('decisionMarkets', () => {
           noMarketPrice: FIFTY_PERCENT
         })
         assert.deepEqual(decisionMarkets(state, action), state)
+      })
+    })
+  })
+
+  describe('yesNoMarketDataLoaded', () => {
+    [
+      {
+        when: 'when there is a matching decision',
+        should: 'should return state with yes and no market data added to the decision',
+        state: [mockDecision(0), mockDecision(123)],
+        action: yesNoMarketDataLoaded({
+          decisionId: 'mock_decision_id_123',
+          yesMarketFee: '1',
+          noMarketFee: '2',
+          yesMarketFunding: '3',
+          noMarketFunding: '4',
+          yesShortOutcomeTokensSold: '5',
+          yesLongOutcomeTokensSold: '6',
+          noShortOutcomeTokensSold: '7',
+          noLongOutcomeTokensSold: '8'
+        }),
+        marketIndex: 1,
+        expectedProps: {
+          yesMarketFee: '1',
+          noMarketFee: '2',
+          yesMarketFunding: '3',
+          noMarketFunding: '4',
+          yesShortOutcomeTokensSold: '5',
+          yesLongOutcomeTokensSold: '6',
+          noShortOutcomeTokensSold: '7',
+          noLongOutcomeTokensSold: '8'
+        }
+      }
+    ].forEach(({ when, should, state, action, marketIndex, expectedProps }) => {
+      describe(when, () => {
+        it(should, () => {
+          for (var propName in expectedProps) {
+            const expectedPropVal = expectedProps[propName]
+            assert.equal(decisionMarkets(state, action)[marketIndex][propName], expectedPropVal)
+          }
+        })
       })
     })
   })

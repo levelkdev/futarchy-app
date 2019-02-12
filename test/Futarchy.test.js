@@ -866,43 +866,6 @@ contract('Futarchy', (accounts) => {
 
   })
 
-  describe('getAvgPricesForDecisionMarkets()', () => {
-    let script, metadata, twenty, five, three
-
-    // StandardMarketWithPriceLogger returns average prices relative to this value of "one"
-    const ONE = 0x10000000000000000
-
-    beforeEach(async () => {
-      twenty = 20 * 10 ** 18
-      five = 5 * 10 ** 18
-      three = 3 * 10 ** 18
-      initializeFutarchy({_futarchyOracleFactoryAddr: futarchyOracleFactoryFull.address})
-      script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
-      metadata = 'Give voting rights to all kitties in the world'
-      await token.approve(futarchy.address, MARKET_FUND_AMOUNT +  (40 * 10 ** 18), {from: root})
-      await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
-      futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
-    })
-
-    describe('when the YES market is shorted', () => {
-      it('returns average price for YES market below 0.5', async () => {
-        await futarchy.buyMarketPositions(0, twenty, [five + three, 0], [0, 0], {from: root})
-        await timeTravel(1800)
-        const yesPrice = (await futarchy.getAvgPricesForDecisionMarkets(0))[0].toNumber()
-        expect(yesPrice / ONE).to.be.lessThan(0.5)
-      })
-    })
-
-    describe('when the NO market is shorted', () => {
-      it('returns average price for NO market below 0.5', async () => {
-        await futarchy.buyMarketPositions(0, twenty, [0, 0], [five + three, 0], {from: root})
-        await timeTravel(1800)
-        const noPrice = (await futarchy.getAvgPricesForDecisionMarkets(0))[1].toNumber()
-        expect(noPrice / ONE).to.be.lessThan(0.5)
-      })
-    })
-  })
-
   async function initializeFutarchy(customParams = {}) {
     const {
       _fee = FEE,
