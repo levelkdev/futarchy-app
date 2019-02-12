@@ -247,6 +247,44 @@ contract('Futarchy', (accounts) => {
     })
   })
 
+  describe('closeDecisionMarkets() unit tests', () => {
+    let script, metadata, decisionId, futarchyOracle, keccak
+    let yesMarket, noMarket, yesEvent, noEvent, yesToken, noToken, yesLongToken, yesShortToken, noLongToken, noShortToken
+
+    beforeEach(async () => {
+      // large setup not required bc no integration with full futarchyOracle here
+      initializeFutarchy()
+      script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
+      metadata = 'Give voting rights to all kitties in the world'
+      await token.approve(futarchy.address, MARKET_FUND_AMOUNT +  (40 * 10 ** 18), {from: root})
+      await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
+      futarchyOracle = FutarchyOracleMock.at((await futarchy.decisions(0))[0])
+    })
+
+    it('calls futarchyOracle.close()', async () => {
+      expect(await futarchyOracle.mock_closed()).to.equal(false)
+      await futarchy.closeDecisionMarkets(0)
+      expect(await futarchyOracle.mock_closed()).to.equal(true)
+    })
+
+    it('transfers the full refund amount to creator when full refund is returned', async () => {
+      let previousTokenBalance = (await token.balanceOf(root)).toNumber()
+      await futarchy.closeDecisionMarkets(0)
+      let newTokenBalance = (await token.balanceOf(root)).toNumber()
+      expect(newTokenBalance - previousTokenBalance).to.equal(MARKET_FUND_AMOUNT)
+    })
+
+    it('transfers the appropriate refund to creator if refund amount is less than the full market funding', async () => {
+      let lowRefundAmount = MARKET_FUND_AMOUNT - 3 * 10 ** 18
+      await futarchyOracle.mock_setRefundAmount(lowRefundAmount)
+
+      let previousTokenBalance = (await token.balanceOf(root)).toNumber()
+      await futarchy.closeDecisionMarkets(0)
+      let newTokenBalance = (await token.balanceOf(root)).toNumber()
+      expect(newTokenBalance - previousTokenBalance).to.equal(lowRefundAmount)
+    })
+  })
+
   describe('executeDecision()', async () => {
     let script, metadata, decisionId, currentBlockNumber, futarchyOracle, exeutionTarget
 
