@@ -1,7 +1,7 @@
 const decisionStatuses = {
   OPEN: 'OPEN',
   RESOLVED: 'RESOLVED',
-  CLOSE: 'CLOSED'
+  CLOSED: 'CLOSED'
 }
 
 export default decisionStatuses

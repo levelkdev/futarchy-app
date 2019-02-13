@@ -6,6 +6,7 @@ import SidePanelDisplayContainer from './containers/SidePanelDisplayContainer'
 import AppHeaderContainer from './containers/AppHeaderContainer'
 import Home from './views/Home'
 import DecisionDetail from './views/DecisionDetail'
+import DecisionTrades from './views/DecisionTrades'
 import Positions from './views/Positions'
 import ClosedDecisions from './views/ClosedDecisions'
 
@@ -19,6 +20,7 @@ const App = () => (
         <Route path="/closed-questions" exact component={ClosedDecisions} />
         <Route path="/positions" exact component={Positions} />
         <Route path="/decision/:decisionId" component={DecisionDetail} />
+        <Route path="/trades/:decisionId" component={DecisionTrades} />
         <SidePanelDisplayContainer />
       </AppInner>
     </div>

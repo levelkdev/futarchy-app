@@ -1,8 +1,6 @@
 import _ from 'lodash'
 import {
-  fetchAvgPricesForDecisionMarkets,
   fetchDecisionData,
-  fetchPotentialProfitData,
   fetchTraderDecisionBalances
 } from '../actions'
 
@@ -10,16 +8,17 @@ const appEventInterceptor = store => next => action => {
   const state = store.getState()
   switch (action.type) {
     case 'BUY_MARKET_POSITIONS_EVENT':
-      action = addDecisionBoundsToAction({
+      action = addDecisionDataToAction({
         decisions: state.decisionMarkets,
         decisionId: action.returnValues.decisionId,
         action
       })
       break
     case 'START_DECISION_EVENT':
-      store.dispatch(
-        fetchAvgPricesForDecisionMarkets(action.returnValues.decisionId)
-      )
+      action = {
+        ...action,
+        blocktime: state.blocktime || null
+      }
       store.dispatch(
         fetchDecisionData(action.returnValues.decisionId)
       )
@@ -49,45 +48,25 @@ const appEventInterceptor = store => next => action => {
   }
 
   const result = next(action)
-  const newState = store.getState()
 
-  switch (action.type) {
-    case 'BUY_MARKET_POSITIONS_EVENT':
-      // when a new buy is executed on a decision, fetch "potential profit" for each
-      // trader who has a balance on the decision's markets. Potential profit is
-      // the total amount of collateral token the trader would receive if they sold
-      // all of their outcome token positions.
-      //
-      // TODO: this fetches the data for all past buy events every time the app is
-      //       loaded. Since this isn't very efficient, we could do the "calcProfit" from
-      //       LMSR calcs client side based on the current marginal price of outcome tokens,
-      //       then we'd only need to fetch marginal prices once. But for now, this is simpler.
-      const { decisionId } = action.returnValues
-      const totalsForDecision = _.filter(newState.performance, { decisionId })
-      for (var i in totalsForDecision) {
-        const total = totalsForDecision[i]
-        store.dispatch(fetchPotentialProfitData({
-          decisionId: total.decisionId,
-          trader: total.trader,
-          balances: [
-            total.yesShortBalance,
-            total.yesLongBalance,
-            total.noShortBalance,
-            total.noLongBalance
-          ]
-        }))
-      }
-      break
-  }
   return result
 }
 
-export const addDecisionBoundsToAction = ({ decisions, decisionId, action }) => {
+export const addDecisionDataToAction = ({ decisions, decisionId, action }) => {
   const decision = _.find(decisions, { decisionId })
+  console.log('DECISION DATA: ', decision)
   return {
     ...action,
     lowerBound: decision ? decision.lowerBound : null,
-    upperBound: decision ? decision.upperBound : null
+    upperBound: decision ? decision.upperBound : null,
+    yesMarketFee: decision ? decision.yesMarketFee : null,
+    noMarketFee: decision ? decision.noMarketFee : null,
+    yesMarketFunding: decision ? decision.yesMarketFunding : null,
+    noMarketFunding: decision ? decision.noMarketFunding : null,
+    yesShortOutcomeTokensSold: decision ? decision.yesShortOutcomeTokensSold : null,
+    yesLongOutcomeTokensSold: decision ? decision.yesLongOutcomeTokensSold : null,
+    noShortOutcomeTokensSold: decision ? decision.noShortOutcomeTokensSold : null,
+    noLongOutcomeTokensSold: decision ? decision.noLongOutcomeTokensSold : null
   }
 }
 

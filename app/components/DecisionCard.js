@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Button } from '@aragon/ui'
-import MarketCircles from './MarketCircles'
+import MarketCirclesContainer from '../containers/MarketCirclesContainer'
 import ShowPanelButtonContainer from '../containers/ShowPanelButtonContainer'
 
 // TODO: deal with the `decision.pending = true` state
@@ -11,11 +11,7 @@ import ShowPanelButtonContainer from '../containers/ShowPanelButtonContainer'
 const DecisionCard = ({ decision }) => (
   <CardContainer>
     <CirclesContainer>
-      <MarketCircles
-        yesDisplayPrice={decision.yesMarketPredictedPrice}
-        noDisplayPrice={decision.noMarketPredictedPrice}
-        yesPercentage={decision.yesMarketPrice}
-        noPercentage={decision.noMarketPrice} />
+      <MarketCirclesContainer decisionId={decision.decisionId} />
     </CirclesContainer>
     <ContentContainer>
       <Question>

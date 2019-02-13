@@ -5,9 +5,14 @@ import { connect } from 'react-redux'
 import AppHeader from '../components/AppHeader'
 
 const getDecisionRouteParams = pathname => {
-  const path = matchPath(pathname, {
+  let path = matchPath(pathname, {
     path: `/decision/:decisionId`,
   })
+  if (!path) {
+    path = matchPath(pathname, {
+      path: `/trades/:decisionId`
+    })
+  }
   return path ? path.params : {}
 }
 

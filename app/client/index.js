@@ -1,6 +1,8 @@
 import contractCall from './contractCall'
 import contractFn from './contractFn'
 import MiniMeToken from './MiniMeToken'
+import FutarchyOracle from './FutarchyOracle'
+import StandardMarketWithPriceLogger from './StandardMarketWithPriceLogger'
 import traderDecisionHash from '../util/traderDecisionHash'
 
 export const accounts = async () => {
@@ -16,6 +18,11 @@ export const accounts = async () => {
       }
     )
   })
+}
+
+export const blocktime = async () => {
+  const blocktime = await call('blocktime')
+  return blocktime
 }
 
 export const tokenContract = async () => {
@@ -53,11 +60,6 @@ export const marketFundAmount = async () => {
 export const decisions = async (decisionId) => {
   const decision = await call('decisions', parseInt(decisionId))
   return decision
-}
-
-export const avgPricesForDecisionMarkets = async (decisionId) => {
-  const [ yesMarketPrice, noMarketPrice ] = await call('getAvgPricesForDecisionMarkets', decisionId)
-  return { yesMarketPrice, noMarketPrice }
 }
 
 export const calcCosts = async (decisionId, outcomeTokenAmounts) => {
@@ -141,6 +143,39 @@ export const redeemWinnings = async (decisionId) => {
   )
 }
 
+export const yesNoMarketData = async (futarchyOracleAddress) => {
+  const futarchyOracle = FutarchyOracle(window.aragonClient, futarchyOracleAddress)
+  const markets = await futarchyOracle.markets()
+
+  const yesMarket = StandardMarketWithPriceLogger(window.aragonClient, markets[0])
+  const noMarket = StandardMarketWithPriceLogger(window.aragonClient, markets[1])
+
+  const yesMarketFee = await yesMarket.fee()
+  const noMarketFee = await noMarket.fee()
+
+  const yesMarketFunding = await yesMarket.funding()
+  const noMarketFunding = await noMarket.funding()
+
+  const yesAveragePrice = await yesMarket.averagePrice()
+  const noAveragePrice = await noMarket.averagePrice()
+
+  const yesNetOutcomeTokensSold = await yesMarket.netOutcomeTokensSold()
+  const noNetOutcomeTokensSold = await noMarket.netOutcomeTokensSold()
+
+  return {
+    yesMarketFee,
+    noMarketFee,
+    yesMarketFunding,
+    noMarketFunding,
+    yesAveragePrice,
+    noAveragePrice,
+    yesShortOutcomeTokensSold: yesNetOutcomeTokensSold[0],
+    yesLongOutcomeTokensSold: yesNetOutcomeTokensSold[1],
+    noShortOutcomeTokensSold: noNetOutcomeTokensSold[0],
+    noLongOutcomeTokensSold: noNetOutcomeTokensSold[1]
+  }
+}
+
 export const call = async (functionName, ...params) => {
   return contractCall(window.aragonClient, 'client', functionName, ...params)
 }
@@ -152,18 +187,19 @@ export const sendTransaction = async (functionName, ...params) => {
 export default {
   accounts,
   decisions,
+  blocktime,
   tokenContract,
   tokenBalance,
   futarchyAddress,
   fee,
   tradingPeriod,
   marketFundAmount,
-  avgPricesForDecisionMarkets,
   calcCosts,
   calcProfits,
   traderDecisionBalances,
   newDecision,
   buyMarketPositions,
   sendTransaction,
-  redeemWinnings
+  redeemWinnings,
+  yesNoMarketData
 }

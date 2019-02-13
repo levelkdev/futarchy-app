@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { ONE } from '../constants/values'
 
 const trades = (state = [], action) => {
   switch (action.type) {
@@ -12,7 +13,8 @@ const trades = (state = [], action) => {
         yesCosts,
         noCosts,
         yesPurchaseAmounts,
-        noPurchaseAmounts
+        noPurchaseAmounts,
+        marginalPrices
       } = returnValues
   
       const {
@@ -25,7 +27,8 @@ const trades = (state = [], action) => {
       const netYesCost = sumTokenValueArray(yesCosts)
       const netNoCost = sumTokenValueArray(noCosts)
       const idx = state.length
-      return [
+
+      return _.sortBy([
         ...state,
         {
           tradeId: idx,
@@ -41,16 +44,22 @@ const trades = (state = [], action) => {
           yesTokenAmount,
           noTokenPrice: calcTokenPrice(netNoCost, noTokenAmount),
           yesTokenPrice: calcTokenPrice(netYesCost, yesTokenAmount),
+          yesLongMarginalPrice: calcOneBasedPrice(marginalPrices[1]),
+          noLongMarginalPrice: calcOneBasedPrice(marginalPrices[3]),
           lowerBound,
           upperBound
         }
-      ]
+      ], trade => trade.tradeTime ? parseInt(trade.tradeTime) : 0)
     default:
       return state
   }
 }
 
 export default trades
+
+function calcOneBasedPrice(marginalPrice) {
+  return parseInt(marginalPrice) / ONE
+}
 
 function calcTokenPrice(netCost, amount) {
   return parseInt(netCost) / parseInt(amount)

@@ -2,30 +2,27 @@ import React from 'react'
 import styled from 'styled-components'
 import LeftArrow from '../icons/LeftArrow'
 import { Link, NavLink } from 'react-router-dom'
-import { Text } from '@aragon/ui'
+import { Text, theme } from '@aragon/ui'
 import ShowPanelButtonContainer from '../containers/ShowPanelButtonContainer'
 
 const AppHeader = ({ decision }) => (
   <AppHeaderStyled>
     <AlignLeft>
-      {
-        decision ?
-          <DecisionHeader question={decision.question} /> : 
-          <TabsContainer />
-      }
-    
+      {decision ? <DecisionDetailsHeader /> : <TabsContainer />}
     </AlignLeft>
     <AlignRight>
-      <ShowPanelButtonContainer panelName="createDecisionMarket">
-        New Decision
-      </ShowPanelButtonContainer>
+      <NewDecisionButton>
+        <ShowPanelButtonContainer panelName="createDecisionMarket">
+          New Decision
+        </ShowPanelButtonContainer>
+      </NewDecisionButton>
     </AlignRight>
   </AppHeaderStyled>
 )
 
 const TabsContainer = () => (
   <div>
-    <Text size="xlarge">Futarchy</Text>
+    <Text size="xlarge">Decisions</Text>
     <br />
     <TabsContainterStyled>
       <NavLinkStyled exact to="/">Open Questions</NavLinkStyled>
@@ -35,15 +32,15 @@ const TabsContainer = () => (
   </div>
 )
 
-const DecisionHeader = ({ question }) => (
-  <div>
-    <LinkStyled to="/">
-      <BackButton>
-        <LeftArrow />
-      </BackButton>
-    </LinkStyled>
-    {question}
-  </div>
+const DecisionDetailsHeader = () => (
+  <LinkStyled to="/">
+    <BackButton>
+      <LeftArrow />
+    </BackButton>
+    <HeaderText size="xlarge" >
+      Decision Details
+    </HeaderText>
+  </LinkStyled>
 )
 
 const AppHeaderStyled = styled.div`
@@ -71,6 +68,11 @@ const LinkStyled = styled(Link)`
   font-size: 16px;
 `
 
+const HeaderText = styled(Text)`
+  position: relative;
+  top: -2px;
+`
+
 const activeClassName = 'active';
 
 const NavLinkStyled = styled(NavLink).attrs({
@@ -93,6 +95,12 @@ const NavLinkStyled = styled(NavLink).attrs({
 const TabsContainterStyled = styled.div`
   display: flex;
   flex-direction: row;
+`
+
+const NewDecisionButton = styled.div`
+  position: relative;
+  top: -10px;
+  right: 13px;
 `
 
 export default AppHeader

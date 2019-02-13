@@ -1,7 +1,7 @@
 import _ from 'lodash'
+import { ONE } from '../constants/values'
 import decisionStatuses from '../constants/decisionStatuses'
-
-const ONE = 0x10000000000000000
+import decisionMarketTypes from '../constants/decisionMarketTypes';
 
 const decisionMarkets = (state = [], action) => {
   switch (action.type) {
@@ -18,8 +18,8 @@ const decisionMarkets = (state = [], action) => {
         )
       ]
     case 'START_DECISION_EVENT':
-      const { returnValues } = action
-      return [
+      const { returnValues, blocktime } = action
+      return _.sortBy([
         ..._.filter(
           state,
           decision => !(decision.pending && decision.question == returnValues.metadata)
@@ -30,13 +30,20 @@ const decisionMarkets = (state = [], action) => {
           question: returnValues.metadata,
           lowerBound: returnValues.marketLowerBound,
           upperBound: returnValues.marketUpperBound,
+          startDate: returnValues.startDate,
+          decisionResolutionDate: returnValues.decisionResolutionDate,
+          priceResolutionDate: returnValues.priceResolutionDate,
 
           // TODO: get the actual status based on time until the trading period is over.
           //       and the oracle's resolution date. We need to add the resolution period
           //       in addition to the trading period to the Futarchy.sol contract
-          status: decisionStatuses.OPEN
+          status: getStatus({
+            blocktime,
+            decisionResolutionDate: returnValues.decisionResolutionDate,
+            priceResolutionDate: returnValues.priceResolutionDate
+          })
         }
-      ]
+      ], decision => decision.startDate ? parseInt(decision.startDate) * -1 : 0)
     case 'DECISION_DATA_LOADED':
       const { decisionId, decisionData } = action
       return state.map(decision => {
@@ -65,8 +72,58 @@ const decisionMarkets = (state = [], action) => {
         }
         return decision
       })
+    case 'YES_NO_MARKET_DATA_LOADED':
+      return state.map(decision => {
+        if (decision.decisionId == action.decisionId) {
+          decision.yesMarketFee = action.yesMarketFee,
+          decision.noMarketFee = action.noMarketFee,
+          decision.yesMarketFunding = action.yesMarketFunding,
+          decision.noMarketFunding = action.noMarketFunding,
+          decision.yesShortOutcomeTokensSold = action.yesShortOutcomeTokensSold,
+          decision.yesLongOutcomeTokensSold = action.yesLongOutcomeTokensSold,
+          decision.noShortOutcomeTokensSold = action.noShortOutcomeTokensSold,
+          decision.noLongOutcomeTokensSold = action.noLongOutcomeTokensSold
+        }
+        return decision
+      })
+    case 'PROP_VALUE_LOADED':
+      if (action.prop == 'blocktime') {
+        return state.map(decision => {
+          decision.status = getStatus({
+            blocktime: action.value,
+            decisionResolutionDate: decision.decisionResolutionDate,
+            priceResolutionDate: decision.priceResolutionDate
+          })
+          return decision
+        })
+      } else {
+        return state
+      }
     default:
       return state
+  }
+}
+
+function getStatus ({
+  blocktime,
+  decisionResolutionDate,
+  priceResolutionDate
+}) {
+  if (!blocktime) {
+    return null
+  }
+  const blocktimeInt = parseInt(blocktime)
+  const decisionResolutionDateInt = parseInt(decisionResolutionDate)
+  const priceResolutionDateInt = parseInt(priceResolutionDate)
+  if (blocktimeInt < decisionResolutionDateInt)
+  {
+    return decisionStatuses.OPEN
+  } else if (blocktimeInt >= decisionResolutionDateInt && 
+             blocktimeInt < priceResolutionDateInt)
+  {
+    return decisionStatuses.RESOLVED
+  } else if (blocktimeInt >= priceResolutionDate) {
+    return decisionStatuses.CLOSED
   }
 }
 

@@ -156,34 +156,40 @@ contract('Futarchy', (accounts) => {
         expect((await futarchy.decisions(0))[1].toNumber()).to.be.closeTo(unixTime(), unixTime() + 5)
       })
 
-      it('sets the correct decisionDate', async () => {
+      it('sets the correct decisionResolutionDate', async () => {
         let startDate = (await futarchy.decisions(0))[1].toNumber()
         let tradingPeriod = (await futarchy.tradingPeriod()).toNumber()
         expect((await futarchy.decisions(0))[2].toNumber()).to.equal(startDate + tradingPeriod)
       })
 
-      it('sets the correct resolved', async () => {
-        expect((await futarchy.decisions(0))[3]).to.equal(false)
+      it('sets the correct priceResolutionDate', async () => {
+        let startDate = (await futarchy.decisions(0))[1].toNumber()
+        let timeToPriceResolution = (await futarchy.timeToPriceResolution()).toNumber()
+        expect((await futarchy.decisions(0))[3].toNumber()).to.equal(startDate + timeToPriceResolution)
       })
 
-      it('sets the correct passed', async () => {
+      it('sets the correct resolved', async () => {
         expect((await futarchy.decisions(0))[4]).to.equal(false)
       })
 
+      it('sets the correct passed', async () => {
+        expect((await futarchy.decisions(0))[5]).to.equal(false)
+      })
+
       it('sets the correct snapshotBlock', async () => {
-        expect((await futarchy.decisions(0))[5].toNumber()).to.equal(currentBlockNumber)
+        expect((await futarchy.decisions(0))[6].toNumber()).to.equal(currentBlockNumber)
       })
 
       it('sets executed to false', async () => {
-        expect((await futarchy.decisions(0))[6]).to.equal(false)
+        expect((await futarchy.decisions(0))[7]).to.equal(false)
       })
 
       it('sets the correct metadata', async () => {
-        expect((await futarchy.decisions(0))[7]).to.equal(metadata)
+        expect((await futarchy.decisions(0))[8]).to.equal(metadata)
       })
 
       it('sets the correct executionScript', async () => {
-        expect((await futarchy.decisions(0))[8]).to.equal(stringToHex(script))
+        expect((await futarchy.decisions(0))[9]).to.equal(stringToHex(script))
       })
     })
 
@@ -348,9 +354,9 @@ contract('Futarchy', (accounts) => {
 
         it('sets decision.executed to true', async () => {
           await timeTravel(TRADING_PERIOD + 1)
-          expect((await futarchy.decisions(0))[6]).to.equal(false)
+          expect((await futarchy.decisions(0))[7]).to.equal(false)
           await futarchy.executeDecision(decisionId)
-          expect((await futarchy.decisions(0))[6]).to.equal(true)
+          expect((await futarchy.decisions(0))[7]).to.equal(true)
         })
 
         it('emits an ExecuteDecision event', async () => {
@@ -764,15 +770,15 @@ contract('Futarchy', (accounts) => {
         })
 
         it('sets resolved to true in the decision struct', async () => {
-          expect((await futarchy.decisions(0))[3]).to.equal(false)
-          await futarchy.redeemTokenWinnings(0, {from: root})
-          expect((await futarchy.decisions(0))[3]).to.equal(true)
-        })
-
-        it('sets passed to true in the decision struct', async () => {
           expect((await futarchy.decisions(0))[4]).to.equal(false)
           await futarchy.redeemTokenWinnings(0, {from: root})
           expect((await futarchy.decisions(0))[4]).to.equal(true)
+        })
+
+        it('sets passed to true in the decision struct', async () => {
+          expect((await futarchy.decisions(0))[5]).to.equal(false)
+          await futarchy.redeemTokenWinnings(0, {from: root})
+          expect((await futarchy.decisions(0))[5]).to.equal(true)
         })
       })
 
@@ -789,15 +795,15 @@ contract('Futarchy', (accounts) => {
         })
 
         it('sets resolved to true in the decision struct', async () => {
-          expect((await futarchy.decisions(0))[3]).to.equal(false)
+          expect((await futarchy.decisions(0))[4]).to.equal(false)
           await futarchy.redeemTokenWinnings(0, {from: root})
-          expect((await futarchy.decisions(0))[3]).to.equal(true)
+          expect((await futarchy.decisions(0))[4]).to.equal(true)
         })
 
         it('keeps passed as false in the decision struct', async () => {
-          expect((await futarchy.decisions(0))[4]).to.equal(false)
+          expect((await futarchy.decisions(0))[5]).to.equal(false)
           await futarchy.redeemTokenWinnings(0, {from: root})
-          expect((await futarchy.decisions(0))[4]).to.equal(false)
+          expect((await futarchy.decisions(0))[5]).to.equal(false)
         })
       })
     })
@@ -879,11 +885,8 @@ contract('Futarchy', (accounts) => {
 
   })
 
-  describe('getAvgPricesForDecisionMarkets()', () => {
-    let script, metadata, twenty, five, three
-
-    // StandardMarketWithPriceLogger returns average prices relative to this value of "one"
-    const ONE = 0x10000000000000000
+  describe('calcMarginalPrices()', () => {
+    let script, metadata, twenty, five, three, yesMarketAddr, noMarketAddr
 
     beforeEach(async () => {
       twenty = 20 * 10 ** 18
@@ -895,25 +898,29 @@ contract('Futarchy', (accounts) => {
       await token.approve(futarchy.address, MARKET_FUND_AMOUNT +  (40 * 10 ** 18), {from: root})
       await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
       futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
+      yesMarketAddr = await futarchyOracle.markets(0)
+      noMarketAddr = await futarchyOracle.markets(1)
     })
 
-    describe('when the YES market is shorted', () => {
-      it('returns average price for YES market below 0.5', async () => {
-        await futarchy.buyMarketPositions(0, twenty, [five + three, 0], [0, 0], {from: root})
-        await timeTravel(1800)
-        const yesPrice = (await futarchy.getAvgPricesForDecisionMarkets(0))[0].toNumber()
-        expect(yesPrice / ONE).to.be.lessThan(0.5)
-      })
+    it('returns marginal prices for outcome tokens on YES and NO markets', async () => {
+      await futarchy.buyMarketPositions(0, twenty, [five + three, 0], [0, five + three], {from: root})
+      await timeTravel(1800)
+
+      const marginalPrices = await futarchy.calcMarginalPrices(0)
+
+      const marginalPricesFromLMSR = [
+        (await lmsrMarketMaker.calcMarginalPrice(yesMarketAddr, 0)).toNumber(),
+        (await lmsrMarketMaker.calcMarginalPrice(yesMarketAddr, 1)).toNumber(),
+        (await lmsrMarketMaker.calcMarginalPrice(noMarketAddr, 0)).toNumber(),
+        (await lmsrMarketMaker.calcMarginalPrice(noMarketAddr, 1)).toNumber()
+      ]
+
+      for(var i in marginalPrices) {
+        const marginalPriceVal = marginalPrices[i].toNumber()
+        expect(marginalPriceVal).to.equal(marginalPricesFromLMSR[i])
+      }
     })
 
-    describe('when the NO market is shorted', () => {
-      it('returns average price for NO market below 0.5', async () => {
-        await futarchy.buyMarketPositions(0, twenty, [0, 0], [five + three, 0], {from: root})
-        await timeTravel(1800)
-        const noPrice = (await futarchy.getAvgPricesForDecisionMarkets(0))[1].toNumber()
-        expect(noPrice / ONE).to.be.lessThan(0.5)
-      })
-    })
   })
 
   async function initializeFutarchy(customParams = {}) {
