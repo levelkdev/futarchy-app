@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "./FutarchyOracleMock.sol";
+import './FutarchyOracleMock.sol';
 
 contract FutarchyOracleFactoryMock {
 
@@ -18,6 +18,6 @@ contract FutarchyOracleFactoryMock {
         public
         returns (FutarchyOracleMock futarchyOracle)
     {
-        futarchyOracle = new FutarchyOracleMock();
+        futarchyOracle = new FutarchyOracleMock(collateralToken);
     }
 }

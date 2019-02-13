@@ -247,6 +247,44 @@ contract('Futarchy', (accounts) => {
     })
   })
 
+  describe('closeDecisionMarkets() unit tests', () => {
+    let script, metadata, decisionId, futarchyOracle, keccak
+    let yesMarket, noMarket, yesEvent, noEvent, yesToken, noToken, yesLongToken, yesShortToken, noLongToken, noShortToken
+
+    beforeEach(async () => {
+      // large setup not required bc no integration with full futarchyOracle here
+      initializeFutarchy()
+      script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
+      metadata = 'Give voting rights to all kitties in the world'
+      await token.approve(futarchy.address, MARKET_FUND_AMOUNT +  (40 * 10 ** 18), {from: root})
+      await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
+      futarchyOracle = FutarchyOracleMock.at((await futarchy.decisions(0))[0])
+    })
+
+    it('calls futarchyOracle.close()', async () => {
+      expect(await futarchyOracle.mock_closed()).to.equal(false)
+      await futarchy.closeDecisionMarkets(0)
+      expect(await futarchyOracle.mock_closed()).to.equal(true)
+    })
+
+    it('transfers the full refund amount to creator when full refund is returned', async () => {
+      let previousTokenBalance = (await token.balanceOf(root)).toNumber()
+      await futarchy.closeDecisionMarkets(0)
+      let newTokenBalance = (await token.balanceOf(root)).toNumber()
+      expect(newTokenBalance - previousTokenBalance).to.equal(MARKET_FUND_AMOUNT)
+    })
+
+    it('transfers the appropriate refund to creator if refund amount is less than the full market funding', async () => {
+      let lowRefundAmount = MARKET_FUND_AMOUNT - 3 * 10 ** 18
+      await futarchyOracle.mock_setRefundAmount(lowRefundAmount)
+
+      let previousTokenBalance = (await token.balanceOf(root)).toNumber()
+      await futarchy.closeDecisionMarkets(0)
+      let newTokenBalance = (await token.balanceOf(root)).toNumber()
+      expect(newTokenBalance - previousTokenBalance).to.equal(lowRefundAmount)
+    })
+  })
+
   describe('executeDecision()', async () => {
     let script, metadata, decisionId, currentBlockNumber, futarchyOracle, exeutionTarget
 
@@ -520,7 +558,7 @@ contract('Futarchy', (accounts) => {
 
   describe('sellMarketPositions()', async () => {
     let script, metadata, decisionId, futarchyOracle, keccak
-    let yesMarket, noMarket, yesToken, noToken, yesLongToken, yesShortToken, noLongToken, noShortToken
+    let yesMarket, noMarket, yesEvent, noEvent, yesToken, noToken, yesLongToken, yesShortToken, noLongToken, noShortToken
 
     beforeEach(async () => {
       let account2 = web3.eth.accounts[1]
@@ -536,8 +574,8 @@ contract('Futarchy', (accounts) => {
       futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
       yesMarket = StandardMarketWithPriceLogger.at(await futarchyOracle.markets(0))
       noMarket = StandardMarketWithPriceLogger.at(await futarchyOracle.markets(1))
-      let yesEvent = ScalarEvent.at(await yesMarket.eventContract())
-      let noEvent = ScalarEvent.at(await noMarket.eventContract())
+      yesEvent = ScalarEvent.at(await yesMarket.eventContract())
+      noEvent = ScalarEvent.at(await noMarket.eventContract())
 
       yesToken = OutcomeToken.at(await yesEvent.collateralToken())
       noToken = OutcomeToken.at(await noEvent.collateralToken())
@@ -547,69 +585,88 @@ contract('Futarchy', (accounts) => {
       noLongToken = OutcomeToken.at(await noEvent.outcomeTokens(1))
 
       await futarchy.buyMarketPositions(0, TWENTY, [TWO, 0], [0, FIVE])
-      await futarchy.buyMarketPositions(0, TEN, [0, THREE], [TWO, 0], {from: account2}) // two buy for good measure
+      await futarchy.buyMarketPositions(0, TEN, [0, THREE], [TWO, 0], {from: account2})
     })
 
-    it('sells entire user balances of yes and no market outcome tokens for unique decision', async () => {
-      let traderDecisionBalances = await futarchy.traderDecisionBalances(keccak256(root, 0))
+    describe('when scalar prediction markets are open', () => {
+      it('sells entire user balances of yes and no market outcome tokens for unique decision', async () => {
+        let traderDecisionBalances = await futarchy.traderDecisionBalances(keccak256(root, 0))
 
-      let traderYesShortTokenBalance = traderDecisionBalances[2].toNumber()
-      let traderNoLongTokenBalance = traderDecisionBalances[5].toNumber()
+        let traderYesShortTokenBalance = traderDecisionBalances[2].toNumber()
+        let traderNoLongTokenBalance = traderDecisionBalances[5].toNumber()
 
-      let previousYesShortTokenBalance = (await yesShortToken.balanceOf(futarchy.address)).toNumber()
-      let previousNoLongTokenBalance = (await noLongToken.balanceOf(futarchy.address)).toNumber()
+        let previousYesShortTokenBalance = (await yesShortToken.balanceOf(futarchy.address)).toNumber()
+        let previousNoLongTokenBalance = (await noLongToken.balanceOf(futarchy.address)).toNumber()
 
-      await futarchy.sellMarketPositions(0, {from: root})
+        await futarchy.sellMarketPositions(0, {from: root})
 
-      let newYesShortTokenBalance = (await yesShortToken.balanceOf(futarchy.address)).toNumber()
-      let newNoLongTokenBalance = (await noLongToken.balanceOf(futarchy.address)).toNumber()
-      expect(newYesShortTokenBalance).to.equal(previousYesShortTokenBalance - traderYesShortTokenBalance)
-      expect(newNoLongTokenBalance).to.equal(previousNoLongTokenBalance - traderNoLongTokenBalance)
+        let newYesShortTokenBalance = (await yesShortToken.balanceOf(futarchy.address)).toNumber()
+        let newNoLongTokenBalance = (await noLongToken.balanceOf(futarchy.address)).toNumber()
+        expect(newYesShortTokenBalance).to.equal(previousYesShortTokenBalance - traderYesShortTokenBalance)
+        expect(newNoLongTokenBalance).to.equal(previousNoLongTokenBalance - traderNoLongTokenBalance)
+      })
+
+      it('receives yes and no market collateral tokens in exchange for selling', async () => {
+        let yesCollateralNetGain = 928961991810478100 // hard-coded for now
+        let noCollateralNetGain = 2538122905593782300
+
+        let previousYesTokenBalance = (await yesToken.balanceOf(futarchy.address)).toNumber()
+        let previousNoTokenBalance = (await noToken.balanceOf(futarchy.address)).toNumber()
+
+        await futarchy.sellMarketPositions(0, {from: root})
+
+        let newYesTokenBalance = (await yesToken.balanceOf(futarchy.address)).toNumber()
+        let newNoTokenBalance = (await noToken.balanceOf(futarchy.address)).toNumber()
+
+        expect(newYesTokenBalance).to.equal(previousYesTokenBalance + yesCollateralNetGain)
+        expect(newNoTokenBalance).to.equal(previousNoTokenBalance + noCollateralNetGain)
+      })
+
+      it('stores correct updated token balances for trader for unique decision', async () => {
+        let yesCollateralNetGain = 928961991810482200 // hard-coded for now
+        let noCollateralNetGain = 2538122905593784300
+
+        let previousDecisionBalances = await rootDecisionBalances()
+
+        await futarchy.sellMarketPositions(0, {from: root})
+
+        let newDecisionBalances = await rootDecisionBalances()
+
+        expect(newDecisionBalances.yesCollateral).to.equal(
+          previousDecisionBalances.yesCollateral + yesCollateralNetGain
+        )
+        expect(newDecisionBalances.noCollateral).to.equal(
+          previousDecisionBalances.noCollateral + noCollateralNetGain
+        )
+        expect(newDecisionBalances.yesShort).to.equal(0)
+        expect(newDecisionBalances.yesLong).to.equal(0)
+        expect(newDecisionBalances.noShort).to.equal(0)
+        expect(newDecisionBalances.noLong).to.equal(0)
+      })
+
+      it('emit a SellMarketPositions event', async () => {
+        const { logs } = await futarchy.sellMarketPositions(0, {from: root})
+        const event = logs[0]
+        expect(event.event).to.equal('SellMarketPositions')
+      })
     })
 
-    it('receives yes and no market collateral tokens in exchange for selling', async () => {
-      let yesCollateralNetGain = 928961991810478100 // hard-coded for now
-      let noCollateralNetGain = 2538122905593782300
+    describe('when scalar prediction markets are closed', () => {
+      it('reverts', async () => {
+        await timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
 
-      let previousYesTokenBalance = (await yesToken.balanceOf(futarchy.address)).toNumber()
-      let previousNoTokenBalance = (await noToken.balanceOf(futarchy.address)).toNumber()
+        await futarchyOracle.setOutcome()
+        await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
+        await futarchy.setPriceOutcome(0, 85)
+        await noEvent.setOutcome()
+        await futarchy.closeDecisionMarkets(0)
 
-      await futarchy.sellMarketPositions(0, {from: root})
-
-      let newYesTokenBalance = (await yesToken.balanceOf(futarchy.address)).toNumber()
-      let newNoTokenBalance = (await noToken.balanceOf(futarchy.address)).toNumber()
-
-      expect(newYesTokenBalance).to.equal(previousYesTokenBalance + yesCollateralNetGain)
-      expect(newNoTokenBalance).to.equal(previousNoTokenBalance + noCollateralNetGain)
+        return assertRevert(async () => {
+          await futarchy.sellMarketPositions(0, {from: root})
+        })
+      })
     })
 
-    it('stores correct updated token balances for trader for unique decision', async () => {
-      let yesCollateralNetGain = 928961991810482200 // hard-coded for now
-      let noCollateralNetGain = 2538122905593784300
-
-      let previousDecisionBalances = await rootDecisionBalances()
-
-      await futarchy.sellMarketPositions(0, {from: root})
-
-      let newDecisionBalances = await rootDecisionBalances()
-
-      expect(newDecisionBalances.yesCollateral).to.equal(
-        previousDecisionBalances.yesCollateral + yesCollateralNetGain
-      )
-      expect(newDecisionBalances.noCollateral).to.equal(
-        previousDecisionBalances.noCollateral + noCollateralNetGain
-      )
-      expect(newDecisionBalances.yesShort).to.equal(0)
-      expect(newDecisionBalances.yesLong).to.equal(0)
-      expect(newDecisionBalances.noShort).to.equal(0)
-      expect(newDecisionBalances.noLong).to.equal(0)
-    })
-
-    it('emit a SellMarketPositions event', async () => {
-      const { logs } = await futarchy.sellMarketPositions(0, {from: root})
-      const event = logs[0]
-      expect(event.event).to.equal('SellMarketPositions')
-    })
   })
 
   describe('redeemTokenWinnings()', () => {
