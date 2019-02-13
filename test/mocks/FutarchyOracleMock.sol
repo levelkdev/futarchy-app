@@ -12,9 +12,14 @@ contract FutarchyOracleMock {
   uint public mock_refundAmount;
   bool public mock_closed;
   ERC20Gnosis public token;
+  MockEvent public categoricalEvent;
+  MarketMock[] public markets;
 
   constructor(address _token) public {
     token = ERC20Gnosis(_token);
+    categoricalEvent = new MockEvent();
+    markets.push(new MarketMock());
+    markets.push(new MarketMock());
   }
 
   function mock_setIsSet(bool _isSet) public {
@@ -51,5 +56,19 @@ contract FutarchyOracleMock {
     mock_closed = true;
     token.transfer(msg.sender, mock_refundAmount);
     emit MockFutarchyClosing();
+  }
+}
+
+contract MarketMock {
+  MockEvent public eventContract;
+
+  constructor() public {
+    eventContract = new MockEvent();
+  }
+}
+
+contract MockEvent {
+  function redeemWinnings() public returns (uint winnings) {
+    winnings = 5;
   }
 }

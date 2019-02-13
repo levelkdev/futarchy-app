@@ -182,12 +182,19 @@ contract Futarchy is AragonApp, IForwarder {
     }
 
     function closeDecisionMarkets(uint decisionId) public {
+      Decision storage decision = decisions[decisionId];
+
       uint previousBalance = token.balanceOf(this);
-      decisions[decisionId].futarchyOracle.close();
+      decision.futarchyOracle.close();
       uint newBalance = token.balanceOf(this);
 
       uint creatorRefund = newBalance - previousBalance;
       require(token.transfer(decisions[decisionId].decisionCreator, creatorRefund));
+
+      uint winningMarketIndex = decision.passed ? 0 : 1;
+
+      decision.futarchyOracle.markets(winningMarketIndex).eventContract().redeemWinnings();
+      decision.futarchyOracle.categoricalEvent().redeemWinnings();
     }
 
 
