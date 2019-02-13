@@ -69,13 +69,6 @@ export const calcCosts = async (decisionId, outcomeTokenAmounts) => {
   return { yesShort, yesLong, noShort, noLong }
 }
 
-export const calcProfits = async (decisionId, outcomeTokenAmounts) => {
-  const [ yesShort, yesLong, noShort, noLong ] = await call(
-    'calcProfits', decisionId, outcomeTokenAmounts, {}
-  )
-  return { yesShort, yesLong, noShort, noLong }
-}
-
 export const traderDecisionBalances = async (decisionId, trader) => {
   const hash = traderDecisionHash(trader, decisionId)
   const balances = await call('traderDecisionBalances', hash)
@@ -195,7 +188,6 @@ export default {
   tradingPeriod,
   marketFundAmount,
   calcCosts,
-  calcProfits,
   traderDecisionBalances,
   newDecision,
   buyMarketPositions,
