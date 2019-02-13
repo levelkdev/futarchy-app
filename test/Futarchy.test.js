@@ -162,34 +162,36 @@ contract('Futarchy', (accounts) => {
         expect((await futarchy.decisions(0))[2].toNumber()).to.equal(startDate + tradingPeriod)
       })
 
-      it('sets the correct priceResolutionDate', async () => {
-        let startDate = (await futarchy.decisions(0))[1].toNumber()
-        let timeToPriceResolution = (await futarchy.timeToPriceResolution()).toNumber()
-        expect((await futarchy.decisions(0))[3].toNumber()).to.equal(startDate + timeToPriceResolution)
+      it('sets the correct lowerBound', async () => {
+        expect((await futarchy.decisions(0))[4].toNumber()).to.equal(LOWER_BOUND)
+      })
+
+      it('sets the correct upperBound', async () => {
+        expect((await futarchy.decisions(0))[5].toNumber()).to.equal(UPPER_BOUND)
       })
 
       it('sets the correct resolved', async () => {
-        expect((await futarchy.decisions(0))[4]).to.equal(false)
+        expect((await futarchy.decisions(0))[6]).to.equal(false)
       })
 
       it('sets the correct passed', async () => {
-        expect((await futarchy.decisions(0))[5]).to.equal(false)
-      })
-
-      it('sets the correct snapshotBlock', async () => {
-        expect((await futarchy.decisions(0))[6].toNumber()).to.equal(currentBlockNumber)
-      })
-
-      it('sets executed to false', async () => {
         expect((await futarchy.decisions(0))[7]).to.equal(false)
       })
 
+      it('sets the correct snapshotBlock', async () => {
+        expect((await futarchy.decisions(0))[8].toNumber()).to.equal(currentBlockNumber)
+      })
+
+      it('sets executed to false', async () => {
+        expect((await futarchy.decisions(0))[9]).to.equal(false)
+      })
+
       it('sets the correct metadata', async () => {
-        expect((await futarchy.decisions(0))[8]).to.equal(metadata)
+        expect((await futarchy.decisions(0))[10]).to.equal(metadata)
       })
 
       it('sets the correct executionScript', async () => {
-        expect((await futarchy.decisions(0))[9]).to.equal(stringToHex(script))
+        expect((await futarchy.decisions(0))[11]).to.equal(stringToHex(script))
       })
     })
 
@@ -354,9 +356,9 @@ contract('Futarchy', (accounts) => {
 
         it('sets decision.executed to true', async () => {
           await timeTravel(TRADING_PERIOD + 1)
-          expect((await futarchy.decisions(0))[7]).to.equal(false)
+          expect((await futarchy.decisions(0))[9]).to.equal(false)
           await futarchy.executeDecision(decisionId)
-          expect((await futarchy.decisions(0))[7]).to.equal(true)
+          expect((await futarchy.decisions(0))[9]).to.equal(true)
         })
 
         it('emits an ExecuteDecision event', async () => {
@@ -770,15 +772,15 @@ contract('Futarchy', (accounts) => {
         })
 
         it('sets resolved to true in the decision struct', async () => {
-          expect((await futarchy.decisions(0))[4]).to.equal(false)
+          expect((await futarchy.decisions(0))[6]).to.equal(false)
           await futarchy.redeemTokenWinnings(0, {from: root})
-          expect((await futarchy.decisions(0))[4]).to.equal(true)
+          expect((await futarchy.decisions(0))[6]).to.equal(true)
         })
 
         it('sets passed to true in the decision struct', async () => {
-          expect((await futarchy.decisions(0))[5]).to.equal(false)
+          expect((await futarchy.decisions(0))[7]).to.equal(false)
           await futarchy.redeemTokenWinnings(0, {from: root})
-          expect((await futarchy.decisions(0))[5]).to.equal(true)
+          expect((await futarchy.decisions(0))[7]).to.equal(true)
         })
       })
 
@@ -795,15 +797,15 @@ contract('Futarchy', (accounts) => {
         })
 
         it('sets resolved to true in the decision struct', async () => {
-          expect((await futarchy.decisions(0))[4]).to.equal(false)
+          expect((await futarchy.decisions(0))[6]).to.equal(false)
           await futarchy.redeemTokenWinnings(0, {from: root})
-          expect((await futarchy.decisions(0))[4]).to.equal(true)
+          expect((await futarchy.decisions(0))[6]).to.equal(true)
         })
 
         it('keeps passed as false in the decision struct', async () => {
-          expect((await futarchy.decisions(0))[5]).to.equal(false)
+          expect((await futarchy.decisions(0))[7]).to.equal(false)
           await futarchy.redeemTokenWinnings(0, {from: root})
-          expect((await futarchy.decisions(0))[5]).to.equal(false)
+          expect((await futarchy.decisions(0))[7]).to.equal(false)
         })
       })
     })

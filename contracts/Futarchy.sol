@@ -37,6 +37,8 @@ contract Futarchy is AragonApp, IForwarder {
     uint startDate;
     uint decisionResolutionDate;
     uint priceResolutionDate;
+    int lowerBound;
+    int upperBound;
     bool resolved;
     bool passed;
     uint64 snapshotBlock;
@@ -120,12 +122,13 @@ contract Futarchy is AragonApp, IForwarder {
       decisionId = decisionLength++;
 
       uint startDate = now;
-      uint decisionResolutionDate = startDate.add(tradingPeriod);
       uint priceResolutionDate = startDate.add(timeToPriceResolution);
 
       decisions[decisionId].startDate = startDate;
-      decisions[decisionId].decisionResolutionDate = decisionResolutionDate;
-      decisions[decisionId].priceResolutionDate = priceResolutionDate;
+      decisions[decisionId].decisionResolutionDate = startDate.add(tradingPeriod);
+      decisions[decisionId].priceResolutionDate = startDate.add(timeToPriceResolution);
+      decisions[decisionId].lowerBound = lowerBound;
+      decisions[decisionId].upperBound = upperBound;
       decisions[decisionId].metadata = metadata;
       decisions[decisionId].snapshotBlock = getBlockNumber64() - 1;
       decisions[decisionId].executionScript = executionScript;
@@ -148,7 +151,7 @@ contract Futarchy is AragonApp, IForwarder {
       require(token.approve(futarchyOracle, marketFundAmount));
       futarchyOracle.fund(marketFundAmount);
 
-      emit StartDecision(decisionId, msg.sender, metadata, futarchyOracle, lowerBound, upperBound, startDate, decisionResolutionDate, priceResolutionDate);
+      emit StartDecision(decisionId, msg.sender, metadata, futarchyOracle, lowerBound, upperBound, startDate, decisions[decisionId].decisionResolutionDate, decisions[decisionId].priceResolutionDate);
     }
 
     /**
@@ -325,6 +328,7 @@ contract Futarchy is AragonApp, IForwarder {
       emit SellMarketPositions(msg.sender, decisionId, now, yesSellPositions, noSellPositions, yesCollateralReceived, noCollateralReceived, marginalPrices);
     }
 
+
     /* @notice allocates token back to the sender based on their balance of the winning outcome collateralToken
      * @param decisionId unique identifier for the decision
      */
@@ -342,7 +346,6 @@ contract Futarchy is AragonApp, IForwarder {
       }
 
       int winningIndex = futarchyOracle.getOutcome();
-
       decisions[decisionId].resolved = true;
       decisions[decisionId].passed = winningIndex == 0 ? true : false;
       futarchyOracle.categoricalEvent().redeemWinnings();

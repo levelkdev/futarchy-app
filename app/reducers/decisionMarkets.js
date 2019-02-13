@@ -50,7 +50,7 @@ const decisionMarkets = (state = [], action) => {
           if  (decision.decisionId == decisionId) {
             decision.passed = decisionData.passed
             decision.resolved = decisionData.resolved
-            decision.decisionDate = decisionData.decisionDate
+            decision.decisionResolutionDate = decisionData.decisionResolutionDate
           }
           return decision
       })
@@ -118,7 +118,7 @@ function getStatus ({
   if (blocktimeInt < decisionResolutionDateInt)
   {
     return decisionStatuses.OPEN
-  } else if (blocktimeInt >= decisionResolutionDateInt && 
+  } else if (blocktimeInt >= decisionResolutionDateInt &&
              blocktimeInt < priceResolutionDateInt)
   {
     return decisionStatuses.RESOLVED
