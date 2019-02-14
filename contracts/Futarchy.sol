@@ -413,7 +413,7 @@ contract Futarchy is AragonApp, IForwarder {
     {
       // For markets, 0 is yes, and 1 is no; and for those markets' outcome tokens, 0 is short, and 1 long
       outcomeTokensSold[0] = decisions[decisionId].futarchyOracle.markets(marketIndex).netOutcomeTokensSold(0);
-      outcomeTokensSold[1] = decisions[decisionId].futarchyOracle.markets(marketIndex).netOutcomeTokensSold(1); 
+      outcomeTokensSold[1] = decisions[decisionId].futarchyOracle.markets(marketIndex).netOutcomeTokensSold(1);
     }
 
     function _addToTraderDecisionBalances(
