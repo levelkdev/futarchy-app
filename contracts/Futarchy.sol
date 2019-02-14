@@ -19,7 +19,7 @@ contract Futarchy is AragonApp, IForwarder {
   event ExecuteDecision(uint decisionId);
   event BuyMarketPositions(address trader, uint decisionId, uint tradeTime, uint collateralAmount, uint[2] yesPurchaseAmounts, uint[2] noPurchaseAmounts, uint[2] yesCosts, uint[2] noCosts, uint[4] marginalPrices);
   event SellMarketPositions(address trader, uint decisionId, uint tradeTime, int[] yesMarketPositions, int[] noMarketPositions, uint yesCollateralReceived, uint noCollateralReceived, uint[4] marginalPrices);
-  event RedeemWinnings(address trader, uint decisionId, int winningIndex, uint winningsAmount);
+  event RedeemWinningCollateralTokens(address trader, uint decisionId, int winningIndex, uint winningsAmount);
 
   bytes32 public constant CREATE_DECISION_ROLE = keccak256("CREATE_DECISION_ROLE");
 
@@ -339,7 +339,7 @@ contract Futarchy is AragonApp, IForwarder {
     /* @notice allocates token back to the sender based on their balance of the winning outcome collateralToken
      * @param decisionId unique identifier for the decision
      */
-    function redeemTokenWinnings(uint decisionId) public {
+    function redeemWinningCollateralTokens(uint decisionId) public {
       require(decisions[decisionId].decisionResolutionDate < now);
 
       FutarchyOracle futarchyOracle = decisions[decisionId].futarchyOracle;
@@ -367,7 +367,7 @@ contract Futarchy is AragonApp, IForwarder {
       }
 
       require(token.transfer(msg.sender, winnings));
-      emit RedeemWinnings(msg.sender, decisionId, winningIndex, winnings);
+      emit RedeemWinningCollateralTokens(msg.sender, decisionId, winningIndex, winnings);
     }
 
     /**

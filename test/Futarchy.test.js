@@ -677,7 +677,7 @@ contract('Futarchy', (accounts) => {
 
   })
 
-  describe('redeemTokenWinnings()', () => {
+  describe('redeemWinningCollateralTokens()', () => {
     beforeEach(async () => {
       let account2 = web3.eth.accounts[1]
       await token.generateTokens(account2, 100 * 10 ** 18)
@@ -708,8 +708,8 @@ contract('Futarchy', (accounts) => {
       await timeTravel(TRADING_PERIOD + 1)
       await futarchyOracle.setOutcome()
       await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
-      const { logs } = await futarchy.redeemTokenWinnings(0, {from: root})
-      expect(logs[0].event).to.equal('RedeemWinnings')
+      const { logs } = await futarchy.redeemWinningCollateralTokens(0, {from: root})
+      expect(logs[0].event).to.equal('RedeemWinningCollateralTokens')
     })
 
     describe('when outcome is YES', () => {
@@ -723,14 +723,14 @@ contract('Futarchy', (accounts) => {
       it('transfers dao token amount matching trader yesCollateral balance', async () => {
         let yesCollateralBalance = (await rootDecisionBalances()).yesCollateral
         let previousTokenBalance = (await token.balanceOf(root)).toNumber()
-        await futarchy.redeemTokenWinnings(0, {from: root})
+        await futarchy.redeemWinningCollateralTokens(0, {from: root})
         let newTokenBalance = (await token.balanceOf(root)).toNumber()
         expect(newTokenBalance).to.equal(previousTokenBalance + yesCollateralBalance)
       })
 
       it('sets yesCollateral trader balance to 0', async () => {
         expect((await rootDecisionBalances()).yesCollateral).to.be.above(0)
-        await futarchy.redeemTokenWinnings(0, {from: root})
+        await futarchy.redeemWinningCollateralTokens(0, {from: root})
         expect((await rootDecisionBalances()).yesCollateral).to.equal(0)
       })
     })
@@ -746,14 +746,14 @@ contract('Futarchy', (accounts) => {
       it('transfers dao token amount matching trader noCollateral balance', async () => {
         let noCollateralBalance = (await rootDecisionBalances()).noCollateral
         let previousTokenBalance = (await token.balanceOf(root)).toNumber()
-        await futarchy.redeemTokenWinnings(0, {from: root})
+        await futarchy.redeemWinningCollateralTokens(0, {from: root})
         let newTokenBalance = (await token.balanceOf(root)).toNumber()
         expect(newTokenBalance).to.equal(previousTokenBalance + noCollateralBalance)
       })
 
       it('sets noCollateral trader balance to 0', async () => {
         expect((await rootDecisionBalances()).noCollateral).to.be.above(0)
-        await futarchy.redeemTokenWinnings(0, {from: root})
+        await futarchy.redeemWinningCollateralTokens(0, {from: root})
         expect((await rootDecisionBalances()).noCollateral).to.equal(0)
       })
     })
@@ -767,19 +767,19 @@ contract('Futarchy', (accounts) => {
 
         it('sets the outcome on FutarchyOracle', async () => {
           expect(await futarchyOracle.isOutcomeSet()).to.equal(false)
-          await futarchy.redeemTokenWinnings(0, {from: root})
+          await futarchy.redeemWinningCollateralTokens(0, {from: root})
           expect(await futarchyOracle.isOutcomeSet()).to.equal(true)
         })
 
         it('sets resolved to true in the decision struct', async () => {
           expect((await futarchy.decisions(0))[6]).to.equal(false)
-          await futarchy.redeemTokenWinnings(0, {from: root})
+          await futarchy.redeemWinningCollateralTokens(0, {from: root})
           expect((await futarchy.decisions(0))[6]).to.equal(true)
         })
 
         it('sets passed to true in the decision struct', async () => {
           expect((await futarchy.decisions(0))[7]).to.equal(false)
-          await futarchy.redeemTokenWinnings(0, {from: root})
+          await futarchy.redeemWinningCollateralTokens(0, {from: root})
           expect((await futarchy.decisions(0))[7]).to.equal(true)
         })
       })
@@ -792,19 +792,19 @@ contract('Futarchy', (accounts) => {
 
         it('sets the outcome on FutarchyOracle', async () => {
           expect(await futarchyOracle.isOutcomeSet()).to.equal(false)
-          await futarchy.redeemTokenWinnings(0, {from: root})
+          await futarchy.redeemWinningCollateralTokens(0, {from: root})
           expect(await futarchyOracle.isOutcomeSet()).to.equal(true)
         })
 
         it('sets resolved to true in the decision struct', async () => {
           expect((await futarchy.decisions(0))[6]).to.equal(false)
-          await futarchy.redeemTokenWinnings(0, {from: root})
+          await futarchy.redeemWinningCollateralTokens(0, {from: root})
           expect((await futarchy.decisions(0))[6]).to.equal(true)
         })
 
         it('keeps passed as false in the decision struct', async () => {
           expect((await futarchy.decisions(0))[7]).to.equal(false)
-          await futarchy.redeemTokenWinnings(0, {from: root})
+          await futarchy.redeemWinningCollateralTokens(0, {from: root})
           expect((await futarchy.decisions(0))[7]).to.equal(false)
         })
       })
