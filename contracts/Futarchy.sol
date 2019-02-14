@@ -282,8 +282,8 @@ contract Futarchy is AragonApp, IForwarder {
       _addToTraderDecisionBalances(
         decisionId,
         [
-          collateralAmount.sub(_calcTotalCost(yesCosts)),
-          collateralAmount.sub(_calcTotalCost(noCosts))
+          collateralAmount.sub(yesCosts[0].add(yesCosts[1])),
+          collateralAmount.sub(noCosts[0].add(noCosts[1]))
         ],
         yesPurchaseAmounts,
         noPurchaseAmounts
@@ -423,10 +423,6 @@ contract Futarchy is AragonApp, IForwarder {
       marketPositions[0] = marketIndex == 0 ? -int(outcomeTokenBalances.yesShort) : -int(outcomeTokenBalances.noShort);
       marketPositions[1] = marketIndex == 0 ? -int(outcomeTokenBalances.yesLong) : -int(outcomeTokenBalances.noLong);
       return marketPositions;
-    }
-
-    function _calcTotalCost(uint[2] costs) internal pure returns (uint) {
-      return costs[0].add(costs[1]);
     }
 
     /**
