@@ -99,6 +99,18 @@ const decisionMarkets = (state = [], action) => {
       } else {
         return state
       }
+    case 'NET_OUTCOME_TOKENS_SOLD_FOR_DECISION_LOADED':
+      return state.map(decision => {
+        if (decision.id == action.decisionId) {
+          if ( action.marketIndex == 0 ) {
+            decision.yesMarketShortOutcomeTokensSold = action.shortOutcomeTokensSold,
+            decision.yesMarketLongOutcomeTokensSold = action.longOutcomeTokensSold
+          } else if (action.marketIndex == 1) {
+            decision.noMarketShortOutcomeTokensSold = action.shortOutcomeTokensSold,
+            decision.yesMarketLongOutcomeTokensSold = action.longOutcomeTokensSold
+          }
+        }
+      })
     default:
       return state
   }

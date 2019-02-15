@@ -24,6 +24,14 @@ export const avgDecisionMarketPricesLoaded = ({ decisionId, yesMarketPrice, noMa
   noMarketPrice
 })
 
+export const netOutcomeTokensSoldForDecisionLoaded = ({ decisionId, marketIndex, shortOutcomeTokensSold, longOutcomeTokensSold }) => ({
+  type: 'NET_OUTCOME_TOKENS_SOLD_FOR_DECISION_LOADED',
+  decisionId,
+  marketIndex,
+  shortOutcomeTokensSold,
+  longOutcomeTokensSold
+})
+
 export const yesNoMarketDataLoaded = ({
   decisionId,
   yesMarketFee,
