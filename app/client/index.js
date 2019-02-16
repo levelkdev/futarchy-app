@@ -57,6 +57,11 @@ export const marketFundAmount = async () => {
   return amount
 }
 
+export const calcMarginalPrices = async (decisionId) => {
+  const marginalPrices = await call('calcMarginalPrices', parseInt(decisionId))
+  return marginalPrices
+}
+
 export const decisions = async (decisionId) => {
   const decision = await call('decisions', parseInt(decisionId))
   return decision
@@ -185,6 +190,7 @@ export default {
   fee,
   tradingPeriod,
   marketFundAmount,
+  calcMarginalPrices,
   netOutcomeTokensSoldForDecision,
   traderDecisionBalances,
   newDecision,

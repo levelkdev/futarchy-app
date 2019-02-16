@@ -61,6 +61,13 @@ export const decisionDataLoaded = ({ decisionId, decisionData }) => ({
   decisionId
 })
 
+export const marginalPricesLoaded = ({ decisionId, yesMarginalPrice, noMarginalPrice }) => ({
+  type: 'MARGINAL_PRICES_LOADED',
+  decisionId,
+  yesMarginalPrice,
+  noMarginalPrice
+})
+
 export const showPanel = ({ panelName, panelContext }) => ({
   type: 'SHOW_PANEL',
   panelName,
@@ -208,12 +215,30 @@ export const fetchYesNoMarketData = ({ decisionId, futarchyOracleAddress }) => d
   })
 }
 
+export const fetchMarginalPrices = ({ decisionId }) => dispatch => {
+  return client.calcMarginalPrices(decisionId).then(marginalPrices => {
+    // index 1 = YES_LONG, index 3 = NO_LONG
+    dispatch(marginalPricesLoaded({
+      decisionId,
+      yesMarginalPrice: marginalPrices[1],
+      noMarginalPrice: marginalPrices[3]
+    }))
+  },
+  errorMessage => {
+    console.error(`fetchMarginalPrices: ${errorMessage}`)
+    // TODO: dispatch error action, to show something to the user
+  })
+}
+
 export const fetchDecisionData = (decisionId) => dispatch => {
   return client.decisions(decisionId).then(
     decisionData => {
       dispatch(fetchYesNoMarketData({
         decisionId,
         futarchyOracleAddress: decisionData.futarchyOracle
+      }))
+      dispatch(fetchMarginalPrices({
+        decisionId
       }))
       dispatch(decisionDataLoaded({ decisionId, decisionData }))
     }

@@ -72,6 +72,25 @@ const decisionMarkets = (state = [], action) => {
         }
         return decision
       })
+    case 'MARGINAL_PRICES_LOADED':
+      // TODO: refactor logic from AVG_DECISION_MARKET_PRICES_LOADED and write tests
+      return state.map(decision => {
+        if (decision.decisionId == action.decisionId) {
+          decision.yesMarketMarginalPrice = calcPriceAsPercentage(action.yesMarginalPrice),
+          decision.noMarketMarginalPrice = calcPriceAsPercentage(action.noMarginalPrice),
+          decision.yesMarketMarginalPredictedPrice = calcPredictedPrice(
+            decision.yesMarketMarginalPrice,
+            decision.lowerBound,
+            decision.upperBound
+          )
+          decision.noMarketMarginalPredictedPrice = calcPredictedPrice(
+            decision.noMarketMarginalPrice,
+            decision.lowerBound,
+            decision.upperBound
+          )
+        }
+        return decision
+      })
     case 'YES_NO_MARKET_DATA_LOADED':
       return state.map(decision => {
         if (decision.decisionId == action.decisionId) {

@@ -1,8 +1,8 @@
 import React from 'react'
-import { Field, reduxForm, formValueSelector } from 'redux-form'
+import { Field, reduxForm } from 'redux-form'
 import { connect } from 'react-redux'
 import { Button, Info, Text, Badge, DropDown, TextInput } from '@aragon/ui'
-import formatBalance from '../util/formatBalance'
+import formatPrice from '../util/formatPrice'
 import styled from 'styled-components'
 
 const dropDownItems = [
@@ -10,8 +10,9 @@ const dropDownItems = [
   'more than',
 ]
 
-let MakePredictionForm = props => {
-  const { 
+const createReduxForm = reduxForm({ form: 'makePredictionForm' })
+
+const MakePredictionForm = createReduxForm(({
   decision,
   handleSubmit,
   executeBuy,
@@ -20,92 +21,77 @@ let MakePredictionForm = props => {
   noPrediction,
   pristine,
   submitting
-  } = props
-  return (
-    <form onSubmit={handleSubmit(values => {
-      executeBuy({
-        decisionId: decision.id,
-        ...values
-      })
-      console.log(`Execute Buy:\n\n${JSON.stringify(values, null, 2)}`);
-    })}>
-      <StyledRow>
-        <StyledSmallCaps>question</StyledSmallCaps>
-        <br />
-        <StyledText size="large">{decision.question}</StyledText>
-        <br />
-      </StyledRow>
-      <StyledRow>
+}) => (
+  <form onSubmit={handleSubmit(values => {
+    executeBuy({
+      decisionId: decision.id,
+      ...values
+    })
+    console.log(`Execute Buy:\n\n${JSON.stringify(values, null, 2)}`);
+  })}>
+    <StyledRow>
+      <StyledSmallCaps>question</StyledSmallCaps>
       <br />
-      <StyledSmallCaps>Allocate your tokens</StyledSmallCaps>
-        <StyledField
-          name="collateralAmount"
-          component="input"
-          type="text"
-          placeholder="Enter Amount to Risk"
-        />
-        <StyledAccountBalance>XXXX ETH Available</StyledAccountBalance>
-      </StyledRow>
-      <StyledRow>
-        <StyledYesBadge>YES</StyledYesBadge>
-        <StyledSmallCaps>price will be:</StyledSmallCaps>
-        <br />
-        <StyledFlexContainer>
-          <div>
-            <StyledDropDown name="yesMarket" component="select">
-              <option value="" selected disabled>Select an option</option>
-              <option value="more">more than</option>
-              <option value="less">less than</option>
-            </StyledDropDown>
-          </div>
-          <div>
-          <TextInput readonly value={decision.yesMarketPredictedPrice} /><br />
-          <StyledSmallCaps>Current <StyledMarketSpan>YES</StyledMarketSpan> price</StyledSmallCaps>
-          </div>
-        </StyledFlexContainer>
-      </StyledRow>
-      <StyledRow>
-        <StyledNoBadge>NO</StyledNoBadge>
-        <StyledSmallCaps>price will be:</StyledSmallCaps>
-        <br />
-        <StyledFlexContainer>
-        <StyledDropDown name="noMarket" component="select">
+      <StyledText size="large">{decision.question}</StyledText>
+      <br />
+    </StyledRow>
+    <StyledRow>
+    <br />
+    <StyledSmallCaps>Allocate your tokens</StyledSmallCaps>
+      <StyledField
+        name="collateralAmount"
+        component="input"
+        type="text"
+        placeholder="Enter Amount to Risk"
+      />
+      <StyledAccountBalance>XXXX ETH Available</StyledAccountBalance>
+    </StyledRow>
+    <StyledRow>
+      <StyledYesBadge>YES</StyledYesBadge>
+      <StyledSmallCaps>price will be:</StyledSmallCaps>
+      <br />
+      <StyledFlexContainer>
+        <div>
+          <StyledDropDown name="yesMarket" component="select">
             <option value="" selected disabled>Select an option</option>
             <option value="more">more than</option>
             <option value="less">less than</option>
           </StyledDropDown>
+        </div>
+        <div>
           <div>
-          <TextInput readonly value={decision.noMarketPredictedPrice} /><br />
-          <StyledSmallCaps>Current <StyledMarketSpan>NO</StyledMarketSpan> price</StyledSmallCaps>
+            <StyledSmallCaps>{formatPrice(decision.yesMarketMarginalPredictedPrice)}</StyledSmallCaps>
           </div>
-        </StyledFlexContainer>
-      </StyledRow>
+          <StyledSmallCaps>Current <StyledMarketSpan>YES</StyledMarketSpan> price</StyledSmallCaps>
+        </div>
+      </StyledFlexContainer>
+    </StyledRow>
+    <StyledRow>
+      <StyledNoBadge>NO</StyledNoBadge>
+      <StyledSmallCaps>price will be:</StyledSmallCaps>
       <br />
-      <br />
-      <StyledInfo>
-        This will use XXXX of your XXXX ETH
-      </StyledInfo>
-      <Button mode="strong" type="submit" wide disabled={pristine || submitting}>Make Prediction</Button>
-    </form>
-)}
-
-MakePredictionForm = reduxForm({
-  form: 'makePredictionForm' 
-})(MakePredictionForm)
-
-const selector = formValueSelector('makePredictionForm')
-
-MakePredictionForm = connect(state => {
-  const collateralAmount = selector(state, 'collateralAmount')
-  const noPrediction = selector(state, 'noPrediction')
-  const yesPrediction = selector(state, 'yesPrediction')
-
-  return {
-    collateralAmount,
-    yesPrediction,
-    noPrediction
-  }
-})(MakePredictionForm)
+      <StyledFlexContainer>
+      <StyledDropDown name="noMarket" component="select">
+          <option value="" selected disabled>Select an option</option>
+          <option value="more">more than</option>
+          <option value="less">less than</option>
+        </StyledDropDown>
+        <div>
+          <div>
+            <StyledSmallCaps>{formatPrice(decision.noMarketMarginalPredictedPrice)}</StyledSmallCaps>
+          </div>
+          <StyledSmallCaps>Current <StyledMarketSpan>NO</StyledMarketSpan> price</StyledSmallCaps>
+        </div>
+      </StyledFlexContainer>
+    </StyledRow>
+    <br />
+    <br />
+    <StyledInfo>
+      This will use XXXX of your XXXX ETH
+    </StyledInfo>
+    <Button mode="strong" type="submit" wide disabled={pristine || submitting}>Make Prediction</Button>
+  </form>
+))
 
 const StyledDropDown = styled(Field)`
   box-shadow: 0 4px 4px 0 rgba(0,0,0,0.03);
