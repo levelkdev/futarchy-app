@@ -47,6 +47,11 @@ module.exports = async (
       'run',
       'start:aragon:http',
       '--',
+      
+      // TODO: spiff this up ... and why doesn't it work??
+      '--environment',
+      'staging',
+
       '--app-init-args',
       FEE,
       TRADING_PERIOD,

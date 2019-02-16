@@ -1,3 +1,5 @@
+const getDeployConfig = require('./getDeployConfig')
+
 const globalArtifacts = this.artifacts // Not injected unless called directly via truffle
 const NULL_ADDRESS = '0x00'
 
@@ -8,8 +10,14 @@ module.exports = async (
   } = {}
 ) => {
   try {
-    console.log('deploying dependencies...')
-    console.log('')
+    const network = process.argv[5]
+    const deployConfig = getDeployConfig(network)
+
+    if (deployConfig !== {}) {
+      console.log(`Using dependency contract addresses from deploy.${network}.json`)
+    } else {
+      console.log('deploying dependencies...')
+    }
 
     const MiniMeToken = artifacts.require('MiniMeToken')
     const CentralizedTimedOracle = artifacts.require('CentralizedTimedOracle')
@@ -25,73 +33,78 @@ module.exports = async (
     const StandardMarketWithPriceLoggerFactory = artifacts.require('StandardMarketWithPriceLoggerFactory')
     const FutarchyOracleFactory = artifacts.require('FutarchyOracleFactory')
 
-    const miniMeToken = await MiniMeToken.new(
-      NULL_ADDRESS,
-      NULL_ADDRESS,
-      0,
-      'TokenCoin',
-      0,
-      'TKN',
-      true
-    )
-    console.log(`MiniMeToken instance: ${miniMeToken.address}`)
+    if (!deployConfig.MiniMeToken) {
+      const miniMeToken = await MiniMeToken.new(
+        NULL_ADDRESS,
+        NULL_ADDRESS,
+        0,
+        'TokenCoin',
+        0,
+        'TKN',
+        true
+      )
+      console.log(`MiniMeToken instance: ${miniMeToken.address}`)
+      deployConfig.MiniMeToken = miniMeToken.address
+    }
 
-    const centralizedTimedOracleFactory = await CentralizedTimedOracleFactory.new()
-    console.log(`CentralizedTimedOracleFactory instance: ${centralizedTimedOracleFactory.address}`)
+    // TODO: check conf for all these....
 
-    const fixed192x64Math = await Fixed192x64Math.new()
-    console.log(`Fixed192x64Math instance: ${fixed192x64Math.address}`)
+    // const centralizedTimedOracleFactory = await CentralizedTimedOracleFactory.new()
+    // console.log(`CentralizedTimedOracleFactory instance: ${centralizedTimedOracleFactory.address}`)
 
-    await LMSRMarketMaker.link('Fixed192x64Math', fixed192x64Math.address)
-    const lmsrMarketMaker = await LMSRMarketMaker.new()
-    console.log(`LMSRMarketMaker instance: ${lmsrMarketMaker.address}`)
+    // const fixed192x64Math = await Fixed192x64Math.new()
+    // console.log(`Fixed192x64Math instance: ${fixed192x64Math.address}`)
 
-    const categoricalEventMaster = await CategoricalEvent.new()
-    console.log(`CategoricalEvent master: ${categoricalEventMaster.address}`)
+    // await LMSRMarketMaker.link('Fixed192x64Math', fixed192x64Math.address)
+    // const lmsrMarketMaker = await LMSRMarketMaker.new()
+    // console.log(`LMSRMarketMaker instance: ${lmsrMarketMaker.address}`)
 
-    const scalarEventMaster = await ScalarEvent.new()
-    console.log(`ScalarEvent master: ${scalarEventMaster.address}`)
+    // const categoricalEventMaster = await CategoricalEvent.new()
+    // console.log(`CategoricalEvent master: ${categoricalEventMaster.address}`)
 
-    const outcomeTokenMaster = await OutcomeToken.new()
-    console.log(`OutcomeToken master: ${outcomeTokenMaster.address}`)
+    // const scalarEventMaster = await ScalarEvent.new()
+    // console.log(`ScalarEvent master: ${scalarEventMaster.address}`)
 
-    const futarchyOracleMaster = await FutarchyOracle.new()
-    console.log(`FutarchyOracle master: ${futarchyOracleMaster.address}`)
+    // const outcomeTokenMaster = await OutcomeToken.new()
+    // console.log(`OutcomeToken master: ${outcomeTokenMaster.address}`)
 
-    const standardMarketWithPriceLoggerMaster = await StandardMarketWithPriceLogger.new()
-    console.log(`StandardMarketWithPriceLogger master: ${standardMarketWithPriceLoggerMaster.address}`)
+    // const futarchyOracleMaster = await FutarchyOracle.new()
+    // console.log(`FutarchyOracle master: ${futarchyOracleMaster.address}`)
 
-    const eventFactory = await EventFactory.new(
-      categoricalEventMaster.address,
-      scalarEventMaster.address,
-      outcomeTokenMaster.address
-    )
-    console.log(`EventFactory instance: ${eventFactory.address}`)
+    // const standardMarketWithPriceLoggerMaster = await StandardMarketWithPriceLogger.new()
+    // console.log(`StandardMarketWithPriceLogger master: ${standardMarketWithPriceLoggerMaster.address}`)
 
-    const standardMarketWithPriceLoggerFactory = await StandardMarketWithPriceLoggerFactory.new(
-      standardMarketWithPriceLoggerMaster.address
-    )
-    console.log(
-      `StandardMarketWithPriceLoggerFactory instance: ${standardMarketWithPriceLoggerFactory.address}`
-    )
+    // const eventFactory = await EventFactory.new(
+    //   categoricalEventMaster.address,
+    //   scalarEventMaster.address,
+    //   outcomeTokenMaster.address
+    // )
+    // console.log(`EventFactory instance: ${eventFactory.address}`)
 
-    const futarchyOracleFactory = await FutarchyOracleFactory.new(
-      futarchyOracleMaster.address,
-      eventFactory.address,
-      standardMarketWithPriceLoggerFactory.address
-    )
-    console.log(`FutarchyOracleFactory instance: ${futarchyOracleFactory.address}`)
+    // const standardMarketWithPriceLoggerFactory = await StandardMarketWithPriceLoggerFactory.new(
+    //   standardMarketWithPriceLoggerMaster.address
+    // )
+    // console.log(
+    //   `StandardMarketWithPriceLoggerFactory instance: ${standardMarketWithPriceLoggerFactory.address}`
+    // )
+
+    // const futarchyOracleFactory = await FutarchyOracleFactory.new(
+    //   futarchyOracleMaster.address,
+    //   eventFactory.address,
+    //   standardMarketWithPriceLoggerFactory.address
+    // )
+    // console.log(`FutarchyOracleFactory instance: ${futarchyOracleFactory.address}`)
 
     if (typeof truffleExecCallback === 'function') {
       truffleExecCallback()
     } else {
       return {
-        miniMeTokenAddress: miniMeToken.address,
-        centralizedTimedOracleFactoryAddress: centralizedTimedOracleFactory.address,
-        lmsrMarketMakerAddress: lmsrMarketMaker.address,
-        eventFactoryAddress: eventFactory.address,
-        standardMarketWithPriceLoggerFactoryAddress: standardMarketWithPriceLoggerFactory.address,
-        futarchyOracleFactoryAddress: futarchyOracleFactory.address
+        miniMeTokenAddress: deployConfig.MiniMeToken,
+        centralizedTimedOracleFactoryAddress: deployConfig.CentralizedTimedOracleFactory,
+        lmsrMarketMakerAddress: deployConfig.LMSRMarketMaker,
+        eventFactoryAddress: deployConfig.EventFactory,
+        standardMarketWithPriceLoggerFactoryAddress: deployConfig.StandardMarketWithPriceLoggerFactory,
+        futarchyOracleFactoryAddress: deployConfig.FutarchyOracleFactory
       }
     }
   } catch (err) {
