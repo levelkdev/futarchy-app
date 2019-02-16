@@ -62,28 +62,9 @@ export const decisions = async (decisionId) => {
   return decision
 }
 
-export const avgPricesForDecisionMarkets = async (decisionId) => {
-  const [ yesMarketPrice, noMarketPrice ] = await call('getAvgPricesForDecisionMarkets', decisionId)
-  return { yesMarketPrice, noMarketPrice }
-}
-
 export const netOutcomeTokensSoldForDecision = async (decisionId, marketIndex) => {
   const [ shortOutcomeTokensSold, longOutcomeTokensSold ] = await call('getNetOutcomeTokensSoldForDecision', decisionId, marketIndex)
   return { shortOutcomeTokensSold, longOutcomeTokensSold }
-}
-
-export const calcCosts = async (decisionId, outcomeTokenAmounts) => {
-  const [ yesShort, yesLong, noShort, noLong ] = await call(
-    'calcCosts', decisionId, outcomeTokenAmounts
-  )
-  return { yesShort, yesLong, noShort, noLong }
-}
-
-export const calcProfits = async (decisionId, outcomeTokenAmounts) => {
-  const [ yesShort, yesLong, noShort, noLong ] = await call(
-    'calcProfits', decisionId, outcomeTokenAmounts, {}
-  )
-  return { yesShort, yesLong, noShort, noLong }
 }
 
 export const traderDecisionBalances = async (decisionId, trader) => {
@@ -204,10 +185,7 @@ export default {
   fee,
   tradingPeriod,
   marketFundAmount,
-  avgPricesForDecisionMarkets,
   netOutcomeTokensSoldForDecision,
-  calcCosts,
-  calcProfits,
   traderDecisionBalances,
   newDecision,
   buyMarketPositions,
