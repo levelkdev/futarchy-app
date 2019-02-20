@@ -14,7 +14,8 @@ const mapStateToProps = state => ({
   decision: findDecisionById(
     state.decisionMarkets,
     state.sidePanel.panelContext.decisionId
-  )
+  ),
+  tokenBalance: state.tokenBalance
 })
 
 const mapDispatchToProps = dispatch => ({

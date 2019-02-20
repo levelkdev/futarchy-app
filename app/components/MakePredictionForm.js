@@ -1,6 +1,9 @@
 import React from 'react'
 import { Field, reduxForm } from 'redux-form'
 import { connect } from 'react-redux'
+import formatBalance from '../util/formatBalance'
+import EtherDisplaySymbol from './EtherDisplaySymbol'
+import TokenSymbolDisplay from './TokenSymbolDisplay'
 import { Button, Info, Text, Badge, DropDown, TextInput } from '@aragon/ui'
 import formatPrice from '../util/formatPrice'
 import styled from 'styled-components'
@@ -20,7 +23,8 @@ const MakePredictionForm = createReduxForm(({
   yesPrediction,
   noPrediction,
   pristine,
-  submitting
+  submitting,
+  tokenBalance
 }) => (
   <form onSubmit={handleSubmit(values => {
     executeBuy({
@@ -44,7 +48,9 @@ const MakePredictionForm = createReduxForm(({
         type="text"
         placeholder="Enter Amount to Risk"
       />
-      <StyledAccountBalance>XXXX ETH Available</StyledAccountBalance>
+      <StyledAccountBalance>
+        {formatBalance(tokenBalance)} <TokenSymbolDisplay /> Available
+      </StyledAccountBalance>
     </StyledRow>
     <StyledRow>
       <StyledYesBadge>YES</StyledYesBadge>
@@ -58,12 +64,12 @@ const MakePredictionForm = createReduxForm(({
             <option value="less">less than</option>
           </StyledDropDown>
         </div>
-        <div>
-          <div>
-            <StyledSmallCaps>{formatPrice(decision.yesMarketMarginalPredictedPrice)}</StyledSmallCaps>
-          </div>
-          <StyledSmallCaps>Current <StyledMarketSpan>YES</StyledMarketSpan> price</StyledSmallCaps>
-        </div>
+        <StyledMarketInfo>
+          <StyledMarketPrice>
+            {formatPrice(decision.yesMarketMarginalPredictedPrice)} <EtherDisplaySymbol />
+          </StyledMarketPrice>
+          <StyledMarketPrediction>Current market prediction</StyledMarketPrediction>
+        </StyledMarketInfo>
       </StyledFlexContainer>
     </StyledRow>
     <StyledRow>
@@ -71,24 +77,20 @@ const MakePredictionForm = createReduxForm(({
       <StyledSmallCaps>price will be:</StyledSmallCaps>
       <br />
       <StyledFlexContainer>
-      <StyledDropDown name="noMarket" component="select">
+        <StyledDropDown name="noMarket" component="select">
           <option value="" selected disabled>Select an option</option>
           <option value="more">more than</option>
           <option value="less">less than</option>
         </StyledDropDown>
-        <div>
-          <div>
-            <StyledSmallCaps>{formatPrice(decision.noMarketMarginalPredictedPrice)}</StyledSmallCaps>
-          </div>
-          <StyledSmallCaps>Current <StyledMarketSpan>NO</StyledMarketSpan> price</StyledSmallCaps>
-        </div>
+        <StyledMarketInfo>
+          <StyledMarketPrice>
+            {formatPrice(decision.noMarketMarginalPredictedPrice)} <EtherDisplaySymbol />
+          </StyledMarketPrice>
+          <StyledMarketPrediction>Current market prediction</StyledMarketPrediction>
+        </StyledMarketInfo>
       </StyledFlexContainer>
     </StyledRow>
     <br />
-    <br />
-    <StyledInfo>
-      This will use XXXX of your XXXX ETH
-    </StyledInfo>
     <Button mode="strong" type="submit" wide disabled={pristine || submitting}>Make Prediction</Button>
   </form>
 ))
@@ -126,13 +128,8 @@ const StyledFlexContainer = styled.div`
   align-items: flex-start;
 `
 
-const StyledMarketSpan = styled.span`
-  font-weight: bold;
-`
-
 const StyledMarketPrice = styled(Text) `
   font-size: 14px;
-  margin: 0px 18px;
   background-color: #E8E8E8;
   padding: 5px 20px;
   border-radius: 25px;
@@ -144,6 +141,18 @@ const StyledSmallCaps = styled(Text)`
   color: #98A0A2;
   font-size: 12px;
   line-height: 28px;
+`
+
+const StyledMarketPrediction = styled(Text)`
+  display: block;
+  text-transform: uppercase;
+  color: #98A0A2;
+  font-size: 10px;
+  line-height: 28px;
+`
+
+const StyledMarketInfo = styled.div`
+  text-align: right;
 `
 
 const StyledField = styled(Field)`
