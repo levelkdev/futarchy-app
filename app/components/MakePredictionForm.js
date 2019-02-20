@@ -1,10 +1,10 @@
 import React from 'react'
 import { Field, reduxForm } from 'redux-form'
-import { connect } from 'react-redux'
 import formatBalance from '../util/formatBalance'
+import decimalToWeiInt from '../util/decimalToWeiInt'
 import EtherDisplaySymbol from './EtherDisplaySymbol'
 import TokenSymbolDisplay from './TokenSymbolDisplay'
-import { Button, Info, Text, Badge, DropDown, TextInput } from '@aragon/ui'
+import { Button, Info, Text, Badge, DropDown } from '@aragon/ui'
 import formatPrice from '../util/formatPrice'
 import styled from 'styled-components'
 
@@ -14,25 +14,30 @@ const dropDownItems = [
   'MORE THAN'
 ]
 
+const dropDownDefault = 0
+
 const createReduxForm = reduxForm({ form: 'makePredictionForm' })
 
 const MakePredictionForm = createReduxForm(({
   decision,
   handleSubmit,
   executeBuy,
-  collateralAmount,
-  yesPrediction,
-  noPrediction,
   pristine,
   submitting,
   tokenBalance
 }) => (
   <form onSubmit={handleSubmit(values => {
+    if (typeof(values.yesPredictionChoiceIndex) === 'undefined') {
+      values.yesPredictionChoiceIndex = dropDownDefault
+    }
+    if (typeof(values.noPredictionChoiceIndex) === 'undefined') {
+      value.noPredictionChoiceIndex = dropDownDefault
+    }
+    values.collateralAmount = decimalToWeiInt(values.collateralAmount)
     executeBuy({
-      decisionId: decision.id,
+      decisionId: decision.decisionId,
       ...values
     })
-    console.log(`Execute Buy:\n\n${JSON.stringify(values, null, 2)}`);
   })}>
     <StyledRow>
       <StyledSmallCaps>question</StyledSmallCaps>
@@ -85,9 +90,9 @@ const ShortLongSelector = ({
     <StyledFlexContainer>
       <div>
         <Field
-          name={`${marketKey}Market`}
+          name={`${marketKey}PredictionChoiceIndex`}
           component={DropDownField}
-          defaultValue={1}
+          defaultValue={dropDownDefault}
         />
       </div>
       <StyledMarketInfo>

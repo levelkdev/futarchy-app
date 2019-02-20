@@ -114,6 +114,13 @@ export const buyMarketPositions = async (
   noPurchaseAmounts
 ) => {
   const address = await call('token')
+
+  // TODO: a buffer amount of .01 percent is negligible, but we're not making this
+  //       transparent to the user. Also, in a fast moving market this might
+  //       have to be set higher, which would be something that the user would need
+  //       to know about before signing.
+  collateralAmount = parseInt(collateralAmount) + (parseInt(collateralAmount) * 0.01)
+
   const transactionOptions = {
     token: { address, value: collateralAmount }
   }

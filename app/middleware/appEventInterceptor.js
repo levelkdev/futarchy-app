@@ -54,7 +54,7 @@ const appEventInterceptor = store => next => action => {
 
 export const addDecisionDataToAction = ({ decisions, decisionId, action }) => {
   const decision = _.find(decisions, { decisionId })
-  console.log('DECISION DATA: ', decision)
+
   return {
     ...action,
     lowerBound: decision ? decision.lowerBound : null,

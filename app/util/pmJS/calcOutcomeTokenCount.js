@@ -1,4 +1,5 @@
-import DecimalJS from 'decimal.js';
+import DecimalJS from 'decimal.js'
+
 let Decimal = DecimalJS.clone({ precision: 80, toExpPos: 9999 })
 
 /**
@@ -7,19 +8,16 @@ let Decimal = DecimalJS.clone({ precision: 80, toExpPos: 9999 })
  * @param {number|string|BigNumber} opts.funding - The amount of funding market has
  * @param {number|string|BigNumber} opts.outcomeTokenIndex - The index of the outcome
  * @param {number|string|BigNumber} opts.cost - The amount of collateral for buying tokens
+ * @param {number|string|BigNumber} opts.feeFactor - The fee factor. Specifying 1,000,000 corresponds to 100%, 50,000 corresponds to 5%, etc.
  * @returns {Decimal} The number of outcome tokens that can be bought
  */
-const calcOutcomeTokenCount = async ({ market, cost, outcomeTokenIndex }) => {
-    let netOutcomeTokensSold, funding, feeFactor
-
-    netOutcomeTokensSold = [
-        await market.netOutcomeTokensSold(0),
-        await market.netOutcomeTokensSold(1)
-    ]
-    
-    funding = await market.funding()
-    feeFactor = await market.fee()
-    
+const calcOutcomeTokenCount = ({
+    netOutcomeTokensSold,
+    funding,
+    outcomeTokenIndex,
+    cost,
+    feeFactor
+}) => {
     cost = new Decimal(cost.toString())
     let b = new Decimal(funding.toString()).dividedBy(new Decimal(netOutcomeTokensSold.length).ln())
     

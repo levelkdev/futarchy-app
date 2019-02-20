@@ -1,4 +1,7 @@
 import _ from 'lodash'
+import decisionById from '../reducers/computed/decisionById'
+import calcOutcomeTokenPurchaseAmounts from '../util/calcOutcomeTokenPurchaseAmounts'
+import decimalToWeiInt from '../util/decimalToWeiInt'
 import client from '../client'
 
 export const newDecisionTxPending = ({ question, txHash }) => ({
@@ -136,10 +139,35 @@ export const newDecision = ({
 export const buyMarketPositions = ({
   decisionId,
   collateralAmount,
-  yesPurchaseAmounts,
-  noPurchaseAmounts
-}) => dispatch => {
-  return client.buyMarketPositions(decisionId, collateralAmount, yesPurchaseAmounts, noPurchaseAmounts).then(txHash => {
+  yesOutcomeTokenIndex, // 0 = SHORT, 1 = LONG, null = none
+  noOutcomeTokenIndex // 0 = SHORT, 1 = LONG, null = none
+}) => (dispatch, getState) => {
+  const decision = decisionById(getState().decisionMarkets, decisionId)
+
+  return client.buyMarketPositions(
+    decisionId,
+    collateralAmount,
+    // YES market SHORT/LONG amounts
+    calcOutcomeTokenPurchaseAmounts({
+      outcomeTokenIndex: yesOutcomeTokenIndex,
+      collateralAmount,
+      outcomeTokenIndex: yesOutcomeTokenIndex,
+      shortOutcomeTokensSold: decision.yesShortOutcomeTokensSold,
+      longOutcomeTokensSold: decision.yesLongOutcomeTokensSold,
+      funding: decision.yesMarketFunding,
+      feeFactor: decision.yesMarketFee
+    }),
+    // NO market SHORT/LONG amounts
+    calcOutcomeTokenPurchaseAmounts({
+      outcomeTokenIndex: noOutcomeTokenIndex,
+      collateralAmount,
+      outcomeTokenIndex: noOutcomeTokenIndex,
+      shortOutcomeTokensSold: decision.noShortOutcomeTokensSold,
+      longOutcomeTokensSold: decision.noLongOutcomeTokensSold,
+      funding: decision.noMarketFunding,
+      feeFactor: decision.noMarketFee
+    })
+  ).then(txHash => {
     dispatch(buyMarketPositionsTxPending({ txHash }))
   }, err => {
     console.error(`buyMarketPositions: ${err}`)
