@@ -154,33 +154,6 @@ contract Futarchy is AragonApp, IForwarder {
       emit StartDecision(decisionId, msg.sender, metadata, futarchyOracle, lowerBound, upperBound, startDate, decisions[decisionId].decisionResolutionDate, decisions[decisionId].priceResolutionDate);
     }
 
-    /**
-    * @notice returns data about decision
-    * @param decisionId decision unique identifier
-    **/
-    function getDecision(uint decisionId)
-      public
-      view
-      decisionExists(decisionId)
-      returns (
-        bool open,
-        bool executed,
-        uint startDate,
-        uint64 snapshotBlock,
-        uint marketPower,
-        bytes script
-
-        )
-    {
-      Decision storage decision = decisions[decisionId];
-      open = !decision.futarchyOracle.isOutcomeSet();
-      executed = decision.executed;
-      startDate = decision.startDate;
-      marketPower = token.totalSupplyAt(decision.snapshotBlock);
-      snapshotBlock = decision.snapshotBlock;
-      script = decision.executionScript;
-    }
-
     function closeDecisionMarkets(uint decisionId) public {
       Decision storage decision = decisions[decisionId];
 
@@ -197,22 +170,34 @@ contract Futarchy is AragonApp, IForwarder {
       decision.futarchyOracle.categoricalEvent().redeemWinnings();
     }
 
+    function setDecision(uint decisionId) public {
+      require(decisions[decisionId].decisionResolutionDate < now);
+      FutarchyOracle futarchyOracle = decisions[decisionId].futarchyOracle;
+      if(!futarchyOracle.categoricalEvent().isOutcomeSet()) {
+        if (!futarchyOracle.isOutcomeSet()) {
+          futarchyOracle.setOutcome();
+        }
+        CategoricalEvent(futarchyOracle.categoricalEvent()).setOutcome();
+      }
+
+      if(futarchyOracle.categoricalEvent().isOutcomeSet()) {
+        decisions[decisionId].resolved = true;
+        decisions[decisionId].passed = futarchyOracle.winningMarketIndex() == 0 ? true : false;
+      }
+    }
+
 
     /**
     * TODO: enable special permissions for executing decisions
-    * TODO: create data to signal "cannot execute, so don't even try" (??)
     * @notice execute decision if final decision is ready and equals YES; otherwise Revert
     * @param decisionId decision unique identifier
     */
     function executeDecision(uint decisionId) public {
       Decision storage decision = decisions[decisionId];
 
-      require(!decision.executed);
-      require(decision.decisionResolutionDate < now);
-      if (!decision.futarchyOracle.isOutcomeSet()) {
-        decision.futarchyOracle.setOutcome();
-      }
-      require(decision.futarchyOracle.getOutcome() == 0); // 0 == YES; 1 == NO
+      require(decision.decisionResolutionDate < now && !decision.executed);
+      setDecision(decisionId);
+      require(decision.resolved && decision.passed);
 
       bytes memory input = new bytes(0); // TODO: (aragon comment) Consider including input for decision scripts
       runScript(decision.executionScript, input, new address[](0));
@@ -344,17 +329,8 @@ contract Futarchy is AragonApp, IForwarder {
 
       FutarchyOracle futarchyOracle = decisions[decisionId].futarchyOracle;
 
-      // set decision if not yet set
-      if(!futarchyOracle.categoricalEvent().isOutcomeSet()) {
-        if (!futarchyOracle.isOutcomeSet()) {
-          futarchyOracle.setOutcome();
-        }
-        futarchyOracle.categoricalEvent().setOutcome();
-      }
-
+      setDecision(decisionId);
       int winningIndex = futarchyOracle.getOutcome();
-      decisions[decisionId].resolved = true;
-      decisions[decisionId].passed = winningIndex == 0 ? true : false;
       futarchyOracle.categoricalEvent().redeemWinnings();
 
       uint winnings;
@@ -391,6 +367,25 @@ contract Futarchy is AragonApp, IForwarder {
           i % 2
         );
       }
+    }
+
+    function redeemWinnings(uint decisionId) public {
+      Decision storage decision = decisions[decisionId];
+      uint winningMarketIndex = decision.passed ? 0 : 1;
+
+      MarketData.Stages marketStage = decision.futarchyOracle.markets(winningMarketIndex).stage();
+      require(marketStage != MarketData.Stages.MarketCreated);
+
+      if (marketStage == MarketData.Stages.MarketFunded)
+        sellMarketPositions(decisionId);
+      else if (marketStage == MarketData.Stages.MarketClosed)
+        redeemScalarWinnings(decisionId);
+
+      redeemWinningCollateralTokens(decisionId);
+    }
+
+    function redeemScalarWinnings(uint decisionId) public {
+      /* TODO: Use updated gnosis contracts for calculation */
     }
 
     /**

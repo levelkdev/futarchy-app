@@ -39,6 +39,7 @@ contract FutarchyOracleMock {
   }
 
   function setOutcome() public {
+    require(!mock_isSet);
     mock_isSet = true;
   }
 
@@ -50,6 +51,10 @@ contract FutarchyOracleMock {
     token.transferFrom(msg.sender, this,  _funding);
     mock_setRefundAmount(_funding);
     emit MockFutarchyFunding(_funding);
+  }
+
+  function winningMarketIndex() public view returns(int) {
+    return mock_winningMarketIndex;
   }
 
   function close() public {
@@ -68,7 +73,24 @@ contract MarketMock {
 }
 
 contract MockEvent {
+  bool public mock_isSet;
+  int public outcome;
+
   function redeemWinnings() public returns (uint winnings) {
     winnings = 5;
+  }
+
+  function mock_setIsSet(bool _isSet) public {
+    mock_isSet = _isSet;
+  }
+
+  function setOutcome() public {
+    require(!mock_isSet);
+    outcome = 0;
+    mock_setIsSet(true);
+  }
+
+  function isOutcomeSet() public view returns (bool) {
+    return mock_isSet;
   }
 }

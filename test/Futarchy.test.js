@@ -218,40 +218,102 @@ contract('Futarchy', (accounts) => {
     })
   })
 
-  describe('getDecision()', async () => {
-    let script, metadata, returnValue, currentBlockNumber
+  describe('setDecision()', () => {
+
     beforeEach(async () => {
-      await initializeFutarchy()
+      // large setup not required bc no integration with full futarchyOracle here
+      initializeFutarchy()
       script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
       metadata = 'Give voting rights to all kitties in the world'
-      await token.approve(futarchy.address, MARKET_FUND_AMOUNT, {from: root})
-      currentBlockNumber = await getBlockNumber()
+      await token.approve(futarchy.address, MARKET_FUND_AMOUNT +  (40 * 10 ** 18), {from: root})
       await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
-      returnValue = await futarchy.getDecision(0)
+      futarchyOracle = FutarchyOracleMock.at((await futarchy.decisions(0))[0])
     })
 
-    it('returns the correct open', async () => {
-      expect(returnValue[0]).to.equal(true)
+    describe('when categoricalEvent is not yet resolved', () => {
+      it('reverts if decisionResolutionDate has not passed yet', async () => {
+        return assertRevert(async () => {
+          await futarchy.setDecision(0)
+        })
+      })
+
+      it('resolves the categoricalEvent', async () => {
+        expect(await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).isOutcomeSet()).to.equal(false)
+        await timeTravel(TRADING_PERIOD + 1)
+        await futarchy.setDecision(0)
+        expect(await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).isOutcomeSet()).to.equal(true)
+      })
+
+      it('resolves the futarchyOracle', async () => {
+        expect(await futarchyOracle.isOutcomeSet()).to.equal(false)
+        await timeTravel(TRADING_PERIOD + 1)
+        await futarchy.setDecision(0)
+        expect(await futarchyOracle.isOutcomeSet()).to.equal(true)
+      })
+
+      it('sets decision.resolved to true', async () => {
+        expect((await futarchy.decisions(0))[6]).to.equal(false)
+        await timeTravel(TRADING_PERIOD + 1)
+        await futarchy.setDecision(0)
+        expect((await futarchy.decisions(0))[6]).to.equal(true)
+      })
+
+      it('sets passed to true if decision passed', async () => {
+        await futarchyOracle.mock_setWinningMarketIndex(0)
+        expect((await futarchy.decisions(0))[7]).to.equal(false)
+        await timeTravel(TRADING_PERIOD + 1)
+        await futarchy.setDecision(0)
+        expect((await futarchy.decisions(0))[7]).to.equal(true)
+      })
+
+      it('sets passed to false if decision failed', async () => {
+        await futarchyOracle.mock_setWinningMarketIndex(1)
+        expect((await futarchy.decisions(0))[7]).to.equal(false)
+        await timeTravel(TRADING_PERIOD + 1)
+        await futarchy.setDecision(0)
+        expect((await futarchy.decisions(0))[7]).to.equal(false)
+      })
     })
 
-    it('returns the correct executed', async () => {
-      expect(returnValue[1]).to.equal(false)
-    })
+    describe('when categoricalEvent is already resolved', () => {
+      it('sets winning decision.passed to true if it is not set already', async () => {
+        await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
+        await futarchyOracle.setOutcome();
+        await futarchyOracle.mock_setWinningMarketIndex(0)
 
-    it('returns the correct startDate', async () => {
-      expect(returnValue[2].toNumber()).to.be.closeTo(unixTime(), unixTime() + 5)
-    })
+        expect((await futarchy.decisions(0))[7]).to.equal(false)
 
-    it('returns the correct snapshotBlock', async () => {
-      expect(returnValue[3].toNumber()).to.equal(currentBlockNumber)
-    })
+        await timeTravel(TRADING_PERIOD + 1)
+        await futarchy.setDecision(0)
 
-    it('returns the correct marketPower', async () => {
-      expect(returnValue[4].toNumber()).to.equal((await token.totalSupply()).toNumber())
-    })
+        expect((await futarchy.decisions(0))[7]).to.equal(true)
+      })
 
-    it('returns the correct script', async () => {
-      expect(returnValue[5]).to.equal(stringToHex(script))
+      it('keeps losing decision.passed false', async () => {
+        await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
+        await futarchyOracle.setOutcome();
+        await futarchyOracle.mock_setWinningMarketIndex(1)
+
+        expect((await futarchy.decisions(0))[7]).to.equal(false)
+
+        await timeTravel(TRADING_PERIOD + 1)
+        await futarchy.setDecision(0)
+
+        expect((await futarchy.decisions(0))[7]).to.equal(false)
+      })
+
+      it('sets resolved to true if it is not set already', async () => {
+        await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
+        await futarchyOracle.setOutcome();
+        await futarchyOracle.mock_setWinningMarketIndex(0)
+
+        expect((await futarchy.decisions(0))[6]).to.equal(false)
+
+        await timeTravel(TRADING_PERIOD + 1)
+        await futarchy.setDecision(0)
+
+        expect((await futarchy.decisions(0))[6]).to.equal(true)
+      })
     })
   })
 
