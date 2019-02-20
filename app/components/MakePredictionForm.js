@@ -39,9 +39,10 @@ const MakePredictionForm = createReduxForm(({
       <StyledText size="large">{decision.question}</StyledText>
       <br />
     </StyledRow>
-    <StyledRow>
     <br />
-    <StyledSmallCaps>Allocate your tokens</StyledSmallCaps>
+
+    <StyledRow>
+      <StyledSmallCaps>Allocate your tokens</StyledSmallCaps>
       <StyledField
         name="collateralAmount"
         component="input"
@@ -52,48 +53,51 @@ const MakePredictionForm = createReduxForm(({
         {formatBalance(tokenBalance)} <TokenSymbolDisplay /> Available
       </StyledAccountBalance>
     </StyledRow>
-    <StyledRow>
-      <StyledYesBadge>YES</StyledYesBadge>
-      <StyledSmallCaps>price will be:</StyledSmallCaps>
-      <br />
-      <StyledFlexContainer>
-        <div>
-          <StyledDropDown name="yesMarket" component="select">
-            <option value="" selected disabled>Select an option</option>
-            <option value="more">more than</option>
-            <option value="less">less than</option>
-          </StyledDropDown>
-        </div>
-        <StyledMarketInfo>
-          <StyledMarketPrice>
-            {formatPrice(decision.yesMarketMarginalPredictedPrice)} <EtherDisplaySymbol />
-          </StyledMarketPrice>
-          <StyledMarketPrediction>Current market prediction</StyledMarketPrediction>
-        </StyledMarketInfo>
-      </StyledFlexContainer>
-    </StyledRow>
-    <StyledRow>
-      <StyledNoBadge>NO</StyledNoBadge>
-      <StyledSmallCaps>price will be:</StyledSmallCaps>
-      <br />
-      <StyledFlexContainer>
-        <StyledDropDown name="noMarket" component="select">
+
+    <ShortLongSelector
+      marketKey="yes"
+      marketName="YES"
+      predictedPrice={decision.yesMarketMarginalPredictedPrice}
+    />
+
+    <ShortLongSelector
+      marketKey="no"
+      marketName="NO"
+      predictedPrice={decision.noMarketMarginalPredictedPrice}
+    />
+
+    <br />
+
+    <Button mode="strong" type="submit" wide disabled={pristine || submitting}>Make Prediction</Button>
+  </form>
+))
+
+const ShortLongSelector = ({
+  marketKey,
+  marketName,
+  predictedPrice
+}) => (
+  <StyledRow>
+    <StyledBadge market={marketKey}>{marketName}</StyledBadge>
+    <StyledSmallCaps>price will be:</StyledSmallCaps>
+    <br />
+    <StyledFlexContainer>
+      <div>
+        <StyledDropDown name={`${marketKey}Market`} component="select">
           <option value="" selected disabled>Select an option</option>
           <option value="more">more than</option>
           <option value="less">less than</option>
         </StyledDropDown>
-        <StyledMarketInfo>
-          <StyledMarketPrice>
-            {formatPrice(decision.noMarketMarginalPredictedPrice)} <EtherDisplaySymbol />
-          </StyledMarketPrice>
-          <StyledMarketPrediction>Current market prediction</StyledMarketPrediction>
-        </StyledMarketInfo>
-      </StyledFlexContainer>
-    </StyledRow>
-    <br />
-    <Button mode="strong" type="submit" wide disabled={pristine || submitting}>Make Prediction</Button>
-  </form>
-))
+      </div>
+      <StyledMarketInfo>
+        <StyledMarketPrice>
+          {formatPrice(predictedPrice)} <EtherDisplaySymbol />
+        </StyledMarketPrice>
+        <StyledMarketPrediction>Current market prediction</StyledMarketPrediction>
+      </StyledMarketInfo>
+    </StyledFlexContainer>
+  </StyledRow>
+)
 
 const StyledDropDown = styled(Field)`
   box-shadow: 0 4px 4px 0 rgba(0,0,0,0.03);
@@ -108,15 +112,8 @@ const StyledAccountBalance = styled.div`
   padding: 5px 0px;
 `
 
-const StyledYesBadge = styled(Badge) `
-  background-color: #80AEDC;
-  color: white;
-  font-weight: 400;
-  margin-right: 6px;
-`
-
-const StyledNoBadge = styled(Badge) `
-  background-color: #39CAD0;
+const StyledBadge = styled(Badge) `
+  background-color: ${props => (props.market == 'yes' ? '#80AEDC' : '#39CAD0')};
   color: white;
   font-weight: 400;
   margin-right: 6px;
