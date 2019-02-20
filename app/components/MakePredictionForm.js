@@ -9,8 +9,9 @@ import formatPrice from '../util/formatPrice'
 import styled from 'styled-components'
 
 const dropDownItems = [
-  'less than',
-  'more than',
+  'EQUAL TO',
+  'LESS THAN',
+  'MORE THAN'
 ]
 
 const createReduxForm = reduxForm({ form: 'makePredictionForm' })
@@ -83,11 +84,11 @@ const ShortLongSelector = ({
     <br />
     <StyledFlexContainer>
       <div>
-        <StyledDropDown name={`${marketKey}Market`} component="select">
-          <option value="" selected disabled>Select an option</option>
-          <option value="more">more than</option>
-          <option value="less">less than</option>
-        </StyledDropDown>
+        <Field
+          name={`${marketKey}Market`}
+          component={DropDownField}
+          defaultValue={1}
+        />
       </div>
       <StyledMarketInfo>
         <StyledMarketPrice>
@@ -99,9 +100,13 @@ const ShortLongSelector = ({
   </StyledRow>
 )
 
-const StyledDropDown = styled(Field)`
-  box-shadow: 0 4px 4px 0 rgba(0,0,0,0.03);
-`
+const DropDownField = (field) => (
+  <DropDown
+    items={dropDownItems}
+    active={field.input.value === '' ? field.defaultValue : field.input.value}
+    onChange={field.input.onChange}
+  />
+)
 
 const StyledAccountBalance = styled.div`
   width: 100%;
