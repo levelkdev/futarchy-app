@@ -1,4 +1,7 @@
 import _ from 'lodash'
+import decisionById from '../reducers/computed/decisionById'
+import calcOutcomeTokenPurchaseAmounts from '../util/calcOutcomeTokenPurchaseAmounts'
+import decimalToWeiInt from '../util/decimalToWeiInt'
 import client from '../client'
 
 export const newDecisionTxPending = ({ question, txHash }) => ({
@@ -22,6 +25,14 @@ export const avgDecisionMarketPricesLoaded = ({ decisionId, yesMarketPrice, noMa
   decisionId,
   yesMarketPrice,
   noMarketPrice
+})
+
+export const netOutcomeTokensSoldForDecisionLoaded = ({ decisionId, marketIndex, shortOutcomeTokensSold, longOutcomeTokensSold }) => ({
+  type: 'NET_OUTCOME_TOKENS_SOLD_FOR_DECISION_LOADED',
+  decisionId,
+  marketIndex,
+  shortOutcomeTokensSold,
+  longOutcomeTokensSold
 })
 
 export const yesNoMarketDataLoaded = ({
@@ -51,6 +62,13 @@ export const decisionDataLoaded = ({ decisionId, decisionData }) => ({
   type: 'DECISION_DATA_LOADED',
   decisionData,
   decisionId
+})
+
+export const marginalPricesLoaded = ({ decisionId, yesMarginalPrice, noMarginalPrice }) => ({
+  type: 'MARGINAL_PRICES_LOADED',
+  decisionId,
+  yesMarginalPrice,
+  noMarginalPrice
 })
 
 export const showPanel = ({ panelName, panelContext }) => ({
@@ -121,10 +139,35 @@ export const newDecision = ({
 export const buyMarketPositions = ({
   decisionId,
   collateralAmount,
-  yesPurchaseAmounts,
-  noPurchaseAmounts
-}) => dispatch => {
-  return client.buyMarketPositions(decisionId, collateralAmount, yesPurchaseAmounts, noPurchaseAmounts).then(txHash => {
+  yesOutcomeTokenIndex, // 0 = SHORT, 1 = LONG, null = none
+  noOutcomeTokenIndex // 0 = SHORT, 1 = LONG, null = none
+}) => (dispatch, getState) => {
+  const decision = decisionById(getState().decisionMarkets, decisionId)
+
+  return client.buyMarketPositions(
+    decisionId,
+    collateralAmount,
+    // YES market SHORT/LONG amounts
+    calcOutcomeTokenPurchaseAmounts({
+      outcomeTokenIndex: yesOutcomeTokenIndex,
+      collateralAmount,
+      outcomeTokenIndex: yesOutcomeTokenIndex,
+      shortOutcomeTokensSold: decision.yesShortOutcomeTokensSold,
+      longOutcomeTokensSold: decision.yesLongOutcomeTokensSold,
+      funding: decision.yesMarketFunding,
+      feeFactor: decision.yesMarketFee
+    }),
+    // NO market SHORT/LONG amounts
+    calcOutcomeTokenPurchaseAmounts({
+      outcomeTokenIndex: noOutcomeTokenIndex,
+      collateralAmount,
+      outcomeTokenIndex: noOutcomeTokenIndex,
+      shortOutcomeTokensSold: decision.noShortOutcomeTokensSold,
+      longOutcomeTokensSold: decision.noLongOutcomeTokensSold,
+      funding: decision.noMarketFunding,
+      feeFactor: decision.noMarketFee
+    })
+  ).then(txHash => {
     dispatch(buyMarketPositionsTxPending({ txHash }))
   }, err => {
     console.error(`buyMarketPositions: ${err}`)
@@ -200,6 +243,21 @@ export const fetchYesNoMarketData = ({ decisionId, futarchyOracleAddress }) => d
   })
 }
 
+export const fetchMarginalPrices = ({ decisionId }) => dispatch => {
+  return client.calcMarginalPrices(decisionId).then(marginalPrices => {
+    // index 1 = YES_LONG, index 3 = NO_LONG
+    dispatch(marginalPricesLoaded({
+      decisionId,
+      yesMarginalPrice: marginalPrices[1],
+      noMarginalPrice: marginalPrices[3]
+    }))
+  },
+  errorMessage => {
+    console.error(`fetchMarginalPrices: ${errorMessage}`)
+    // TODO: dispatch error action, to show something to the user
+  })
+}
+
 export const fetchDecisionData = (decisionId) => dispatch => {
   return client.decisions(decisionId).then(
     decisionData => {
@@ -207,7 +265,25 @@ export const fetchDecisionData = (decisionId) => dispatch => {
         decisionId,
         futarchyOracleAddress: decisionData.futarchyOracle
       }))
+      dispatch(fetchMarginalPrices({
+        decisionId
+      }))
       dispatch(decisionDataLoaded({ decisionId, decisionData }))
+    }
+  )
+}
+
+export const fetchNetOutcomeTokensSoldForDecision = (decisionId, marketIndex) => dispatch => {
+  return client.netOutcomeTokensSoldForDecision(decisionId, marketIndex).then(
+    outcomeTokensSold => dispatch(netOutcomeTokensSoldForDecisionLoaded({
+      decisionId,
+      marketIndex,
+      shortOutcomeTokensSold: outcomeTokensSold.shortOutcomeTokensSold,
+      longOutcomeTokensSold: outcomeTokensSold.longOutcomeTokensSold
+    })),
+    errorMessage => {
+      console.error('fetchNetOutcomeTokensSoldForDecision: ${errorMessage}')
+      // TODO: dispatch error action, to show something to the user
     }
   )
 }

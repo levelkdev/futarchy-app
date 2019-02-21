@@ -14,26 +14,39 @@ const mapStateToProps = state => ({
   decision: findDecisionById(
     state.decisionMarkets,
     state.sidePanel.panelContext.decisionId
-  )
+  ),
+  tokenBalance: state.tokenBalance
 })
 
 const mapDispatchToProps = dispatch => ({
   executeBuy: async values => {
-    dispatch(hidePanel())
+    const {
+      decisionId,
+      collateralAmount,
+      yesPredictionChoiceIndex,
+      noPredictionChoiceIndex
+    } = values
+    
     dispatch(buyMarketPositions({
-      decisionId: values.decisionId,
-      collateralAmount: values.collateralAmount,
-      yesPurchaseAmounts: [
-        values.yesShortAmount,
-        values.yesLongAmount
-      ],
-      noPurchaseAmounts: [
-        values.noShortAmount,
-        values.noLongAmount
-      ]
+      decisionId,
+      collateralAmount,
+      yesOutcomeTokenIndex: predictionChoiceToOutcomeIndex(yesPredictionChoiceIndex),
+      noOutcomeTokenIndex: predictionChoiceToOutcomeIndex(noPredictionChoiceIndex)
     }))
+
+    dispatch(hidePanel())
   }
 })
+
+function predictionChoiceToOutcomeIndex (choice) {
+  if (choice === 1) {
+    return 0
+  } else if (choice === 2) {
+    return 1
+  } else {
+    return null
+  }
+}
 
 export default connect(
   mapStateToProps,

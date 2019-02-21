@@ -1,21 +1,39 @@
 import React from 'react'
 import { Field, reduxForm } from 'redux-form'
-import { Button, Info, Text, Badge, DropDown, TextInput } from '@aragon/ui'
 import formatBalance from '../util/formatBalance'
+import decimalToWeiInt from '../util/decimalToWeiInt'
+import EtherDisplaySymbol from './EtherDisplaySymbol'
+import TokenSymbolDisplay from './TokenSymbolDisplay'
+import { Button, Info, Text, Badge, DropDown } from '@aragon/ui'
+import formatPrice from '../util/formatPrice'
 import styled from 'styled-components'
 
-const createReduxForm = reduxForm({ form: 'makePrediction' })
 const dropDownItems = [
-  'less than',
-  'more than',
+  'EQUAL TO',
+  'LESS THAN',
+  'MORE THAN'
 ]
+
+const dropDownDefault = 0
+
+const createReduxForm = reduxForm({ form: 'makePredictionForm' })
 
 const MakePredictionForm = createReduxForm(({
   decision,
   handleSubmit,
-  executeBuy
+  executeBuy,
+  pristine,
+  submitting,
+  tokenBalance
 }) => (
   <form onSubmit={handleSubmit(values => {
+    if (typeof(values.yesPredictionChoiceIndex) === 'undefined') {
+      values.yesPredictionChoiceIndex = dropDownDefault
+    }
+    if (typeof(values.noPredictionChoiceIndex) === 'undefined') {
+      value.noPredictionChoiceIndex = dropDownDefault
+    }
+    values.collateralAmount = decimalToWeiInt(values.collateralAmount)
     executeBuy({
       decisionId: decision.decisionId,
       ...values
@@ -27,48 +45,73 @@ const MakePredictionForm = createReduxForm(({
       <StyledText size="large">{decision.question}</StyledText>
       <br />
     </StyledRow>
-    <StyledRow>
     <br />
-    <StyledSmallCaps>Allocate your tokens</StyledSmallCaps>
+
+    <StyledRow>
+      <StyledSmallCaps>Allocate your tokens</StyledSmallCaps>
       <StyledField
         name="collateralAmount"
         component="input"
         type="text"
         placeholder="Enter Amount to Risk"
       />
-      <StyledAccountBalance>XXXX ETH Available</StyledAccountBalance>
+      <StyledAccountBalance>
+        {formatBalance(tokenBalance)} <TokenSymbolDisplay /> Available
+      </StyledAccountBalance>
     </StyledRow>
-    <StyledRow>
-      <StyledYesBadge>YES</StyledYesBadge>
-      <StyledSmallCaps>price will be:</StyledSmallCaps>
-      <br />
-      <StyledFlexContainer>
-        <DropDown items={dropDownItems}/>
-        <div>
-        <TextInput readonly value={decision.yesMarketPredictedPrice} /><br />
-        <StyledSmallCaps>Current <StyledMarketSpan>YES</StyledMarketSpan> price</StyledSmallCaps>
-        </div>
-      </StyledFlexContainer>
-      <StyledNoBadge>NO</StyledNoBadge>
-      <StyledSmallCaps>price will be:</StyledSmallCaps>
-      <br />
-      <StyledFlexContainer>
-        <DropDown items={dropDownItems}/>
-        <div>
-        <TextInput readonly value={decision.noMarketPredictedPrice} /><br />
-        <StyledSmallCaps>Current <StyledMarketSpan>NO</StyledMarketSpan> price</StyledSmallCaps>
-        </div>
-      </StyledFlexContainer>
-    </StyledRow>
-    <StyledRow>
-      <br />
-      <Button mode="strong" type="submit" wide>Make Prediction</Button>
-      <StyledInfo>
-        This will use XXXX of your XXXX ETH
-      </StyledInfo>
-    </StyledRow>
+
+    <ShortLongSelector
+      marketKey="yes"
+      marketName="YES"
+      predictedPrice={decision.yesMarketMarginalPredictedPrice}
+    />
+
+    <ShortLongSelector
+      marketKey="no"
+      marketName="NO"
+      predictedPrice={decision.noMarketMarginalPredictedPrice}
+    />
+
+    <br />
+
+    <Button mode="strong" type="submit" wide disabled={pristine || submitting}>Make Prediction</Button>
   </form>
 ))
+
+const ShortLongSelector = ({
+  marketKey,
+  marketName,
+  predictedPrice
+}) => (
+  <StyledRow>
+    <StyledBadge market={marketKey}>{marketName}</StyledBadge>
+    <StyledSmallCaps>price will be:</StyledSmallCaps>
+    <br />
+    <StyledFlexContainer>
+      <div>
+        <Field
+          name={`${marketKey}PredictionChoiceIndex`}
+          component={DropDownField}
+          defaultValue={dropDownDefault}
+        />
+      </div>
+      <StyledMarketInfo>
+        <StyledMarketPrice>
+          {formatPrice(predictedPrice)} <EtherDisplaySymbol />
+        </StyledMarketPrice>
+        <StyledMarketPrediction>Current market prediction</StyledMarketPrediction>
+      </StyledMarketInfo>
+    </StyledFlexContainer>
+  </StyledRow>
+)
+
+const DropDownField = (field) => (
+  <DropDown
+    items={dropDownItems}
+    active={field.input.value === '' ? field.defaultValue : field.input.value}
+    onChange={field.input.onChange}
+  />
+)
 
 const StyledAccountBalance = styled.div`
   width: 100%;
@@ -79,16 +122,9 @@ const StyledAccountBalance = styled.div`
   padding: 5px 0px;
 `
 
-const StyledYesBadge = styled(Badge) `
-  background-color: #80AEDC;
-  color: white !important;
-  font-weight: 400;
-  margin-right: 6px;
-`
-
-const StyledNoBadge = styled(Badge) `
-  background-color: #39CAD0;
-  color: white !important;
+const StyledBadge = styled(Badge) `
+  background-color: ${props => (props.market == 'yes' ? '#80AEDC' : '#39CAD0')};
+  color: white;
   font-weight: 400;
   margin-right: 6px;
 `
@@ -99,13 +135,8 @@ const StyledFlexContainer = styled.div`
   align-items: flex-start;
 `
 
-const StyledMarketSpan = styled.span`
-  font-weight: bold;
-`
-
 const StyledMarketPrice = styled(Text) `
   font-size: 14px;
-  margin: 0px 18px;
   background-color: #E8E8E8;
   padding: 5px 20px;
   border-radius: 25px;
@@ -117,6 +148,18 @@ const StyledSmallCaps = styled(Text)`
   color: #98A0A2;
   font-size: 12px;
   line-height: 28px;
+`
+
+const StyledMarketPrediction = styled(Text)`
+  display: block;
+  text-transform: uppercase;
+  color: #98A0A2;
+  font-size: 10px;
+  line-height: 28px;
+`
+
+const StyledMarketInfo = styled.div`
+  text-align: right;
 `
 
 const StyledField = styled(Field)`

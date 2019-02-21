@@ -72,6 +72,25 @@ const decisionMarkets = (state = [], action) => {
         }
         return decision
       })
+    case 'MARGINAL_PRICES_LOADED':
+      // TODO: refactor logic from AVG_DECISION_MARKET_PRICES_LOADED and write tests
+      return state.map(decision => {
+        if (decision.decisionId == action.decisionId) {
+          decision.yesMarketMarginalPrice = calcPriceAsPercentage(action.yesMarginalPrice),
+          decision.noMarketMarginalPrice = calcPriceAsPercentage(action.noMarginalPrice),
+          decision.yesMarketMarginalPredictedPrice = calcPredictedPrice(
+            decision.yesMarketMarginalPrice,
+            decision.lowerBound,
+            decision.upperBound
+          )
+          decision.noMarketMarginalPredictedPrice = calcPredictedPrice(
+            decision.noMarketMarginalPrice,
+            decision.lowerBound,
+            decision.upperBound
+          )
+        }
+        return decision
+      })
     case 'YES_NO_MARKET_DATA_LOADED':
       return state.map(decision => {
         if (decision.decisionId == action.decisionId) {
@@ -99,6 +118,18 @@ const decisionMarkets = (state = [], action) => {
       } else {
         return state
       }
+    case 'NET_OUTCOME_TOKENS_SOLD_FOR_DECISION_LOADED':
+      return state.map(decision => {
+        if (decision.id == action.decisionId) {
+          if ( action.marketIndex == 0 ) {
+            decision.yesMarketShortOutcomeTokensSold = action.shortOutcomeTokensSold,
+            decision.yesMarketLongOutcomeTokensSold = action.longOutcomeTokensSold
+          } else if (action.marketIndex == 1) {
+            decision.noMarketShortOutcomeTokensSold = action.shortOutcomeTokensSold,
+            decision.yesMarketLongOutcomeTokensSold = action.longOutcomeTokensSold
+          }
+        }
+      })
     default:
       return state
   }

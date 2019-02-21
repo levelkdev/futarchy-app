@@ -392,6 +392,25 @@ contract Futarchy is AragonApp, IForwarder {
       return now > decision.decisionResolutionDate;
     }
 
+    /**
+    * @notice gets net outcome tokens sold for one of a decision's markets
+    * @param decisionId decision to get results for
+    * @param marketIndex market to get net outcome tokens sold for
+    * @return uint array with net outcome tokens sold
+    */
+    function getNetOutcomeTokensSoldForDecision(
+      uint decisionId,
+      uint marketIndex
+    )
+      public
+      view
+      returns(int[2] outcomeTokensSold)
+    {
+      // For markets, 0 is yes, and 1 is no; and for those markets' outcome tokens, 0 is short, and 1 long
+      outcomeTokensSold[0] = decisions[decisionId].futarchyOracle.markets(marketIndex).netOutcomeTokensSold(0);
+      outcomeTokensSold[1] = decisions[decisionId].futarchyOracle.markets(marketIndex).netOutcomeTokensSold(1); 
+    }
+
     function _addToTraderDecisionBalances(
       uint decisionId,
       uint[2] collateralAmounts,
