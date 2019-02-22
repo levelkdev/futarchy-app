@@ -20,6 +20,7 @@ contract Futarchy is AragonApp, IForwarder {
   event BuyMarketPositions(address trader, uint decisionId, uint tradeTime, uint collateralAmount, uint[2] yesPurchaseAmounts, uint[2] noPurchaseAmounts, uint[2] yesCosts, uint[2] noCosts, uint[4] marginalPrices);
   event SellMarketPositions(address trader, uint decisionId, uint tradeTime, int[] yesMarketPositions, int[] noMarketPositions, uint yesCollateralReceived, uint noCollateralReceived, uint[4] marginalPrices);
   event RedeemWinningCollateralTokens(address trader, uint decisionId, int winningIndex, uint winningsAmount);
+  event RedeemScalarWinnings(uint decisionId, address trader, uint winnings);
 
   bytes32 public constant CREATE_DECISION_ROLE = keccak256("CREATE_DECISION_ROLE");
 
@@ -180,10 +181,9 @@ contract Futarchy is AragonApp, IForwarder {
         CategoricalEvent(futarchyOracle.categoricalEvent()).setOutcome();
       }
 
-      if(futarchyOracle.categoricalEvent().isOutcomeSet()) {
-        decisions[decisionId].resolved = true;
-        decisions[decisionId].passed = futarchyOracle.winningMarketIndex() == 0 ? true : false;
-      }
+
+      decisions[decisionId].resolved = true;
+      decisions[decisionId].passed = futarchyOracle.winningMarketIndex() == 0 ? true : false;
     }
 
 
@@ -385,16 +385,31 @@ contract Futarchy is AragonApp, IForwarder {
     }
 
     function redeemScalarWinnings(uint decisionId) public {
-      /* TODO: Use updated gnosis contracts for calculation */
-    }
-
-    /**
-    * @notice returns true if the trading period before making the decision has passed
-    * @param decisionId decision unique identifier
-    */
-    function tradingPeriodEnded(uint decisionId) public view returns(bool) {
       Decision storage decision = decisions[decisionId];
-      return now > decision.decisionResolutionDate;
+      uint winningMarketIndex = decision.passed ? 0 : 1;
+      OutcomeTokenBalances storage balances = traderDecisionBalances[keccak256(msg.sender, decisionId)];
+      ScalarEvent scalarEvent = ScalarEvent(decision.futarchyOracle.markets(winningMarketIndex).eventContract());
+
+      scalarEvent.redeemWinnings();
+      decision.futarchyOracle.categoricalEvent().redeemWinnings();
+
+      uint shortOutcomeTokenCount;
+      uint longOutcomeTokenCount;
+      if (decision.passed) {
+        shortOutcomeTokenCount = balances.yesShort;
+        longOutcomeTokenCount = balances.yesLong;
+        balances.yesShort = 0;
+        balances.yesLong = 0;
+      } else {
+        shortOutcomeTokenCount = balances.noShort;
+        longOutcomeTokenCount = balances.noLong;
+        balances.noShort = 0;
+        balances.noLong = 0;
+      }
+
+      uint winnings = scalarEvent.calculateWinnings(shortOutcomeTokenCount, longOutcomeTokenCount);
+      require(token.transfer(msg.sender, winnings));
+      emit RedeemScalarWinnings(decisionId, msg.sender, winnings);
     }
 
     /**
