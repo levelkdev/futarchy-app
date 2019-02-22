@@ -29,7 +29,7 @@
     "styled-components": "^4.0.0"
   },
   "devDependencies": {
-    "@aragon/cli": "^5.0.0",
+    "@aragon/cli": "^5.3.3",
     "@aragon/test-helpers": "^1.0.1",
     "@babel/core": "^7.1.2",
     "@babel/plugin-proposal-class-properties": "^7.1.0",
@@ -40,7 +40,8 @@
     "decimal.js": "10.0.0",
     "http-server": "^0.11.1",
     "left-pad": "^1.3.0",
-    "parcel-bundler": "^1.10.1"
+    "parcel-bundler": "^1.10.1",
+    "truffle-flattener": "1.2.12"
   },
   "scripts": {
     "deploy:staging": "truffle exec scripts/deploy.js --network rinkeby --environment staging",
