@@ -1,4 +1,6 @@
-const getDeployConfig = require('./getDeployConfig')
+const configForNetwork = require('./deployConfig/configForNetwork')
+const isLocalNetwork = require('./deployConfig/isLocalNetwork')
+const writeDeployConfig = require('./deployConfig/writeDeployConfig')
 
 const globalArtifacts = this.artifacts // Not injected unless called directly via truffle
 
@@ -9,14 +11,15 @@ module.exports = async (
     tokenAddress,
     owner,
     accounts,
-    amount
+    amount,
+    network
   } = {}
 ) => {
-  try {
-    const network = process.argv[5]
-    const deployConfig = getDeployConfig(network)
+  let deployConfig = configForNetwork(network)
 
-    if (deployConfig == {}) {
+  try {
+
+    if (!deployConfig.tokensDistributed) {
       console.log('distributing tokens...')
       console.log('')
 
@@ -28,6 +31,10 @@ module.exports = async (
         account = accounts[i]
         console.log(`allocating ${amount} tokens to ${account}`)
         await token.generateTokens(account, amount, { from: owner })
+      }
+      if (!isLocalNetwork(network)) {
+        deployConfig.tokensDistributed = true
+        writeDeployConfig(network, deployConfig)
       }
     } else {
       console.log(`Tokens already allocated for MiniMeToken ${deployConfig.MiniMeToken} on ${network} network`)

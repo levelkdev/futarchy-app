@@ -1,4 +1,6 @@
-const getDeployConfig = require('./getDeployConfig')
+const configForNetwork = require('./deployConfig/configForNetwork')
+const isLocalNetwork = require('./deployConfig/isLocalNetwork')
+const writeDeployConfig = require('./deployConfig/writeDeployConfig')
 
 const globalArtifacts = this.artifacts // Not injected unless called directly via truffle
 const NULL_ADDRESS = '0x00'
@@ -6,108 +8,137 @@ const NULL_ADDRESS = '0x00'
 module.exports = async (
   truffleExecCallback,
   {
-    artifacts = globalArtifacts
+    artifacts = globalArtifacts,
+    network
   } = {}
 ) => {
+  const MiniMeToken = artifacts.require('MiniMeToken')
+  const CentralizedTimedOracleFactory = artifacts.require('CentralizedTimedOracleFactory')
+  const Fixed192x64Math = artifacts.require('Fixed192x64Math')
+  const LMSRMarketMaker = artifacts.require('LMSRMarketMaker')
+  const CategoricalEvent = artifacts.require('CategoricalEvent')
+  const ScalarEvent = artifacts.require('ScalarEvent')
+  const OutcomeToken = artifacts.require('OutcomeToken')
+  const FutarchyOracle = artifacts.require('FutarchyOracle')
+  const StandardMarketWithPriceLogger = artifacts.require('StandardMarketWithPriceLogger')
+  const EventFactory = artifacts.require('EventFactory')
+  const StandardMarketWithPriceLoggerFactory = artifacts.require('StandardMarketWithPriceLoggerFactory')
+  const FutarchyOracleFactory = artifacts.require('FutarchyOracleFactory')
+
+  console.log('NETWORK: ', network)
+
+  let deployConfig = configForNetwork(network)
+
   try {
-    const network = process.argv[5]
-    const deployConfig = getDeployConfig(network)
+    console.log(`Deploying dependencies for "${network}" network`)
 
-    if (deployConfig !== {}) {
-      console.log(`Using dependency contract addresses from deploy.${network}.json`)
-    } else {
-      console.log('deploying dependencies...')
-    }
+    const miniMeToken = await tryDeploy(
+      MiniMeToken, 
+      'MiniMeToken',
+      [ NULL_ADDRESS, NULL_ADDRESS, 0, 'TokenCoin', 0, 'TKN', true ]
+    )
 
-    const MiniMeToken = artifacts.require('MiniMeToken')
-    const CentralizedTimedOracle = artifacts.require('CentralizedTimedOracle')
-    const CentralizedTimedOracleFactory = artifacts.require('CentralizedTimedOracleFactory')
-    const Fixed192x64Math = artifacts.require('Fixed192x64Math')
-    const LMSRMarketMaker = artifacts.require('LMSRMarketMaker')
-    const CategoricalEvent = artifacts.require('CategoricalEvent')
-    const ScalarEvent = artifacts.require('ScalarEvent')
-    const OutcomeToken = artifacts.require('OutcomeToken')
-    const FutarchyOracle = artifacts.require('FutarchyOracle')
-    const StandardMarketWithPriceLogger = artifacts.require('StandardMarketWithPriceLogger')
-    const EventFactory = artifacts.require('EventFactory')
-    const StandardMarketWithPriceLoggerFactory = artifacts.require('StandardMarketWithPriceLoggerFactory')
-    const FutarchyOracleFactory = artifacts.require('FutarchyOracleFactory')
+    const centralizedTimedOracleFactory = await tryDeploy(
+      CentralizedTimedOracleFactory,
+      'CentralizedTimedOracleFactory'
+    )
 
-    if (!deployConfig.MiniMeToken) {
-      const miniMeToken = await MiniMeToken.new(
-        NULL_ADDRESS,
-        NULL_ADDRESS,
-        0,
-        'TokenCoin',
-        0,
-        'TKN',
-        true
-      )
-      console.log(`MiniMeToken instance: ${miniMeToken.address}`)
-      deployConfig.MiniMeToken = miniMeToken.address
-    }
+    const fixed192x64Math = await tryDeploy(
+      Fixed192x64Math,
+      'Fixed192x64Math'
+    )
 
-    // TODO: check conf for all these....
+    await LMSRMarketMaker.link('Fixed192x64Math', fixed192x64Math.address)
+  
+    const lmsrMarketMaker = await tryDeploy(
+      LMSRMarketMaker,
+      'LMSRMarketMaker'
+    )
 
-    // const centralizedTimedOracleFactory = await CentralizedTimedOracleFactory.new()
-    // console.log(`CentralizedTimedOracleFactory instance: ${centralizedTimedOracleFactory.address}`)
+    const categoricalEventMaster = await tryDeploy(
+      CategoricalEvent,
+      'CategoricalEvent'
+    )
 
-    // const fixed192x64Math = await Fixed192x64Math.new()
-    // console.log(`Fixed192x64Math instance: ${fixed192x64Math.address}`)
+    const scalarEventMaster = await tryDeploy(
+      ScalarEvent,
+      'ScalarEvent'
+    )
 
-    // await LMSRMarketMaker.link('Fixed192x64Math', fixed192x64Math.address)
-    // const lmsrMarketMaker = await LMSRMarketMaker.new()
-    // console.log(`LMSRMarketMaker instance: ${lmsrMarketMaker.address}`)
+    const outcomeTokenMaster = await tryDeploy(
+      OutcomeToken,
+      'OutcomeToken'
+    )
 
-    // const categoricalEventMaster = await CategoricalEvent.new()
-    // console.log(`CategoricalEvent master: ${categoricalEventMaster.address}`)
+    const futarchyOracleMaster = await tryDeploy(
+      FutarchyOracle,
+      'FutarchyOracle'
+    )
 
-    // const scalarEventMaster = await ScalarEvent.new()
-    // console.log(`ScalarEvent master: ${scalarEventMaster.address}`)
+    const standardMarketWithPriceLoggerMaster = await tryDeploy(
+      StandardMarketWithPriceLogger,
+      'StandardMarketWithPriceLogger'
+    )
 
-    // const outcomeTokenMaster = await OutcomeToken.new()
-    // console.log(`OutcomeToken master: ${outcomeTokenMaster.address}`)
+    const eventFactory = await tryDeploy(
+      EventFactory,
+      'EventFactory',
+      [
+        categoricalEventMaster.address,
+        scalarEventMaster.address,
+        outcomeTokenMaster.address
+      ]
+    )
+    console.log(`EventFactory instance: ${eventFactory.address}`)
 
-    // const futarchyOracleMaster = await FutarchyOracle.new()
-    // console.log(`FutarchyOracle master: ${futarchyOracleMaster.address}`)
+    const standardMarketWithPriceLoggerFactory = await tryDeploy(
+      StandardMarketWithPriceLoggerFactory,
+      'StandardMarketWithPriceLoggerFactory',
+      [
+        standardMarketWithPriceLoggerMaster.address
+      ]
+    )
 
-    // const standardMarketWithPriceLoggerMaster = await StandardMarketWithPriceLogger.new()
-    // console.log(`StandardMarketWithPriceLogger master: ${standardMarketWithPriceLoggerMaster.address}`)
-
-    // const eventFactory = await EventFactory.new(
-    //   categoricalEventMaster.address,
-    //   scalarEventMaster.address,
-    //   outcomeTokenMaster.address
-    // )
-    // console.log(`EventFactory instance: ${eventFactory.address}`)
-
-    // const standardMarketWithPriceLoggerFactory = await StandardMarketWithPriceLoggerFactory.new(
-    //   standardMarketWithPriceLoggerMaster.address
-    // )
-    // console.log(
-    //   `StandardMarketWithPriceLoggerFactory instance: ${standardMarketWithPriceLoggerFactory.address}`
-    // )
-
-    // const futarchyOracleFactory = await FutarchyOracleFactory.new(
-    //   futarchyOracleMaster.address,
-    //   eventFactory.address,
-    //   standardMarketWithPriceLoggerFactory.address
-    // )
-    // console.log(`FutarchyOracleFactory instance: ${futarchyOracleFactory.address}`)
+    const futarchyOracleFactory = await tryDeploy(
+      FutarchyOracleFactory,
+      'FutarchyOracleFactory',
+      [
+        futarchyOracleMaster.address,
+        eventFactory.address,
+        standardMarketWithPriceLoggerFactory.address
+      ]
+    )
 
     if (typeof truffleExecCallback === 'function') {
       truffleExecCallback()
     } else {
       return {
-        miniMeTokenAddress: deployConfig.MiniMeToken,
-        centralizedTimedOracleFactoryAddress: deployConfig.CentralizedTimedOracleFactory,
-        lmsrMarketMakerAddress: deployConfig.LMSRMarketMaker,
-        eventFactoryAddress: deployConfig.EventFactory,
-        standardMarketWithPriceLoggerFactoryAddress: deployConfig.StandardMarketWithPriceLoggerFactory,
-        futarchyOracleFactoryAddress: deployConfig.FutarchyOracleFactory
+        miniMeTokenAddress: miniMeToken.address,
+        centralizedTimedOracleFactoryAddress: centralizedTimedOracleFactory.address,
+        lmsrMarketMakerAddress: lmsrMarketMaker.address,
+        eventFactoryAddress: eventFactory.address,
+        standardMarketWithPriceLoggerFactoryAddress: standardMarketWithPriceLoggerFactory.address,
+        futarchyOracleFactoryAddress: futarchyOracleFactory.address
       }
     }
   } catch (err) {
     console.log('Error in scripts/deploy_deps.js: ', err)
+  }
+
+  async function tryDeploy(contractArtifact, contractName, params = []) {
+    let contractInstance
+    const deployedAddress = deployConfig.dependencyContracts[contractName]
+    if (!deployedAddress) {
+      contractInstance = await contractArtifact.new.apply(this, params)
+      console.log(`Deployed ${contractName}: ${contractInstance.address}`)
+      if (!isLocalNetwork(network)) {
+        deployConfig.dependencyContracts[contractName] = contractInstance.address
+        writeDeployConfig(network, deployConfig)
+      }
+    } else {
+      contractInstance = await contractArtifact.at(deployedAddress)
+      console.log(`${contractName} already deployed: ${deployedAddress}`)
+    }
+    return contractInstance
   }
 }

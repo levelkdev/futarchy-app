@@ -29,7 +29,7 @@
     "styled-components": "^4.0.0"
   },
   "devDependencies": {
-    "@aragon/cli": "^5.3.3",
+    "@aragon/cli": "^5.0.0",
     "@aragon/test-helpers": "^1.0.1",
     "@babel/core": "^7.1.2",
     "@babel/plugin-proposal-class-properties": "^7.1.0",
@@ -43,11 +43,9 @@
     "parcel-bundler": "^1.10.1"
   },
   "scripts": {
+    "deploy:staging": "truffle exec scripts/deploy.js --network rinkeby --environment staging",
     "start:aragon": "truffle exec scripts/run.js --network rpc",
-    "deploy:rinkeby": "truffle exec scripts/run.js --network rinkeby",
-    "publish:default": "node /Users/mfcalvanese/dev/eth/aragon-cli/dist/cli.js apm publish minor",
-    "publish:rinkeby": "node /Users/mfcalvanese/dev/eth/aragon-cli/dist/cli.js apm publish minor --environment staging",
-    "start:aragon:http": "node /Users/mfcalvanese/dev/eth/aragon-cli/dist/cli.js run --http localhost:8001 --http-served-from ./dist",
+    "start:aragon:http": "aragon run --http localhost:8001 --http-served-from ./dist",
     "start:app": "rm -rf dist/ && npm run sync-assets && npm run build:script -- --no-minify && parcel serve app/index.html -p 8001 --out-dir dist/ --no-cache",
     "start:sandbox": "http-server ./dist",
     "devchain": "aragon devchain",

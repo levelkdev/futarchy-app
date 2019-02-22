@@ -1,3 +1,7 @@
+/**
+ * Setup and run deployment on local devchain
+ */
+
 const execa = require('execa')
 const getAccounts = require('@aragon/os/scripts/helpers/get-accounts')
 const deployDeps = require('./deploy_deps')
@@ -17,6 +21,8 @@ module.exports = async (
     owner = defaultOwner
   } = {}
 ) => {
+  const network = process.argv[5]
+
   try {
     let accounts
     if (!owner) {
@@ -32,7 +38,7 @@ module.exports = async (
       futarchyOracleFactoryAddress,
       centralizedTimedOracleFactoryAddress,
       lmsrMarketMakerAddress
-    } = await deployDeps(null, { artifacts })
+    } = await deployDeps(null, { artifacts, network })
     console.log('')
 
     await distributeTokens(null, {
@@ -40,18 +46,14 @@ module.exports = async (
       tokenAddress: miniMeTokenAddress,
       owner,
       accounts,
-      amount: TOKEN_DISTRIBUTION_AMOUNT
+      amount: TOKEN_DISTRIBUTION_AMOUNT,
+      network
     })
 
     const aragonRunArgs = [
       'run',
       'start:aragon:http',
       '--',
-      
-      // TODO: spiff this up ... and why doesn't it work??
-      '--environment',
-      'staging',
-
       '--app-init-args',
       FEE,
       TRADING_PERIOD,
