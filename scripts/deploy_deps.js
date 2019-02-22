@@ -29,6 +29,7 @@ module.exports = async (
 
   try {
     console.log(`Deploying dependencies for "${network}" network`)
+    console.log('')
 
     const miniMeToken = await tryDeploy(
       MiniMeToken, 
@@ -87,7 +88,6 @@ module.exports = async (
         outcomeTokenMaster.address
       ]
     )
-    console.log(`EventFactory instance: ${eventFactory.address}`)
 
     const standardMarketWithPriceLoggerFactory = await tryDeploy(
       StandardMarketWithPriceLoggerFactory,
@@ -127,7 +127,8 @@ module.exports = async (
     let contractInstance
     const deployedAddress = deployConfig.dependencyContracts[contractName]
     if (!deployedAddress) {
-      contractInstance = await contractArtifact.new.apply(this, params)
+      console.log(`Deploying ${contractName}...`)
+      contractInstance = await contractArtifact.new.apply(null, params)
       console.log(`Deployed ${contractName}: ${contractInstance.address}`)
       if (!isLocalNetwork(network)) {
         deployConfig.dependencyContracts[contractName] = contractInstance.address
@@ -137,6 +138,7 @@ module.exports = async (
       contractInstance = await contractArtifact.at(deployedAddress)
       console.log(`${contractName} already deployed: ${deployedAddress}`)
     }
+    console.log('')
     return contractInstance
   }
 }

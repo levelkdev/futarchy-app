@@ -1,16 +1,22 @@
 {
-  "dependencyContracts": {
-    "MiniMeToken": "0x9d4eb9a0b6965e1780711291288f3ac0215d7e18",
-    "CentralizedTimedOracleFactory": "0x55d41f19bef4f099028103a2981e008e4fd1efc6",
-    "Fixed192x64Math": "0xd761133aef1c5fd4ea01659c375f6c75c09cd51d",
-    "LMSRMarketMaker": "0x321e8387464d94dc1f0f57f5951fdf14323babc4",
-    "CategoricalEventMaster": "0x75951908c89143b943e83017db5dbe0265354be1",
-    "ScalarEventMaster": "0x6aaa571a8f391c762f8e77e18785498937e58757",
-    "OutcomeTokenMaster": "0xb374301f5d1d6b682ef406ffaffcbc303b1ce487",
-    "FutarchyOracleMaster": "0x1d4b84ecb7d1c5b9964b69c15f6deeee0d050c53",
-    "StandardMarketWithPriceLoggerMaster": "0x3305df407e33844784d9258170fc2b5abbdc7606",
-    "EventFactory": "0xd21db485c86bf198518209c526541aac0e6d3d50",
-    "StandardMarketWithPriceLoggerFactory": "0x200c4466ec598e6ac8f9620ee5482f16e08df5a0",
-    "FutarchyOracleFactory": "0xff068a75a67accb73fe4b32bf4e00cb0481dded4"
-  }
+    "dependencyContracts": {
+        "MiniMeToken": "0x6917ca90c0670024a9f48aecefd6c3c82fc5d3e9",
+        "CentralizedTimedOracleFactory": "0x14f53093de40e5924af4abe20cdc860995a4fd47",
+        "Fixed192x64Math": "0x68407ea068c8348ac50fcd4e3e85b9cd3a7d0e4e",
+        "LMSRMarketMaker": "0x5995f896899256ac9496d17a03125b2ea3df34a4",
+        "CategoricalEvent": "0xc1ea53b67bfcc1350b2e6b1c9d97b83666c865dd",
+        "ScalarEvent": "0xa43b87ae476711e19225e7744081730ca8ec1215",
+        "OutcomeToken": "0xedc015151f0890d2164340cfdf67b61dc92fa14e",
+        "FutarchyOracle": "0x09e04d044ca9303b94451f407c467e0dfcd1ccfa",
+        "StandardMarketWithPriceLogger": "0x260357b8e3d93180858a95f5e3d4a2eda3e6a6ad",
+        "EventFactory": "0x525cc4cc523e376a3952f31998aaf312fb9ee82d",
+        "StandardMarketWithPriceLoggerFactory": "0x64cec831d0109c40a734384beaf011b9deeebd53",
+        "FutarchyOracleFactory": "0x1fad5ae333ef73ea9810bf90846cadbaabb72a36"
+    },
+    "tokensAllocated": {
+        "0x44360017c1460BC0149946b4fad97665c25586b0": "1e+26",
+        "0xE3717CCDfbE15649F44FF27a81BE38d4648E1Ef0": "1e+26",
+        "0x33329F5a360649Eb1C473b998cF3b975FEb109f6": "1e+26",
+        "0xb4124cEB3451635DAcedd11767f004d8a28c6eE7": "1e+26"
+    }
 }

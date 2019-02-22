@@ -7,5 +7,4 @@ module.exports = function readDeployConfig (network) {
   } catch (err) {
     console.log(`No existing deploy.${network}.json file found`)
   }
-  return {}
 }

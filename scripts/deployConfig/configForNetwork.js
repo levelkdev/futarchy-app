@@ -3,13 +3,13 @@ const isLocalNetwork = require('./isLocalNetwork')
 
 const defaultConf = {
   dependencyContracts: {},
-  tokensDistributed: false
+  tokensAllocated: {}
 }
 
 module.exports = function configForEnv (network) {
   if (isLocalNetwork(network)) {
     return defaultConf
   } else {
-    return readDeployConfig(network)
+    return readDeployConfig(network) || defaultConf
   }
 }

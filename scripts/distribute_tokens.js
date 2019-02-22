@@ -18,26 +18,25 @@ module.exports = async (
   let deployConfig = configForNetwork(network)
 
   try {
+    console.log('distributing tokens...')
+    console.log('')
 
-    if (!deployConfig.tokensDistributed) {
-      console.log('distributing tokens...')
-      console.log('')
+    const MiniMeToken = artifacts.require('MiniMeToken')
+    const token = MiniMeToken.at(tokenAddress)
 
-      const MiniMeToken = artifacts.require('MiniMeToken')
-      const token = MiniMeToken.at(tokenAddress)
-
-      let account
-      for (var i in accounts) {
-        account = accounts[i]
+    let account
+    for (var i in accounts) {
+      account = accounts[i]
+      if (!deployConfig.tokensAllocated[account]) {
         console.log(`allocating ${amount} tokens to ${account}`)
         await token.generateTokens(account, amount, { from: owner })
+        if (!isLocalNetwork(network)) {
+          deployConfig.tokensAllocated[account] = amount.toString()
+          writeDeployConfig(network, deployConfig)
+        }
+      } else {
+        console.log(`Already allocated ${deployConfig.tokensAllocated[account]} tokens to ${account}`)
       }
-      if (!isLocalNetwork(network)) {
-        deployConfig.tokensDistributed = true
-        writeDeployConfig(network, deployConfig)
-      }
-    } else {
-      console.log(`Tokens already allocated for MiniMeToken ${deployConfig.MiniMeToken} on ${network} network`)
     }
     console.log('')
   } catch (err) {
