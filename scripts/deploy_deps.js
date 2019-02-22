@@ -25,8 +25,6 @@ module.exports = async (
   const StandardMarketWithPriceLoggerFactory = artifacts.require('StandardMarketWithPriceLoggerFactory')
   const FutarchyOracleFactory = artifacts.require('FutarchyOracleFactory')
 
-  console.log('NETWORK: ', network)
-
   let deployConfig = configForNetwork(network)
 
   try {
