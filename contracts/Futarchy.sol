@@ -19,7 +19,7 @@ contract Futarchy is AragonApp, IForwarder {
   event ExecuteDecision(uint decisionId);
   event BuyMarketPositions(address trader, uint decisionId, uint tradeTime, uint collateralAmount, uint[2] yesPurchaseAmounts, uint[2] noPurchaseAmounts, uint[2] yesCosts, uint[2] noCosts, uint[4] marginalPrices);
   event SellMarketPositions(address trader, uint decisionId, uint tradeTime, int[] yesMarketPositions, int[] noMarketPositions, uint yesCollateralReceived, uint noCollateralReceived, uint[4] marginalPrices);
-  event RedeemWinnings(address trader, uint decisionId, int winningIndex, uint winningsAmount);
+  event RedeemWinningCollateralTokens(address trader, uint decisionId, int winningIndex, uint winningsAmount);
 
   bytes32 public constant CREATE_DECISION_ROLE = keccak256("CREATE_DECISION_ROLE");
 
@@ -37,6 +37,8 @@ contract Futarchy is AragonApp, IForwarder {
     uint startDate;
     uint decisionResolutionDate;
     uint priceResolutionDate;
+    int lowerBound;
+    int upperBound;
     bool resolved;
     bool passed;
     uint64 snapshotBlock;
@@ -120,12 +122,13 @@ contract Futarchy is AragonApp, IForwarder {
       decisionId = decisionLength++;
 
       uint startDate = now;
-      uint decisionResolutionDate = startDate.add(tradingPeriod);
       uint priceResolutionDate = startDate.add(timeToPriceResolution);
 
       decisions[decisionId].startDate = startDate;
-      decisions[decisionId].decisionResolutionDate = decisionResolutionDate;
-      decisions[decisionId].priceResolutionDate = priceResolutionDate;
+      decisions[decisionId].decisionResolutionDate = startDate.add(tradingPeriod);
+      decisions[decisionId].priceResolutionDate = startDate.add(timeToPriceResolution);
+      decisions[decisionId].lowerBound = lowerBound;
+      decisions[decisionId].upperBound = upperBound;
       decisions[decisionId].metadata = metadata;
       decisions[decisionId].snapshotBlock = getBlockNumber64() - 1;
       decisions[decisionId].executionScript = executionScript;
@@ -148,61 +151,53 @@ contract Futarchy is AragonApp, IForwarder {
       require(token.approve(futarchyOracle, marketFundAmount));
       futarchyOracle.fund(marketFundAmount);
 
-      emit StartDecision(decisionId, msg.sender, metadata, futarchyOracle, lowerBound, upperBound, startDate, decisionResolutionDate, priceResolutionDate);
-    }
-
-    /**
-    * @notice returns data about decision
-    * @param decisionId decision unique identifier
-    **/
-    function getDecision(uint decisionId)
-      public
-      view
-      decisionExists(decisionId)
-      returns (
-        bool open,
-        bool executed,
-        uint startDate,
-        uint64 snapshotBlock,
-        uint marketPower,
-        bytes script
-
-        )
-    {
-      Decision storage decision = decisions[decisionId];
-      open = !decision.futarchyOracle.isOutcomeSet();
-      executed = decision.executed;
-      startDate = decision.startDate;
-      marketPower = token.totalSupplyAt(decision.snapshotBlock);
-      snapshotBlock = decision.snapshotBlock;
-      script = decision.executionScript;
+      emit StartDecision(decisionId, msg.sender, metadata, futarchyOracle, lowerBound, upperBound, startDate, decisions[decisionId].decisionResolutionDate, decisions[decisionId].priceResolutionDate);
     }
 
     function closeDecisionMarkets(uint decisionId) public {
+      Decision storage decision = decisions[decisionId];
+
       uint previousBalance = token.balanceOf(this);
-      decisions[decisionId].futarchyOracle.close();
+      decision.futarchyOracle.close();
       uint newBalance = token.balanceOf(this);
 
       uint creatorRefund = newBalance - previousBalance;
       require(token.transfer(decisions[decisionId].decisionCreator, creatorRefund));
+
+      uint winningMarketIndex = decision.passed ? 0 : 1;
+
+      decision.futarchyOracle.markets(winningMarketIndex).eventContract().redeemWinnings();
+      decision.futarchyOracle.categoricalEvent().redeemWinnings();
+    }
+
+    function setDecision(uint decisionId) public {
+      require(decisions[decisionId].decisionResolutionDate < now);
+      FutarchyOracle futarchyOracle = decisions[decisionId].futarchyOracle;
+      if(!futarchyOracle.categoricalEvent().isOutcomeSet()) {
+        if (!futarchyOracle.isOutcomeSet()) {
+          futarchyOracle.setOutcome();
+        }
+        CategoricalEvent(futarchyOracle.categoricalEvent()).setOutcome();
+      }
+
+      if(futarchyOracle.categoricalEvent().isOutcomeSet()) {
+        decisions[decisionId].resolved = true;
+        decisions[decisionId].passed = futarchyOracle.winningMarketIndex() == 0 ? true : false;
+      }
     }
 
 
     /**
     * TODO: enable special permissions for executing decisions
-    * TODO: create data to signal "cannot execute, so don't even try" (??)
     * @notice execute decision if final decision is ready and equals YES; otherwise Revert
     * @param decisionId decision unique identifier
     */
     function executeDecision(uint decisionId) public {
       Decision storage decision = decisions[decisionId];
 
-      require(!decision.executed);
-      require(decision.decisionResolutionDate < now);
-      if (!decision.futarchyOracle.isOutcomeSet()) {
-        decision.futarchyOracle.setOutcome();
-      }
-      require(decision.futarchyOracle.getOutcome() == 0); // 0 == YES; 1 == NO
+      require(decision.decisionResolutionDate < now && !decision.executed);
+      setDecision(decisionId);
+      require(decision.resolved && decision.passed);
 
       bytes memory input = new bytes(0); // TODO: (aragon comment) Consider including input for decision scripts
       runScript(decision.executionScript, input, new address[](0));
@@ -272,8 +267,8 @@ contract Futarchy is AragonApp, IForwarder {
       _addToTraderDecisionBalances(
         decisionId,
         [
-          collateralAmount.sub(_calcTotalCost(yesCosts)),
-          collateralAmount.sub(_calcTotalCost(noCosts))
+          collateralAmount.sub(yesCosts[0].add(yesCosts[1])),
+          collateralAmount.sub(noCosts[0].add(noCosts[1]))
         ],
         yesPurchaseAmounts,
         noPurchaseAmounts
@@ -325,26 +320,17 @@ contract Futarchy is AragonApp, IForwarder {
       emit SellMarketPositions(msg.sender, decisionId, now, yesSellPositions, noSellPositions, yesCollateralReceived, noCollateralReceived, marginalPrices);
     }
 
+
     /* @notice allocates token back to the sender based on their balance of the winning outcome collateralToken
      * @param decisionId unique identifier for the decision
      */
-    function redeemTokenWinnings(uint decisionId) public {
+    function redeemWinningCollateralTokens(uint decisionId) public {
       require(decisions[decisionId].decisionResolutionDate < now);
 
       FutarchyOracle futarchyOracle = decisions[decisionId].futarchyOracle;
 
-      // set decision if not yet set
-      if(!futarchyOracle.categoricalEvent().isOutcomeSet()) {
-        if (!futarchyOracle.isOutcomeSet()) {
-          futarchyOracle.setOutcome();
-        }
-        futarchyOracle.categoricalEvent().setOutcome();
-      }
-
+      setDecision(decisionId);
       int winningIndex = futarchyOracle.getOutcome();
-
-      decisions[decisionId].resolved = true;
-      decisions[decisionId].passed = winningIndex == 0 ? true : false;
       futarchyOracle.categoricalEvent().redeemWinnings();
 
       uint winnings;
@@ -357,7 +343,7 @@ contract Futarchy is AragonApp, IForwarder {
       }
 
       require(token.transfer(msg.sender, winnings));
-      emit RedeemWinnings(msg.sender, decisionId, winningIndex, winnings);
+      emit RedeemWinningCollateralTokens(msg.sender, decisionId, winningIndex, winnings);
     }
 
     /**
@@ -381,6 +367,25 @@ contract Futarchy is AragonApp, IForwarder {
           i % 2
         );
       }
+    }
+
+    function redeemWinnings(uint decisionId) public {
+      Decision storage decision = decisions[decisionId];
+      uint winningMarketIndex = decision.passed ? 0 : 1;
+
+      MarketData.Stages marketStage = decision.futarchyOracle.markets(winningMarketIndex).stage();
+      require(marketStage != MarketData.Stages.MarketCreated);
+
+      if (marketStage == MarketData.Stages.MarketFunded)
+        sellMarketPositions(decisionId);
+      else if (marketStage == MarketData.Stages.MarketClosed)
+        redeemScalarWinnings(decisionId);
+
+      redeemWinningCollateralTokens(decisionId);
+    }
+
+    function redeemScalarWinnings(uint decisionId) public {
+      /* TODO: Use updated gnosis contracts for calculation */
     }
 
     /**
@@ -432,10 +437,6 @@ contract Futarchy is AragonApp, IForwarder {
       marketPositions[0] = marketIndex == 0 ? -int(outcomeTokenBalances.yesShort) : -int(outcomeTokenBalances.noShort);
       marketPositions[1] = marketIndex == 0 ? -int(outcomeTokenBalances.yesLong) : -int(outcomeTokenBalances.noLong);
       return marketPositions;
-    }
-
-    function _calcTotalCost(uint[2] costs) internal pure returns (uint) {
-      return costs[0].add(costs[1]);
     }
 
     /**

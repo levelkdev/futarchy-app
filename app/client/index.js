@@ -141,7 +141,7 @@ export const redeemWinnings = async (decisionId) => {
   return contractFn(
     window.aragonClient,
     'client',
-    'redeemTokenWinnings',
+    'redeemWinnings',
     decisionId
   )
 }

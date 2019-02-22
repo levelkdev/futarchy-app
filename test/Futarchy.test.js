@@ -162,34 +162,36 @@ contract('Futarchy', (accounts) => {
         expect((await futarchy.decisions(0))[2].toNumber()).to.equal(startDate + tradingPeriod)
       })
 
-      it('sets the correct priceResolutionDate', async () => {
-        let startDate = (await futarchy.decisions(0))[1].toNumber()
-        let timeToPriceResolution = (await futarchy.timeToPriceResolution()).toNumber()
-        expect((await futarchy.decisions(0))[3].toNumber()).to.equal(startDate + timeToPriceResolution)
+      it('sets the correct lowerBound', async () => {
+        expect((await futarchy.decisions(0))[4].toNumber()).to.equal(LOWER_BOUND)
+      })
+
+      it('sets the correct upperBound', async () => {
+        expect((await futarchy.decisions(0))[5].toNumber()).to.equal(UPPER_BOUND)
       })
 
       it('sets the correct resolved', async () => {
-        expect((await futarchy.decisions(0))[4]).to.equal(false)
+        expect((await futarchy.decisions(0))[6]).to.equal(false)
       })
 
       it('sets the correct passed', async () => {
-        expect((await futarchy.decisions(0))[5]).to.equal(false)
-      })
-
-      it('sets the correct snapshotBlock', async () => {
-        expect((await futarchy.decisions(0))[6].toNumber()).to.equal(currentBlockNumber)
-      })
-
-      it('sets executed to false', async () => {
         expect((await futarchy.decisions(0))[7]).to.equal(false)
       })
 
+      it('sets the correct snapshotBlock', async () => {
+        expect((await futarchy.decisions(0))[8].toNumber()).to.equal(currentBlockNumber)
+      })
+
+      it('sets executed to false', async () => {
+        expect((await futarchy.decisions(0))[9]).to.equal(false)
+      })
+
       it('sets the correct metadata', async () => {
-        expect((await futarchy.decisions(0))[8]).to.equal(metadata)
+        expect((await futarchy.decisions(0))[10]).to.equal(metadata)
       })
 
       it('sets the correct executionScript', async () => {
-        expect((await futarchy.decisions(0))[9]).to.equal(stringToHex(script))
+        expect((await futarchy.decisions(0))[11]).to.equal(stringToHex(script))
       })
     })
 
@@ -216,40 +218,102 @@ contract('Futarchy', (accounts) => {
     })
   })
 
-  describe('getDecision()', async () => {
-    let script, metadata, returnValue, currentBlockNumber
+  describe('setDecision()', () => {
+
     beforeEach(async () => {
-      await initializeFutarchy()
+      // large setup not required bc no integration with full futarchyOracle here
+      initializeFutarchy()
       script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
       metadata = 'Give voting rights to all kitties in the world'
-      await token.approve(futarchy.address, MARKET_FUND_AMOUNT, {from: root})
-      currentBlockNumber = await getBlockNumber()
+      await token.approve(futarchy.address, MARKET_FUND_AMOUNT +  (40 * 10 ** 18), {from: root})
       await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
-      returnValue = await futarchy.getDecision(0)
+      futarchyOracle = FutarchyOracleMock.at((await futarchy.decisions(0))[0])
     })
 
-    it('returns the correct open', async () => {
-      expect(returnValue[0]).to.equal(true)
+    describe('when categoricalEvent is not yet resolved', () => {
+      it('reverts if decisionResolutionDate has not passed yet', async () => {
+        return assertRevert(async () => {
+          await futarchy.setDecision(0)
+        })
+      })
+
+      it('resolves the categoricalEvent', async () => {
+        expect(await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).isOutcomeSet()).to.equal(false)
+        await timeTravel(TRADING_PERIOD + 1)
+        await futarchy.setDecision(0)
+        expect(await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).isOutcomeSet()).to.equal(true)
+      })
+
+      it('resolves the futarchyOracle', async () => {
+        expect(await futarchyOracle.isOutcomeSet()).to.equal(false)
+        await timeTravel(TRADING_PERIOD + 1)
+        await futarchy.setDecision(0)
+        expect(await futarchyOracle.isOutcomeSet()).to.equal(true)
+      })
+
+      it('sets decision.resolved to true', async () => {
+        expect((await futarchy.decisions(0))[6]).to.equal(false)
+        await timeTravel(TRADING_PERIOD + 1)
+        await futarchy.setDecision(0)
+        expect((await futarchy.decisions(0))[6]).to.equal(true)
+      })
+
+      it('sets passed to true if decision passed', async () => {
+        await futarchyOracle.mock_setWinningMarketIndex(0)
+        expect((await futarchy.decisions(0))[7]).to.equal(false)
+        await timeTravel(TRADING_PERIOD + 1)
+        await futarchy.setDecision(0)
+        expect((await futarchy.decisions(0))[7]).to.equal(true)
+      })
+
+      it('sets passed to false if decision failed', async () => {
+        await futarchyOracle.mock_setWinningMarketIndex(1)
+        expect((await futarchy.decisions(0))[7]).to.equal(false)
+        await timeTravel(TRADING_PERIOD + 1)
+        await futarchy.setDecision(0)
+        expect((await futarchy.decisions(0))[7]).to.equal(false)
+      })
     })
 
-    it('returns the correct executed', async () => {
-      expect(returnValue[1]).to.equal(false)
-    })
+    describe('when categoricalEvent is already resolved', () => {
+      it('sets winning decision.passed to true if it is not set already', async () => {
+        await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
+        await futarchyOracle.setOutcome();
+        await futarchyOracle.mock_setWinningMarketIndex(0)
 
-    it('returns the correct startDate', async () => {
-      expect(returnValue[2].toNumber()).to.be.closeTo(unixTime(), unixTime() + 5)
-    })
+        expect((await futarchy.decisions(0))[7]).to.equal(false)
 
-    it('returns the correct snapshotBlock', async () => {
-      expect(returnValue[3].toNumber()).to.equal(currentBlockNumber)
-    })
+        await timeTravel(TRADING_PERIOD + 1)
+        await futarchy.setDecision(0)
 
-    it('returns the correct marketPower', async () => {
-      expect(returnValue[4].toNumber()).to.equal((await token.totalSupply()).toNumber())
-    })
+        expect((await futarchy.decisions(0))[7]).to.equal(true)
+      })
 
-    it('returns the correct script', async () => {
-      expect(returnValue[5]).to.equal(stringToHex(script))
+      it('keeps losing decision.passed false', async () => {
+        await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
+        await futarchyOracle.setOutcome();
+        await futarchyOracle.mock_setWinningMarketIndex(1)
+
+        expect((await futarchy.decisions(0))[7]).to.equal(false)
+
+        await timeTravel(TRADING_PERIOD + 1)
+        await futarchy.setDecision(0)
+
+        expect((await futarchy.decisions(0))[7]).to.equal(false)
+      })
+
+      it('sets resolved to true if it is not set already', async () => {
+        await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
+        await futarchyOracle.setOutcome();
+        await futarchyOracle.mock_setWinningMarketIndex(0)
+
+        expect((await futarchy.decisions(0))[6]).to.equal(false)
+
+        await timeTravel(TRADING_PERIOD + 1)
+        await futarchy.setDecision(0)
+
+        expect((await futarchy.decisions(0))[6]).to.equal(true)
+      })
     })
   })
 
@@ -354,9 +418,9 @@ contract('Futarchy', (accounts) => {
 
         it('sets decision.executed to true', async () => {
           await timeTravel(TRADING_PERIOD + 1)
-          expect((await futarchy.decisions(0))[7]).to.equal(false)
+          expect((await futarchy.decisions(0))[9]).to.equal(false)
           await futarchy.executeDecision(decisionId)
-          expect((await futarchy.decisions(0))[7]).to.equal(true)
+          expect((await futarchy.decisions(0))[9]).to.equal(true)
         })
 
         it('emits an ExecuteDecision event', async () => {
@@ -675,7 +739,7 @@ contract('Futarchy', (accounts) => {
 
   })
 
-  describe('redeemTokenWinnings()', () => {
+  describe('redeemWinningCollateralTokens()', () => {
     beforeEach(async () => {
       let account2 = web3.eth.accounts[1]
       await token.generateTokens(account2, 100 * 10 ** 18)
@@ -706,8 +770,8 @@ contract('Futarchy', (accounts) => {
       await timeTravel(TRADING_PERIOD + 1)
       await futarchyOracle.setOutcome()
       await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
-      const { logs } = await futarchy.redeemTokenWinnings(0, {from: root})
-      expect(logs[0].event).to.equal('RedeemWinnings')
+      const { logs } = await futarchy.redeemWinningCollateralTokens(0, {from: root})
+      expect(logs[0].event).to.equal('RedeemWinningCollateralTokens')
     })
 
     describe('when outcome is YES', () => {
@@ -721,14 +785,14 @@ contract('Futarchy', (accounts) => {
       it('transfers dao token amount matching trader yesCollateral balance', async () => {
         let yesCollateralBalance = (await rootDecisionBalances()).yesCollateral
         let previousTokenBalance = (await token.balanceOf(root)).toNumber()
-        await futarchy.redeemTokenWinnings(0, {from: root})
+        await futarchy.redeemWinningCollateralTokens(0, {from: root})
         let newTokenBalance = (await token.balanceOf(root)).toNumber()
         expect(newTokenBalance).to.equal(previousTokenBalance + yesCollateralBalance)
       })
 
       it('sets yesCollateral trader balance to 0', async () => {
         expect((await rootDecisionBalances()).yesCollateral).to.be.above(0)
-        await futarchy.redeemTokenWinnings(0, {from: root})
+        await futarchy.redeemWinningCollateralTokens(0, {from: root})
         expect((await rootDecisionBalances()).yesCollateral).to.equal(0)
       })
     })
@@ -744,14 +808,14 @@ contract('Futarchy', (accounts) => {
       it('transfers dao token amount matching trader noCollateral balance', async () => {
         let noCollateralBalance = (await rootDecisionBalances()).noCollateral
         let previousTokenBalance = (await token.balanceOf(root)).toNumber()
-        await futarchy.redeemTokenWinnings(0, {from: root})
+        await futarchy.redeemWinningCollateralTokens(0, {from: root})
         let newTokenBalance = (await token.balanceOf(root)).toNumber()
         expect(newTokenBalance).to.equal(previousTokenBalance + noCollateralBalance)
       })
 
       it('sets noCollateral trader balance to 0', async () => {
         expect((await rootDecisionBalances()).noCollateral).to.be.above(0)
-        await futarchy.redeemTokenWinnings(0, {from: root})
+        await futarchy.redeemWinningCollateralTokens(0, {from: root})
         expect((await rootDecisionBalances()).noCollateral).to.equal(0)
       })
     })
@@ -765,20 +829,20 @@ contract('Futarchy', (accounts) => {
 
         it('sets the outcome on FutarchyOracle', async () => {
           expect(await futarchyOracle.isOutcomeSet()).to.equal(false)
-          await futarchy.redeemTokenWinnings(0, {from: root})
+          await futarchy.redeemWinningCollateralTokens(0, {from: root})
           expect(await futarchyOracle.isOutcomeSet()).to.equal(true)
         })
 
         it('sets resolved to true in the decision struct', async () => {
-          expect((await futarchy.decisions(0))[4]).to.equal(false)
-          await futarchy.redeemTokenWinnings(0, {from: root})
-          expect((await futarchy.decisions(0))[4]).to.equal(true)
+          expect((await futarchy.decisions(0))[6]).to.equal(false)
+          await futarchy.redeemWinningCollateralTokens(0, {from: root})
+          expect((await futarchy.decisions(0))[6]).to.equal(true)
         })
 
         it('sets passed to true in the decision struct', async () => {
-          expect((await futarchy.decisions(0))[5]).to.equal(false)
-          await futarchy.redeemTokenWinnings(0, {from: root})
-          expect((await futarchy.decisions(0))[5]).to.equal(true)
+          expect((await futarchy.decisions(0))[7]).to.equal(false)
+          await futarchy.redeemWinningCollateralTokens(0, {from: root})
+          expect((await futarchy.decisions(0))[7]).to.equal(true)
         })
       })
 
@@ -790,20 +854,20 @@ contract('Futarchy', (accounts) => {
 
         it('sets the outcome on FutarchyOracle', async () => {
           expect(await futarchyOracle.isOutcomeSet()).to.equal(false)
-          await futarchy.redeemTokenWinnings(0, {from: root})
+          await futarchy.redeemWinningCollateralTokens(0, {from: root})
           expect(await futarchyOracle.isOutcomeSet()).to.equal(true)
         })
 
         it('sets resolved to true in the decision struct', async () => {
-          expect((await futarchy.decisions(0))[4]).to.equal(false)
-          await futarchy.redeemTokenWinnings(0, {from: root})
-          expect((await futarchy.decisions(0))[4]).to.equal(true)
+          expect((await futarchy.decisions(0))[6]).to.equal(false)
+          await futarchy.redeemWinningCollateralTokens(0, {from: root})
+          expect((await futarchy.decisions(0))[6]).to.equal(true)
         })
 
         it('keeps passed as false in the decision struct', async () => {
-          expect((await futarchy.decisions(0))[5]).to.equal(false)
-          await futarchy.redeemTokenWinnings(0, {from: root})
-          expect((await futarchy.decisions(0))[5]).to.equal(false)
+          expect((await futarchy.decisions(0))[7]).to.equal(false)
+          await futarchy.redeemWinningCollateralTokens(0, {from: root})
+          expect((await futarchy.decisions(0))[7]).to.equal(false)
         })
       })
     })
