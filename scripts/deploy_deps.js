@@ -138,7 +138,6 @@ module.exports = async (
       contractInstance = await contractArtifact.at(deployedAddress)
       console.log(`${contractName} already deployed: ${deployedAddress}`)
     }
-    console.log('')
     return contractInstance
   }
 }
