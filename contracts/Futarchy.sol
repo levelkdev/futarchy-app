@@ -4,16 +4,13 @@ import './Oracles/IScalarPriceOracle.sol';
 import './Oracles/IScalarPriceOracleFactory.sol';
 import '@aragon/os/contracts/apps/AragonApp.sol';
 import '@aragon/os/contracts/common/IForwarder.sol';
-import '@aragon/os/contracts/lib/math/SafeMath64.sol';
 import '@gnosis.pm/pm-contracts/contracts/Oracles/Oracle.sol';
 import '@gnosis.pm/pm-contracts/contracts/Oracles/FutarchyOracleFactory.sol';
 import '@gnosis.pm/pm-contracts/contracts/MarketMakers/LMSRMarketMaker.sol';
-import "@aragon/apps-shared-minime/contracts/MiniMeToken.sol";
 import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 
 contract Futarchy is AragonApp, IForwarder {
   using SafeMath for uint;
-  using SafeMath64 for uint64;
 
   event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle, int marketLowerBound, int marketUpperBound, uint startDate, uint decisionResolutionDate, uint priceResolutionDate);
   event ExecuteDecision(uint decisionId);
@@ -25,7 +22,7 @@ contract Futarchy is AragonApp, IForwarder {
   bytes32 public constant CREATE_DECISION_ROLE = keccak256("CREATE_DECISION_ROLE");
 
   FutarchyOracleFactory public futarchyOracleFactory;
-  MiniMeToken public token;
+  ERC20Gnosis public token;
   IScalarPriceOracleFactory public priceOracleFactory;
   LMSRMarketMaker public lmsrMarketMaker;
   uint24 public fee;
@@ -42,7 +39,6 @@ contract Futarchy is AragonApp, IForwarder {
     int upperBound;
     bool resolved;
     bool passed;
-    uint64 snapshotBlock;
     bool executed;
     string metadata;
     bytes executionScript;
@@ -85,7 +81,7 @@ contract Futarchy is AragonApp, IForwarder {
       uint _tradingPeriod,
       uint _timeToPriceResolution,
       uint _marketFundAmount,
-      MiniMeToken _token,
+      ERC20Gnosis _token,
       FutarchyOracleFactory _futarchyOracleFactory,
       IScalarPriceOracleFactory _priceOracleFactory,
       LMSRMarketMaker _lmsrMarketMaker
@@ -131,7 +127,6 @@ contract Futarchy is AragonApp, IForwarder {
       decisions[decisionId].lowerBound = lowerBound;
       decisions[decisionId].upperBound = upperBound;
       decisions[decisionId].metadata = metadata;
-      decisions[decisionId].snapshotBlock = getBlockNumber64() - 1;
       decisions[decisionId].executionScript = executionScript;
       decisions[decisionId].decisionCreator = msg.sender;
 
@@ -180,7 +175,6 @@ contract Futarchy is AragonApp, IForwarder {
         }
         CategoricalEvent(futarchyOracle.categoricalEvent()).setOutcome();
       }
-
 
       decisions[decisionId].resolved = true;
       decisions[decisionId].passed = futarchyOracle.winningMarketIndex() == 0 ? true : false;
@@ -376,40 +370,35 @@ contract Futarchy is AragonApp, IForwarder {
       MarketData.Stages marketStage = decision.futarchyOracle.markets(winningMarketIndex).stage();
       require(marketStage != MarketData.Stages.MarketCreated);
 
-      if (marketStage == MarketData.Stages.MarketFunded)
+      if (marketStage == MarketData.Stages.MarketFunded) {
         sellMarketPositions(decisionId);
-      else if (marketStage == MarketData.Stages.MarketClosed)
-        redeemScalarWinnings(decisionId);
+      } else if (marketStage == MarketData.Stages.MarketClosed) {
+        // else Redeem Scalar Winnings
+        OutcomeTokenBalances storage balances = traderDecisionBalances[keccak256(msg.sender, decisionId)];
+        ScalarEvent scalarEvent = ScalarEvent(decision.futarchyOracle.markets(winningMarketIndex).eventContract());
 
-      redeemWinningCollateralTokens(decisionId);
-    }
+        scalarEvent.redeemWinnings();
 
-    function redeemScalarWinnings(uint decisionId) public {
-      Decision storage decision = decisions[decisionId];
-      uint winningMarketIndex = decision.passed ? 0 : 1;
-      OutcomeTokenBalances storage balances = traderDecisionBalances[keccak256(msg.sender, decisionId)];
-      ScalarEvent scalarEvent = ScalarEvent(decision.futarchyOracle.markets(winningMarketIndex).eventContract());
+        uint shortOutcomeTokenCount;
+        uint longOutcomeTokenCount;
+        if (decision.passed) {
+          shortOutcomeTokenCount = balances.yesShort;
+          longOutcomeTokenCount = balances.yesLong;
+          balances.yesShort = 0;
+          balances.yesLong = 0;
+        } else {
+          shortOutcomeTokenCount = balances.noShort;
+          longOutcomeTokenCount = balances.noLong;
+          balances.noShort = 0;
+          balances.noLong = 0;
+        }
 
-      scalarEvent.redeemWinnings();
-      decision.futarchyOracle.categoricalEvent().redeemWinnings();
-
-      uint shortOutcomeTokenCount;
-      uint longOutcomeTokenCount;
-      if (decision.passed) {
-        shortOutcomeTokenCount = balances.yesShort;
-        longOutcomeTokenCount = balances.yesLong;
-        balances.yesShort = 0;
-        balances.yesLong = 0;
-      } else {
-        shortOutcomeTokenCount = balances.noShort;
-        longOutcomeTokenCount = balances.noLong;
-        balances.noShort = 0;
-        balances.noLong = 0;
+        uint winnings = scalarEvent.calculateWinnings(shortOutcomeTokenCount, longOutcomeTokenCount);
+        require(token.transfer(msg.sender, winnings));
+        emit RedeemScalarWinnings(decisionId, msg.sender, winnings);
       }
 
-      uint winnings = scalarEvent.calculateWinnings(shortOutcomeTokenCount, longOutcomeTokenCount);
-      require(token.transfer(msg.sender, winnings));
-      emit RedeemScalarWinnings(decisionId, msg.sender, winnings);
+      redeemWinningCollateralTokens(decisionId);
     }
 
     /**

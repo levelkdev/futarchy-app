@@ -178,20 +178,16 @@ contract('Futarchy', (accounts) => {
         expect((await futarchy.decisions(0))[7]).to.equal(false)
       })
 
-      it('sets the correct snapshotBlock', async () => {
-        expect((await futarchy.decisions(0))[8].toNumber()).to.equal(currentBlockNumber)
-      })
-
       it('sets executed to false', async () => {
-        expect((await futarchy.decisions(0))[9]).to.equal(false)
+        expect((await futarchy.decisions(0))[8]).to.equal(false)
       })
 
       it('sets the correct metadata', async () => {
-        expect((await futarchy.decisions(0))[10]).to.equal(metadata)
+        expect((await futarchy.decisions(0))[9]).to.equal(metadata)
       })
 
       it('sets the correct executionScript', async () => {
-        expect((await futarchy.decisions(0))[11]).to.equal(stringToHex(script))
+        expect((await futarchy.decisions(0))[10]).to.equal(stringToHex(script))
       })
     })
 
@@ -418,9 +414,9 @@ contract('Futarchy', (accounts) => {
 
         it('sets decision.executed to true', async () => {
           await timeTravel(TRADING_PERIOD + 1)
-          expect((await futarchy.decisions(0))[9]).to.equal(false)
+          expect((await futarchy.decisions(0))[8]).to.equal(false)
           await futarchy.executeDecision(decisionId)
-          expect((await futarchy.decisions(0))[9]).to.equal(true)
+          expect((await futarchy.decisions(0))[8]).to.equal(true)
         })
 
         it('emits an ExecuteDecision event', async () => {
@@ -872,85 +868,6 @@ contract('Futarchy', (accounts) => {
     })
   })
 
-  describe('redeemScalarWinnings()', () => {
-    beforeEach(async () => {
-      initializeFutarchy({_futarchyOracleFactoryAddr: futarchyOracleFactoryFull.address})
-      script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
-      metadata = 'Give voting rights to all kitties in the world'
-      await token.approve(futarchy.address, MARKET_FUND_AMOUNT +  (40 * 10 ** 18), {from: root})
-      await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
-      futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
-      yesMarketAddr = await futarchyOracle.markets(0)
-      noMarketAddr = await futarchyOracle.markets(1)
-
-      token.generateTokens(account2, TWENTY)
-      await token.approve(futarchy.address, MARKET_FUND_AMOUNT +  (20 * 10 ** 18), {from: account2})
-      await futarchy.buyMarketPositions(0, TWENTY,  [FIVE, 0], [0, FIVE], {from: root})
-      await futarchy.buyMarketPositions(0, TWENTY, [THREE, 0], [0, THREE], {from: account2})
-    })
-
-    it('reverts if the ScalarEvent outcome is not set', async () => {
-      timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
-      await futarchy.setDecision(0)
-      assertRevert(async () =>{
-        await futarchy.redeemScalarWinnings(0)
-      })
-    })
-
-    it('transfers the correct amount of tokens to each sender', async () => {
-      const rootWinnings = 4343430000000008000
-      const account2Winnings = 2606058000000000000
-      timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
-
-      const prevBalanceRoot = (await token.balanceOf(root)).toNumber()
-      const prevBalanceAcct2 = (await token.balanceOf(account2)).toNumber()
-
-      await futarchy.setDecision(0)
-      await setScalarEvent(futarchy, 0, 87)
-
-      await futarchy.redeemScalarWinnings(0, { from: account2 })
-      await futarchy.redeemScalarWinnings(0, { from: root })
-
-      const currentBalanceRoot = (await token.balanceOf(root)).toNumber()
-      const currentBalanceAcct2 = (await token.balanceOf(account2)).toNumber()
-
-      expect(currentBalanceRoot - prevBalanceRoot).to.equal(rootWinnings)
-      expect(currentBalanceAcct2 - prevBalanceAcct2).to.equal(account2Winnings)
-    })
-
-    it('sets the senders new balances to 0 for winning outcome tokens', async () => {
-      timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
-      let rootBalances = await rootDecisionBalances()
-      let acct2Balances = await account2DecisionBalances()
-
-      expect(rootBalances.noLong).to.not.equal(0)
-      expect(acct2Balances.noLong).to.not.equal(0)
-
-      await futarchy.setDecision(0)
-      await setScalarEvent(futarchy, 0, 87)
-
-      await futarchy.redeemScalarWinnings(0, { from: root })
-      rootBalances = await rootDecisionBalances()
-      acct2Balances = await account2DecisionBalances()
-      expect(rootBalances.noLong).to.equal(0)
-      expect(acct2Balances.noLong).to.not.equal(0)
-
-      await futarchy.redeemScalarWinnings(0, { from: account2 })
-      rootBalances = await rootDecisionBalances()
-      acct2Balances = await account2DecisionBalances()
-      expect(rootBalances.noLong).to.equal(0)
-      expect(acct2Balances.noLong).to.equal(0)
-    })
-
-    it('emits a RedeemScalarWinnings event', async () => {
-      timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
-      await futarchy.setDecision(0)
-      await setScalarEvent(futarchy, 0, 87)
-      const { logs } = await futarchy.redeemScalarWinnings(0, { from: root })
-      expect(logs[0].event).to.equal('RedeemScalarWinnings')
-    })
-  })
-
   describe('redeemWinnings()', () => {
     beforeEach(async () => {
       initializeFutarchy({_futarchyOracleFactoryAddr: futarchyOracleFactoryFull.address})
@@ -981,7 +898,7 @@ contract('Futarchy', (accounts) => {
 
       it('calls redeemWinningCollateralTokenBalance', async () => {
         const { logs } = await futarchy.redeemWinnings(0, { from: root })
-        expect(logs[1].event).to.equal('redeemWinningCollateralTokens')
+        expect(logs[1].event).to.equal('RedeemWinningCollateralTokens')
       })
     })
 
@@ -990,17 +907,60 @@ contract('Futarchy', (accounts) => {
         timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
         await futarchy.setDecision(0)
         await setScalarEvent(futarchy, 0, 87)
-        await futarchy.closeDecisionMarkets(0)
       })
 
-      it('calls redeemScalarWinnings', async () => {
+      it('transfers the correct amount of tokens to each sender', async () => {
+        const rootWinnings = 21622465902300610000
+        const account2Winnings = 20770371446164095000
+
+        await futarchy.closeDecisionMarkets(0)
+
+        const prevBalanceRoot = (await token.balanceOf(root)).toNumber()
+        const prevBalanceAcct2 = (await token.balanceOf(account2)).toNumber()
+
+        await futarchy.redeemWinnings(0, { from: account2 })
+        await futarchy.redeemWinnings(0, { from: root })
+
+        const currentBalanceRoot = (await token.balanceOf(root)).toNumber()
+        const currentBalanceAcct2 = (await token.balanceOf(account2)).toNumber()
+
+
+        expect(currentBalanceRoot - prevBalanceRoot).to.equal(rootWinnings)
+        expect(currentBalanceAcct2 - prevBalanceAcct2).to.equal(account2Winnings)
+      })
+
+      it('sets the senders new balances to 0 for winning outcome tokens', async () => {
+        let rootBalances = await rootDecisionBalances()
+        let acct2Balances = await account2DecisionBalances()
+
+        expect(rootBalances.noLong).to.not.equal(0)
+        expect(acct2Balances.noLong).to.not.equal(0)
+
+        await futarchy.closeDecisionMarkets(0)
+
+        await futarchy.redeemWinnings(0, { from: root })
+        rootBalances = await rootDecisionBalances()
+        acct2Balances = await account2DecisionBalances()
+        expect(rootBalances.noLong).to.equal(0)
+        expect(acct2Balances.noLong).to.not.equal(0)
+        //
+        await futarchy.redeemWinnings(0, { from: account2 })
+        rootBalances = await rootDecisionBalances()
+        acct2Balances = await account2DecisionBalances()
+        expect(rootBalances.noLong).to.equal(0)
+        expect(acct2Balances.noLong).to.equal(0)
+      })
+
+      it('emits a RedeemScalarWinnings event', async () => {
+        await futarchy.closeDecisionMarkets(0)
         const { logs } = await futarchy.redeemWinnings(0, { from: root })
         expect(logs[0].event).to.equal('RedeemScalarWinnings')
       })
 
       it('calls redeemWinningCollateralTokenBalance', async () => {
+        await futarchy.closeDecisionMarkets(0)
         const { logs } = await futarchy.redeemWinnings(0, { from: root })
-        expect(logs[1].event).to.equal('redeemWinningCollateralTokens')
+        expect(logs[1].event).to.equal('RedeemWinningCollateralTokens')
       })
     })
   })
@@ -1054,7 +1014,7 @@ contract('Futarchy', (accounts) => {
       initializeFutarchy({_futarchyOracleFactoryAddr: futarchyOracleFactoryFull.address})
       script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
       metadata = 'Give voting rights to all kitties in the world'
-      await token.approve(futarchy.address, marketFundAmount +  (40 * 10 ** 18), {from: root})
+      await token.approve(futarchy.address, MARKET_FUND_AMOUNT +  (40 * 10 ** 18), {from: root})
       await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
       futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
       await futarchy.buyMarketPositions(0, twenty, [three, 0], [three, 0], {from: root})
