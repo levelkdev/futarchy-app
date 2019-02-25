@@ -8,7 +8,7 @@
     "@aragon/kits-base": "^1.0.0",
     "@aragon/os": "4.0.1",
     "@aragon/ui": "^0.28.0",
-    "@gnosis.pm/pm-contracts": "github:levelkdev/pm-contracts#111d9606131b9ae229ab4d0988bb9ae851931ab0",
+    "@gnosis.pm/pm-contracts": "github:levelkdev/pm-contracts#c98d85c08be3ba2de9a0f4238940b2912f3710ed",
     "@gnosis.pm/util-contracts": "2.0.0-alpha",
     "bignumber.js": "^8.0.1",
     "decimal.js": "^10.0.2",
