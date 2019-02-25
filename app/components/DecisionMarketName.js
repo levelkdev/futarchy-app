@@ -1,4 +1,4 @@
-import React from 'React'
+import React from 'react'
 import { Text, theme } from '@aragon/ui'
 import decisionMarketTypes from '../constants/decisionMarketTypes'
 
