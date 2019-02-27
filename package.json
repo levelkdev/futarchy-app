@@ -8,7 +8,7 @@
     "@aragon/kits-base": "^1.0.0",
     "@aragon/os": "4.0.1",
     "@aragon/ui": "^0.28.0",
-    "@gnosis.pm/pm-contracts": "github:levelkdev/pm-contracts#c98d85c08be3ba2de9a0f4238940b2912f3710ed",
+    "@gnosis.pm/pm-contracts": "github:levelkdev/pm-contracts#5dc005e8a146d556d8da7a9ee4b4f4f1bf8f8d5f",
     "@gnosis.pm/util-contracts": "2.0.0-alpha",
     "bignumber.js": "^8.0.1",
     "decimal.js": "^10.0.2",
@@ -40,8 +40,7 @@
     "decimal.js": "10.0.0",
     "http-server": "^0.11.1",
     "left-pad": "^1.3.0",
-    "parcel-bundler": "^1.10.1",
-    "truffle-flattener": "1.2.12"
+    "parcel-bundler": "^1.10.1"
   },
   "scripts": {
     "start:aragon": "truffle exec scripts/run.js --network rpc",
