@@ -40,7 +40,8 @@
     "decimal.js": "10.0.0",
     "http-server": "^0.11.1",
     "left-pad": "^1.3.0",
-    "parcel-bundler": "^1.10.1"
+    "parcel-bundler": "^1.10.1",
+    "truffle-flattener": "1.2.12"
   },
   "scripts": {
     "start:aragon": "truffle exec scripts/run.js --network rpc",
