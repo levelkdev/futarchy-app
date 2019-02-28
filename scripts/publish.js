@@ -1,12 +1,12 @@
 /**
- * Prepares for deployment by deploying dependencies and allocating tokens
+ * Publishes the Futarchy app to the APM
  */
 
 const async = require('async')
 const execa = require('execa')
 
 const environment = process.argv[2]
-const versionBump = process.argv[3]
+const versionBump = process.argv[3] // 'major' || 'minor'
 
 const aragonPublishArgs = [
   'run',
