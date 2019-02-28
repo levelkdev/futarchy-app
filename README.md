@@ -105,3 +105,29 @@ This should display the `DecisionSummary` component with the state that we provi
 ## Styling
 
 We're using react [styled-components](https://www.styled-components.com/docs/basics), which allow you to add CSS within the component .js files. See `./app/components/AppHeader.js` for a good example of this.
+
+## Publishing
+
+Before publishing, make sure a local IPFS instance is running: `npm run ipfs`
+
+### `npm run deploy:staging:prepare`:
+
+Deploys these dependency contracts to staging (rinkeby). Allocates balances for the `MiniMeToken` to the accounts in `accounts.rinkeby.json`.
+
+Deployed contract addresses and token allocation amounts will be stored in `deploy.rinkeby.json`.
+
+### `npm run deploy:staging:publish:major`:
+
+Publishes a new "major" version of the Futarchy app to staging (rinkeby).
+
+### `npm run deploy:staging:publish:minor`:
+
+Publishes a new "minor" version of the Futarchy app to staging (rinkeby).
+
+## Deploying a Futarchy DAO
+
+Before deploying, make sure a local IPFS instance is running: `npm run ipfs`
+
+### `deploy:staging:newFutarchyDAO`
+
+Deploys a new DAO on staging (rinkeby), installs on instance of the futarchy app `futarchy.open.aragonpm.eth`, and sets permissions for the deployer account.
