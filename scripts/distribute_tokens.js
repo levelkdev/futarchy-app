@@ -1,3 +1,7 @@
+const configForNetwork = require('./deployConfig/configForNetwork')
+const isLocalNetwork = require('./deployConfig/isLocalNetwork')
+const writeDeployConfig = require('./deployConfig/writeDeployConfig')
+
 const globalArtifacts = this.artifacts // Not injected unless called directly via truffle
 
 module.exports = async (
@@ -7,9 +11,12 @@ module.exports = async (
     tokenAddress,
     owner,
     accounts,
-    amount
+    amount,
+    network
   } = {}
 ) => {
+  let deployConfig = configForNetwork(network)
+
   try {
     console.log('distributing tokens...')
     console.log('')
@@ -20,11 +27,18 @@ module.exports = async (
     let account
     for (var i in accounts) {
       account = accounts[i]
-      console.log(`allocating ${amount} tokens to ${account}`)
-      await token.generateTokens(account, amount, { from: owner })
+      if (!deployConfig.tokensAllocated[account]) {
+        console.log(`allocating ${amount} tokens to ${account}`)
+        await token.generateTokens(account, amount, { from: owner })
+        if (!isLocalNetwork(network)) {
+          deployConfig.tokensAllocated[account] = amount.toString()
+          writeDeployConfig(network, deployConfig)
+        }
+      } else {
+        console.log(`Already allocated ${deployConfig.tokensAllocated[account]} tokens to ${account}`)
+      }
     }
     console.log('')
-
   } catch (err) {
     console.log('Error in scripts/distribute_token.js: ', err)
   }

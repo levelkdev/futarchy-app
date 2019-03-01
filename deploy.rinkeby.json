@@ -1,0 +1,22 @@
+{
+    "dependencyContracts": {
+        "MiniMeToken": "0x6917ca90c0670024a9f48aecefd6c3c82fc5d3e9",
+        "CentralizedTimedOracleFactory": "0x14f53093de40e5924af4abe20cdc860995a4fd47",
+        "Fixed192x64Math": "0x68407ea068c8348ac50fcd4e3e85b9cd3a7d0e4e",
+        "LMSRMarketMaker": "0x5995f896899256ac9496d17a03125b2ea3df34a4",
+        "CategoricalEvent": "0xc1ea53b67bfcc1350b2e6b1c9d97b83666c865dd",
+        "ScalarEvent": "0xa43b87ae476711e19225e7744081730ca8ec1215",
+        "OutcomeToken": "0xedc015151f0890d2164340cfdf67b61dc92fa14e",
+        "FutarchyOracle": "0x09e04d044ca9303b94451f407c467e0dfcd1ccfa",
+        "StandardMarketWithPriceLogger": "0x260357b8e3d93180858a95f5e3d4a2eda3e6a6ad",
+        "EventFactory": "0x525cc4cc523e376a3952f31998aaf312fb9ee82d",
+        "StandardMarketWithPriceLoggerFactory": "0x64cec831d0109c40a734384beaf011b9deeebd53",
+        "FutarchyOracleFactory": "0x1fad5ae333ef73ea9810bf90846cadbaabb72a36"
+    },
+    "tokensAllocated": {
+        "0x44360017c1460BC0149946b4fad97665c25586b0": "1e+26",
+        "0xE3717CCDfbE15649F44FF27a81BE38d4648E1Ef0": "1e+26",
+        "0x33329F5a360649Eb1C473b998cF3b975FEb109f6": "1e+26",
+        "0xb4124cEB3451635DAcedd11767f004d8a28c6eE7": "1e+26"
+    }
+}
