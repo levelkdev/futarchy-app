@@ -22,7 +22,12 @@ const decisionMarketArray = [
 describe('filterDecisions', () => {
   describe('when given data with matching traders and statuses', () => {
     it('returns the correct decisions', () => {
-      const decisions = filterDecisions(decisionMarketArray, performanceArray, 'trader_0', 'OPEN')
+      const decisions = filterDecisions({
+        decisionMarkets: decisionMarketArray,
+        performance: performanceArray,
+        trader: 'trader_0',
+        status: 'OPEN'
+      })
       assert.equal(decisions.length, 3)
       assert.deepEqual(decisions[0], mockDecisionMarketData(0, 'OPEN'))
       assert.deepEqual(decisions[1], mockDecisionMarketData(1, 'OPEN'))
@@ -32,13 +37,37 @@ describe('filterDecisions', () => {
 
   describe('when given performance data with no matching statuses', () => {
     it('returns an empty array', () => {
-      assert.deepEqual(filterDecisions(decisionMarketArray, performanceArray, 'trader_0', 'RESOLVED'), [])
+      assert.deepEqual(filterDecisions({
+        decisionMarkets: decisionMarketArray,
+        performance: performanceArray,
+        trader: 'trader_0',
+        status: 'RESOLVED'
+      }), [])
     })
   })
 
   describe('when given performance data with no matching traders', () => {
     it('returns an empty array', () => {
-      assert.deepEqual(filterDecisions(decisionMarketArray, performanceArray, 'trader_5', 'OPEN'), [])
+      assert.deepEqual(filterDecisions({
+        decisionMarkets: decisionMarketArray,
+        performance: performanceArray,
+        trader: 'trader_5',
+        status: 'OPEN'
+      }), [])
+    })
+  })
+
+  describe('when given undefined trader value', () => {
+    it('returns decisions for all traders', () => {
+      const decisions = filterDecisions({
+        decisionMarkets: decisionMarketArray,
+        performance: performanceArray,
+        status: 'OPEN'
+      })
+      assert.equal(decisions.length, 3)
+      assert.deepEqual(decisions[0], mockDecisionMarketData(0, 'OPEN'))
+      assert.deepEqual(decisions[1], mockDecisionMarketData(1, 'OPEN'))
+      assert.deepEqual(decisions[2], mockDecisionMarketData(2, 'OPEN'))
     })
   })
 })

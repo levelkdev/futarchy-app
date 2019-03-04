@@ -2,15 +2,10 @@ import React from 'react'
 import _ from 'lodash'
 import styled from 'styled-components'
 import decisionStatuses from '../constants/decisionStatuses'
+import decisionLabels from '../constants/decisionLabels'
 import PerformanceTotalsContainer from '../containers/PerformanceTotalsContainer'
 import MyDecisionsBadgeContainer from '../containers/MyDecisionsBadgeContainer'
 import DecisionsTableContainer from '../containers/DecisionsTableContainer'
-
-const decisionLabelsMap = {
-  OPEN: 'My Open Decisions',
-  RESOLVED: 'My Resolved Decisions',
-  CLOSED: 'My Closed Decisions'
-}
 
 const Positions = () => (
   <ViewElem>
@@ -22,7 +17,7 @@ const Positions = () => (
       <DecisionSummarySection key={decisionState}>
         <div>
           <TableTitle>
-            {decisionLabelsMap[decisionState]}
+            {decisionLabels[decisionState]}
             <DecisionsCountBadge>
               <MyDecisionsBadgeContainer statusFilter={decisionState} />
             </DecisionsCountBadge>
