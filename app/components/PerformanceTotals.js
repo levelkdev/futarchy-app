@@ -11,7 +11,7 @@ import negativePositiveColor from '../util/negativePositiveColor'
 import TokenSymbolDisplay from './TokenSymbolDisplay'
 
 const PerformanceTotals = ({
-  currentGainLoss, 
+  currentGainLoss,
   realizedGainLoss,
   tokenBalance,
   tokenRisked
@@ -41,17 +41,17 @@ const PerformanceTotals = ({
           size="xxlarge"
           color={negativePositiveColor(realizedGainLoss)}
         >
-          {formatBalance(realizedGainLoss)} 
+          {formatBalance(realizedGainLoss)}
           <Text size="large">&nbsp;<TokenSymbolDisplay /></Text>
         </Text>
       </TableCell>
       <TableCell>
-        <Text size="xxlarge">{formatBalance(tokenBalance)} 
+        <Text size="xxlarge">{formatBalance(tokenBalance)}
           <Text size="large">&nbsp;<TokenSymbolDisplay /></Text>
         </Text>
       </TableCell>
       <TableCell>
-        <Text size="xxlarge">{formatBalance(tokenRisked)} 
+        <Text size="xxlarge">{formatBalance(tokenRisked)}
           <Text size="large">&nbsp;<TokenSymbolDisplay /></Text>
         </Text>
       </TableCell>
