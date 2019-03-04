@@ -10,23 +10,32 @@ const Home = () => (
   <div>
     {_.values(decisionStatuses).map(decisionState => (
       <div key={decisionState}>
-        <div>
-          <div>
+        <MarketCardSection>
+          <MarketCardSectionTitle>
             {decisionLabels[decisionState]}
             <DecisionsCountBadge>
               <AllDecisionsBadgeContainer statusFilter={decisionState} />
             </DecisionsCountBadge>
-          </div>
-        </div>
+          </MarketCardSectionTitle>
+
+          <DecisionListContainer statusFilter={decisionState} />
+        </MarketCardSection>
       </div>
     ))}
-
-    <DecisionListContainer />
   </div>
 )
 
 const DecisionsCountBadge = styled.span`
   margin-left: 15px;
+`
+
+const MarketCardSectionTitle = styled.div`
+  font-weight: bold;
+  margin-bottom: 10px;
+`
+
+const MarketCardSection = styled.div`
+  margin-bottom: 20px;
 `
 
 export default Home

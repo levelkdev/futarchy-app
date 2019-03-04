@@ -6,7 +6,6 @@ import CountBadge from '../components/CountBadge'
 const mapStateToProps = (state, ownProps) => ({
   count: filterDecisions({
     decisionMarkets: state.decisionMarkets,
-    performance: state.performance,
     status: ownProps.statusFilter
   }).length
 })
