@@ -7,7 +7,6 @@ const mapStateToProps = (state, ownProps) => ({
   count: filterDecisions({
     decisionMarkets: state.decisionMarkets,
     performance: state.performance,
-    trader: state.accounts[0],
     status: ownProps.statusFilter
   }).length
 })
