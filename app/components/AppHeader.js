@@ -25,8 +25,7 @@ const TabsContainer = () => (
     <Text size="xlarge">Decisions</Text>
     <br />
     <TabsContainterStyled>
-      <NavLinkStyled exact to="/">Open Questions</NavLinkStyled>
-      <NavLinkStyled exact to="/closed-questions">Closed Questions</NavLinkStyled>
+      <NavLinkStyled exact to="/">Markets</NavLinkStyled>
       <NavLinkStyled exact to="/positions">My Positions</NavLinkStyled>
     </TabsContainterStyled>
   </div>
