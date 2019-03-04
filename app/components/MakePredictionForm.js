@@ -31,7 +31,7 @@ const MakePredictionForm = createReduxForm(({
       values.yesPredictionChoiceIndex = dropDownDefault
     }
     if (typeof(values.noPredictionChoiceIndex) === 'undefined') {
-      value.noPredictionChoiceIndex = dropDownDefault
+      values.noPredictionChoiceIndex = dropDownDefault
     }
     values.collateralAmount = decimalToWeiInt(values.collateralAmount)
     executeBuy({
@@ -52,7 +52,7 @@ const MakePredictionForm = createReduxForm(({
       <StyledField
         name="collateralAmount"
         component="input"
-        type="text"
+        type="number"
         placeholder="Enter Amount to Risk"
       />
       <StyledAccountBalance>
