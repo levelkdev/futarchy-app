@@ -6,12 +6,12 @@ import DecisionsTable from '../components/decisionTables/DecisionsTable'
 
 const mapStateToProps = (state, ownProps) => ({
   statusFilter: ownProps.statusFilter,
-  decisionIds: _.map(filterDecisions(
-    state.decisionMarkets,
-    state.performance,
-    state.accounts[0],
-    ownProps.statusFilter
-  ), decision => decision.decisionId) || []
+  decisionIds: _.map(filterDecisions({
+    decisionMarkets: state.decisionMarkets,
+    performance: state.performance,
+    trader: state.accounts[0],
+    status: ownProps.statusFilter
+  }), decision => decision.decisionId) || []
 })
 
 export default connect(
