@@ -1,38 +1,40 @@
 import React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
-import { Button } from '@aragon/ui'
+import { Button, Countdown } from '@aragon/ui'
 import MarketCirclesContainer from '../containers/MarketCirclesContainer'
 import ShowPanelButtonContainer from '../containers/ShowPanelButtonContainer'
 
 // TODO: deal with the `decision.pending = true` state
-// TODO: show time remaining in the market using the <Countdown> aragon component 
 
 const DecisionCard = ({ decision }) => (
-  <CardContainer>
-    <CirclesContainer>
-      <MarketCirclesContainer decisionId={decision.decisionId} />
-    </CirclesContainer>
-    <ContentContainer>
-      <Question>
-        {decision.question}
-      </Question>
-      <ButtonsContainer>
-        <LinkStyled
-          to={`/decision/${decision.decisionId}`}
-          key={decision.decisionId}
-        >
-        <Button>View details</Button>
-        </LinkStyled>
-        <ShowPanelButtonContainer
-          panelName="makePrediction"
-          panelContext={{ decisionId: decision.decisionId }}
-        >
-          Predict
-        </ShowPanelButtonContainer>
-      </ButtonsContainer>
-    </ContentContainer>
-  </CardContainer>
+  <div>
+    <Countdown end={Number(decision.decisionResolutionDate) * 1000} />
+    <CardContainer>
+      <CirclesContainer>
+        <MarketCirclesContainer decisionId={decision.decisionId} />
+      </CirclesContainer>
+      <ContentContainer>
+        <Question>
+          {decision.question}
+        </Question>
+        <ButtonsContainer>
+          <LinkStyled
+            to={`/decision/${decision.decisionId}`}
+            key={decision.decisionId}
+          >
+          <Button>View details</Button>
+          </LinkStyled>
+          <ShowPanelButtonContainer
+            panelName="makePrediction"
+            panelContext={{ decisionId: decision.decisionId }}
+          >
+            Predict
+          </ShowPanelButtonContainer>
+        </ButtonsContainer>
+      </ContentContainer>
+    </CardContainer>
+  </div>
 )
 
 const CardContainer = styled.div`
@@ -43,7 +45,7 @@ const CardContainer = styled.div`
   border: 1px solid #dadada;
   box-shadow: 0px 0px 6px #00000012;
   border-radius: 3px;
-  
+
   margin-bottom: 20px;
 `
 
