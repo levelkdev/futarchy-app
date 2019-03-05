@@ -5,8 +5,6 @@ import { Button, Countdown } from '@aragon/ui'
 import MarketCirclesContainer from '../containers/MarketCirclesContainer'
 import ShowPanelButtonContainer from '../containers/ShowPanelButtonContainer'
 
-// TODO: deal with the `decision.pending = true` state
-
 const DecisionCard = ({ decision }) => (
   <div>
     <Countdown end={Number(decision.decisionResolutionDate) * 1000} />
