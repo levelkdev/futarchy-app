@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import formatBalance from '../util/formatBalance'
+import moment from 'moment'
 
 const TradeList = ({ trades }) => (
   <div>
@@ -22,7 +23,7 @@ const TradeList = ({ trades }) => (
         </tr>
         {trades.map((trade, i) => (
           <tr key={i}>
-            <DataCell>{trade.tradeTime}</DataCell>
+            <TradeTime timestamp={Number(trade.tradeTime) * 1000} />
             <DataCell>{formatBalance(trade.tokenAmount)}</DataCell>
             <DataCell>{formatBalance(trade.yesTokenAmount)} {trade.yesTokenName}</DataCell>
             <DataCell>{formatBalance(trade.netYesCost)} TKN</DataCell>
@@ -43,15 +44,29 @@ const TradeList = ({ trades }) => (
 
 const DataTable = styled.table`
   border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  white-space: nowrap;
 `
 
 const DataCell = styled.td`
   border: 1px solid #e8e8e8;
   padding: 5px 8px;
+  font-size: 14px;
+  white-space: normal;
+  overflow: hidden;
+  word-wrap: break-word;
 `
 
 const DataHeaderCell = styled(DataCell)`
   font-weight: bold;
 `
+
+const TradeTime = ({ timestamp }) => (
+  <React.Fragment>
+    <DataCell>{moment(timestamp).format('MMM Do YYYY h:mm A')}</DataCell>
+  </React.Fragment>
+)
+
 
 export default TradeList
