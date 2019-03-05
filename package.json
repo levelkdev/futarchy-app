@@ -16,6 +16,7 @@
     "execa": "^1.0.0",
     "ganache-core": "2.2.1",
     "lodash": "^4.17.11",
+    "moment": "2.24.0",
     "openzeppelin-solidity": "github:gnosis/openzeppelin-solidity#fix-signed-safemath",
     "proxyquire": "^2.1.0",
     "react": "^16.3.2",

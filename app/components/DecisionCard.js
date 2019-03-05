@@ -1,15 +1,17 @@
 import React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
-import { Button, Countdown } from '@aragon/ui'
+import moment from 'moment'
+import { Button, Countdown, IconTime } from '@aragon/ui'
+import decisionStatuses from'../constants/decisionStatuses'
 import MarketCirclesContainer from '../containers/MarketCirclesContainer'
 import ShowPanelButtonContainer from '../containers/ShowPanelButtonContainer'
 
-// TODO: deal with the `decision.pending = true` state
-
 const DecisionCard = ({ decision }) => (
   <div>
-    <Countdown end={Number(decision.decisionResolutionDate) * 1000} />
+    <DateDisplayStyled>
+      <DateDisplay decision={decision} />
+    </DateDisplayStyled>
     <CardContainer>
       <CirclesContainer>
         <MarketCirclesContainer decisionId={decision.decisionId} />
@@ -36,6 +38,51 @@ const DecisionCard = ({ decision }) => (
     </CardContainer>
   </div>
 )
+
+const DateDisplay = ({ decision }) => {
+  switch (decision.status) {
+    case decisionStatuses.OPEN:
+      return <Countdown end={Number(decision.decisionResolutionDate) * 1000} />
+    case decisionStatuses.RESOLVED:
+      return <Countdown end={Number(decision.priceResolutionDate) * 1000} />
+    case decisionStatuses.CLOSED:
+      return <DateTime timestamp={Number(decision.priceResolutionDate) * 1000} />
+  }
+}
+
+const DateTime = ({ timestamp }) => (
+  <React.Fragment>
+    <IconTimeStyled />
+    <StyledDate>{month(timestamp)}</StyledDate>
+    <StyledTime>{time(timestamp)}</StyledTime>
+  </React.Fragment>
+)
+
+function month (timestamp) {
+  return moment(timestamp).format('MMMM Do YYYY')
+}
+
+function time (timestamp) {
+  return moment(timestamp).format('h:mm a')
+}
+
+const IconTimeStyled = styled(IconTime)`
+  margin-right: 12px;
+`
+
+const StyledDate = styled.span`
+  font-weight: bold;
+`
+
+const StyledTime = styled.span`
+  margin-left: 10px;
+  font-size: 12px;
+  color: #707070;
+`
+
+const DateDisplayStyled = styled.div`
+  margin-bottom: 5px;
+`
 
 const CardContainer = styled.div`
   /* TODO: apply to global: */
