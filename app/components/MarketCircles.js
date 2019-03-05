@@ -19,7 +19,7 @@ const MarketCircles = ({
   noDisplayPrice,
   yesPercentage,
   noPercentage,
-  marketResolved
+  marketWinner
 }) => {
   let y = yesPercentage
   let n = noPercentage
@@ -28,20 +28,6 @@ const MarketCircles = ({
   if (typeof(n) == 'undefined') n = 0.5
 
   const { yes: yesDiam, no: noDiam } = calcCircleDiameters(y, n)
- 
-  const hasYesMarketLost = 
-    (!marketResolved)
-      ? false
-      : (yesPercentage > noPercentage)
-      ? false
-      : true;
-
-  const hasNoMarketLost = 
-    (!marketResolved)
-      ? false
-      : (noPercentage > yesPercentage)
-      ? false
-      : true;
 
   // Moves the inner circle axis angle between -60 degrees and 60 degrees
   // (60 degrees = π/3 radians)
@@ -69,20 +55,20 @@ const MarketCircles = ({
         <Circle
           angle={angle}
           diameter={yesDiam}
-          color={hasYesMarketLost ? LOSER_CIRCLE_COLOR : YES_COLOR}
+          color={(marketWinner=="NO") ? LOSER_CIRCLE_COLOR : YES_COLOR}
           nameText="YES"
           isYes={true}
           priceText={yesDisplayPrice}
-          loser={hasYesMarketLost}
+          loser={(marketWinner=="NO")}
         />
         <Circle
           angle={angle}
           diameter={noDiam}
-          color={hasNoMarketLost ? LOSER_CIRCLE_COLOR : NO_COLOR}
+          color={(marketWinner=="YES") ? LOSER_CIRCLE_COLOR : NO_COLOR}
           nameText="NO"
           isYes={false}
           priceText={noDisplayPrice}
-          loser={hasNoMarketLost}
+          loser={(marketWinner=="YES")}
         />
       </svg>
     </div>
@@ -97,6 +83,7 @@ const Circle = ({ angle, diameter, color, nameText, priceText, isYes, loser }) =
   const yOffset = OUTER_CIRCLE_RADIUS + (OUTER_CIRCLE_RADIUS - radius) * (isYes ? -1 : 1) * Math.sin(angle)
   const lineStartX = xOffset - radius;
   const lineEndX = xOffset + radius;
+  const fontColor = loser ? "#A4B2B6" : "#ffffff";
 
   let nameFontSize = Math.round(CIRCLE_NAME_MAX_FONT_SIZE * (radius / OUTER_CIRCLE_RADIUS))
   if (nameFontSize < MIN_FONT_SIZE) nameFontSize = MIN_FONT_SIZE
@@ -113,23 +100,23 @@ const Circle = ({ angle, diameter, color, nameText, priceText, isYes, loser }) =
         fontFamily="overpass,sans-serif"
         fontSize={`${nameFontSize}px`}
         textAnchor="middle"
-        fill="white">{nameText}</text>
+        fill={fontColor}>{nameText}</text>
       {
         priceText ? (
           <text x={xOffset} y={yOffset + priceTextOffset}
             fontFamily="overpass,sans-serif"
             fontSize={`${priceFontSize}px`}
             textAnchor="middle"
-            fill="#ffffffab">{`${formatPrice(priceText)} ETH`}</text>
+            fill={fontColor}>{`${formatPrice(priceText)} ETH`}</text>
         ): <text x={xOffset} y={yOffset + priceTextOffset}
           fontFamily="overpass,sans-serif"
           fontSize={`${priceFontSize}px`}
           textAnchor="middle"
-          fill="#ffffffab">Loading...</text>
+          fill={fontColor}>Loading...</text>
       }
       {
         (loser && priceText)  ? (
-          <line x1={lineStartX} y1={yOffset} x2={lineEndX} y2={yOffset} stroke="rgb(151,151,151)" stroke-width="2" 
+          <line x1={lineStartX} y1={yOffset} x2={lineEndX} y2={yOffset} stroke="rgb(164,178,182)" stroke-width="2" 
           transform={`rotate(45, ${xOffset}, ${yOffset})`}/>
         ) : null
       }

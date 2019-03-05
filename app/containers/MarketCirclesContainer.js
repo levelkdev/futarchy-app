@@ -2,6 +2,7 @@ import React from 'react'
 import _ from 'lodash'
 import { connect } from 'react-redux'
 import MarketCircles from '../components/MarketCircles'
+import decisionStatuses from'../constants/decisionStatuses'
 
 const findDecisionById = (decisions, decisionId) => _.find(
   decisions,
@@ -15,7 +16,21 @@ const mapStateToProps = (state, ownProps) => {
     noDisplayPrice: decision.noMarketPredictedPrice,
     yesPercentage: decision.yesMarketPrice,
     noPercentage: decision.noMarketPrice,
-    marketResolved: decision.resolved
+    marketWinner: getMarketWinner(decision)
+  }
+}
+
+function getMarketWinner (decision) {
+  switch (decision.status) {
+    case decisionStatuses.OPEN:
+      return null
+    case decisionStatuses.RESOLVED:
+    case decisionStatuses.CLOSED:
+      if (decision.yesMarketPrice > decision.noMarketPrice) {
+        return "YES"
+      } else {
+        return "NO"
+      }
   }
 }
 
