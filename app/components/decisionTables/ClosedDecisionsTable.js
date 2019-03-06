@@ -28,7 +28,7 @@ const FinalDecisionsTable = ({ decisionIds }) => (
         <TableHeader title="Market Predictions" />
         <TableHeader title="You Risked" />
         <TableHeader title="Returns" />
-        <TableHeader title="Gain/Loss %" />
+        <TableHeader title="Gain/Loss" />
         <TableHeader title="Actions" />
       </TableRow>
     }

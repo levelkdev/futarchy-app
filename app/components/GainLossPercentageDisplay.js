@@ -37,7 +37,7 @@ const DownArrow = styled.span`
   border-top: 5px solid ${theme.negative};
 `
 
-const formatPercentage = p => Math.abs(twoDecimalPercentage(p))
+const formatPercentage = p => Math.abs(twoDecimalPercentage(p)) + '%'
 
 const twoDecimalPercentage = p => Math.round(p * 10000) / 100
 
