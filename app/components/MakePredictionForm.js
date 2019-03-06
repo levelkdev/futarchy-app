@@ -16,7 +16,20 @@ const dropDownItems = [
 
 const dropDownDefault = 0
 
-const createReduxForm = reduxForm({ form: 'makePredictionForm' })
+const noSelectedPosition = position => {
+  return position == undefined || position == 0
+}
+
+const validate = values => {
+  let errors = {}
+  if (noSelectedPosition(values.yesPredictionChoiceIndex) && noSelectedPosition(values.noPredictionChoiceIndex)) {
+    const error = "You must take at least one market position"
+     errors._error = error
+  }
+  return errors
+}
+
+const createReduxForm = reduxForm({ form: 'makePredictionForm', validate })
 
 const MakePredictionForm = createReduxForm(({
   decision,
@@ -24,7 +37,10 @@ const MakePredictionForm = createReduxForm(({
   executeBuy,
   pristine,
   submitting,
-  tokenBalance
+  tokenBalance,
+  validate,
+  error,
+  submitFailed
 }) => (
   <form onSubmit={handleSubmit(values => {
     if (typeof(values.yesPredictionChoiceIndex) === 'undefined') {
@@ -73,7 +89,7 @@ const MakePredictionForm = createReduxForm(({
     />
 
     <br />
-
+    {submitFailed && error && <ErrorSection error={error} />}
     <Button mode="strong" type="submit" wide disabled={pristine || submitting}>Make Prediction</Button>
   </form>
 ))
@@ -105,13 +121,24 @@ const ShortLongSelector = ({
   </StyledRow>
 )
 
-const DropDownField = (field) => (
-  <DropDown
-    items={dropDownItems}
-    active={field.input.value === '' ? field.defaultValue : field.input.value}
-    onChange={field.input.onChange}
-  />
-)
+const DropDownField = (field) => {
+  return (
+    <DropDown
+      items={dropDownItems}
+      active={field.input.value === '' ? field.defaultValue : field.input.value}
+      onChange={field.input.onChange}
+    />
+  )
+}
+
+const ErrorSection = ({ error }) => {
+  return (
+    <React.Fragment>
+      <StyledError>{error}</StyledError>
+      <br />
+    </React.Fragment>
+  )
+}
 
 const StyledAccountBalance = styled.div`
   width: 100%;
@@ -189,6 +216,10 @@ const StyledRow = styled.div`
 
 const StyledInfo = styled(Info.Action)`
   margin: 16px 0;
+`
+
+const StyledError = styled.div`
+  color: #fd0f0f;
 `
 
 const StyledPermissions = styled(Info.Permissions)`
