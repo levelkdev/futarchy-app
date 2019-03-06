@@ -9,7 +9,7 @@ import {
   Text
 } from '@aragon/ui'
 import DecisionsTableRows from './DecisionsTableRows'
-import DecisionQuestionContainer from '../../containers/DecisionQuestionContainer'
+import DecisionQuestionLinkContainer from '../../containers/DecisionQuestionLinkContainer'
 import DecisionResolveTimeContainer from '../../containers/DecisionResolveTimeContainer'
 import DecisionCloseTimeContainer from '../../containers/DecisionCloseTimeContainer'
 import DecisionPredictedPricesContainer from '../../containers/DecisionPredictedPricesContainer'
@@ -35,7 +35,7 @@ const ResolvedDecisionsTable = ({ decisionIds }) => (
       {decisionIds.map(decisionId => (
         <TableRow key={decisionId}>
           <TopAlignedCell>
-            <DecisionQuestionContainer decisionId={decisionId} />
+            <DecisionQuestionLinkContainer decisionId={decisionId} />
           </TopAlignedCell>
           <TopAlignedCell>
             <DecisionResolveTimeContainer decisionId={decisionId} />
