@@ -1,5 +1,6 @@
 import React from 'react'
 import formatPrice from '../util/formatPrice'
+import decisionMarketTypes from'../constants/decisionMarketTypes'
 import { Text } from '@aragon/ui'
 
 const OUTER_CIRCLE_DIAMETER = 180
@@ -55,20 +56,20 @@ const MarketCircles = ({
         <Circle
           angle={angle}
           diameter={yesDiam}
-          color={(marketWinner=="NO") ? LOSER_CIRCLE_COLOR : YES_COLOR}
+          color={(marketWinner == decisionMarketTypes.NO) ? LOSER_CIRCLE_COLOR : YES_COLOR}
           nameText="YES"
           isYes={true}
           priceText={yesDisplayPrice}
-          loser={(marketWinner=="NO")}
+          loser={(marketWinner == decisionMarketTypes.YES)}
         />
         <Circle
           angle={angle}
           diameter={noDiam}
-          color={(marketWinner=="YES") ? LOSER_CIRCLE_COLOR : NO_COLOR}
+          color={(marketWinner == decisionMarketTypes.YES) ? LOSER_CIRCLE_COLOR : NO_COLOR}
           nameText="NO"
           isYes={false}
           priceText={noDisplayPrice}
-          loser={(marketWinner=="YES")}
+          loser={(marketWinner == decisionMarketTypes.YES)}
         />
       </svg>
     </div>
@@ -116,7 +117,7 @@ const Circle = ({ angle, diameter, color, nameText, priceText, isYes, loser }) =
       }
       {
         (loser && priceText)  ? (
-          <line x1={lineStartX} y1={yOffset} x2={lineEndX} y2={yOffset} stroke="rgb(164,178,182)" stroke-width="2" 
+          <line x1={lineStartX} y1={yOffset} x2={lineEndX} y2={yOffset} stroke="rgb(164,178,182)" strokeWidth="2" 
           transform={`rotate(45, ${xOffset}, ${yOffset})`}/>
         ) : null
       }
