@@ -4,20 +4,11 @@ import ResolvedDecisionsTable from './ResolvedDecisionsTable'
 import ClosedDecisionsTable from './ClosedDecisionsTable'
 
 const DecisionsTable = ({ decisionIds, statusFilter }) => {
-  // Temporarily Using the OpenDecisionsTable component for all rendering
-  // on the "positions" view.
-  // TODO: Implement ResolvedDecisionsTable and ClosedDecisionsTable
 
-  // const DecisionsTableComponent = {
-  //   OPEN: OpenDecisionsTable,
-  //   RESOLVED: ResolvedDecisionsTable,
-  //   CLOSED: ClosedDecisionsTable
-  // }[statusFilter]
-  
   const DecisionsTableComponent = {
     OPEN: OpenDecisionsTable,
-    RESOLVED: OpenDecisionsTable,
-    CLOSED: OpenDecisionsTable
+    RESOLVED: ResolvedDecisionsTable,
+    CLOSED: ClosedDecisionsTable
   }[statusFilter]
 
   return (

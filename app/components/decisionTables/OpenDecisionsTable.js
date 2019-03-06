@@ -10,6 +10,8 @@ import {
 } from '@aragon/ui'
 import DecisionsTableRows from './DecisionsTableRows'
 import DecisionQuestionContainer from '../../containers/DecisionQuestionContainer'
+import DecisionResolveTimeContainer from '../../containers/DecisionResolveTimeContainer'
+import DecisionCloseTimeContainer from '../../containers/DecisionCloseTimeContainer'
 import DecisionPredictedPricesContainer from '../../containers/DecisionPredictedPricesContainer'
 import DecisionAmountRiskedContainer from '../../containers/DecisionAmountRiskedContainer'
 import DecisionPotentialValuesContainer from '../../containers/DecisionPotentialValuesContainer'
@@ -38,10 +40,10 @@ const OpenDecisionsTable = ({ decisionIds }) => (
             <DecisionQuestionContainer decisionId={decisionId} />
           </TopAlignedCell>
           <TopAlignedCell>
-            <Text>...</Text>
+            <DecisionResolveTimeContainer decisionId={decisionId} />
           </TopAlignedCell>
           <TopAlignedCell>
-            <Text>...</Text>
+            <DecisionCloseTimeContainer decisionId={decisionId} />
           </TopAlignedCell>
           <TopAlignedCell width="150">
             <DecisionPredictedPricesContainer decisionId={decisionId} />

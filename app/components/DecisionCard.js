@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import moment from 'moment'
 import { Button, Countdown, IconTime } from '@aragon/ui'
+import { date, time } from '../util/formatDateTime'
 import decisionStatuses from'../constants/decisionStatuses'
 import MarketCirclesContainer from '../containers/MarketCirclesContainer'
 import ShowPanelButtonContainer from '../containers/ShowPanelButtonContainer'
@@ -46,25 +47,17 @@ const DateDisplay = ({ decision }) => {
     case decisionStatuses.RESOLVED:
       return <Countdown end={Number(decision.priceResolutionDate) * 1000} />
     case decisionStatuses.CLOSED:
-      return <DateTime timestamp={Number(decision.priceResolutionDate) * 1000} />
+      return <DateTime timestamp={decision.priceResolutionDate} />
   }
 }
 
 const DateTime = ({ timestamp }) => (
   <React.Fragment>
     <IconTimeStyled />
-    <StyledDate>{month(timestamp)}</StyledDate>
+    <StyledDate>{date(timestamp)}</StyledDate>
     <StyledTime>{time(timestamp)}</StyledTime>
   </React.Fragment>
 )
-
-function month (timestamp) {
-  return moment(timestamp).format('MMMM Do YYYY')
-}
-
-function time (timestamp) {
-  return moment(timestamp).format('h:mm a')
-}
 
 const IconTimeStyled = styled(IconTime)`
   margin-right: 12px;
