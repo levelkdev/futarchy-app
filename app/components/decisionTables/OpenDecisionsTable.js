@@ -26,7 +26,7 @@ const OpenDecisionsTable = ({ decisionIds }) => (
         <TableHeader title="Closes" />
         <TableHeader title="Market Predictions" />
         <TableHeader title="You Risked" />
-        <TableHeader title="Potential Value" />
+        <TableHeader title="Potential Returns" />
         <TableHeader title="Potential Gain/Loss %" />
       </TableRow>
     }

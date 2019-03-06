@@ -16,6 +16,7 @@ import DecisionPredictedPricesContainer from '../../containers/DecisionPredicted
 import DecisionAmountRiskedContainer from '../../containers/DecisionAmountRiskedContainer'
 import DecisionPotentialValuesContainer from '../../containers/DecisionPotentialValuesContainer'
 import DecisionPotentialGainLossContainer from '../../containers/DecisionPotentialGainLossContainer'
+import ShowPanelButtonContainer from '../../containers/ShowPanelButtonContainer'
 
 const ResolvedDecisionsTable = ({ decisionIds }) => (
   <Table
@@ -26,8 +27,9 @@ const ResolvedDecisionsTable = ({ decisionIds }) => (
         <TableHeader title="Closes" />
         <TableHeader title="Market Predictions" />
         <TableHeader title="You Risked" />
-        <TableHeader title="Potential Value" />
-        <TableHeader title="Potential Gain/Loss %" />
+        <TableHeader title="Returns" />
+        <TableHeader title="Gain/Loss %" />
+        <TableHeader title="Actions" />
       </TableRow>
     }
   >
@@ -54,6 +56,14 @@ const ResolvedDecisionsTable = ({ decisionIds }) => (
           </TopAlignedCell>
           <TopAlignedCell width="150">
             <DecisionPotentialGainLossContainer decisionId={decisionId} />
+          </TopAlignedCell>
+          <TopAlignedCell>
+            <ShowPanelButtonContainer
+              panelName="claimReturns"
+              panelContext={{ decisionId }}
+            >
+              Claim Returns
+            </ShowPanelButtonContainer >
           </TopAlignedCell>
         </TableRow>
       ))}

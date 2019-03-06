@@ -27,8 +27,8 @@ const FinalDecisionsTable = ({ decisionIds }) => (
         <TableHeader title="Closed" />
         <TableHeader title="Market Predictions" />
         <TableHeader title="You Risked" />
-        <TableHeader title="Potential Value" />
-        <TableHeader title="Potential Gain/Loss %" />
+        <TableHeader title="Returns" />
+        <TableHeader title="Gain/Loss %" />
         <TableHeader title="Actions" />
       </TableRow>
     }
@@ -59,10 +59,10 @@ const FinalDecisionsTable = ({ decisionIds }) => (
           </TopAlignedCell>
           <TopAlignedCell>
             <ShowPanelButtonContainer
-              panelName="redeemWinnings"
+              panelName="claimReturns"
               panelContext={{ decisionId }}
             >
-              Redeem Winnings
+              Claim Returns
             </ShowPanelButtonContainer >
           </TopAlignedCell>
         </TableRow>
