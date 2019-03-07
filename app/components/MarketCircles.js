@@ -60,7 +60,7 @@ const MarketCircles = ({
           nameText="YES"
           isYes={true}
           priceText={yesDisplayPrice}
-          loser={(marketWinner == decisionMarketTypes.YES)}
+          loser={(marketWinner == decisionMarketTypes.NO)}
         />
         <Circle
           angle={angle}
@@ -116,7 +116,7 @@ const Circle = ({ angle, diameter, color, nameText, priceText, isYes, loser }) =
           fill={fontColor}>Loading...</text>
       }
       {
-        (loser && priceText)  ? (
+        (loser && priceText) ? (
           <line x1={lineStartX} y1={yOffset} x2={lineEndX} y2={yOffset} stroke="rgb(164,178,182)" strokeWidth="2" 
           transform={`rotate(45, ${xOffset}, ${yOffset})`}/>
         ) : null
