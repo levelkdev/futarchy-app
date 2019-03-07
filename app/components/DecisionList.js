@@ -1,17 +1,12 @@
 import React from 'react'
 import styled from 'styled-components'
-import DecisionListEmptyState from './DecisionListEmptyState'
 import DecisionCard from './DecisionCard'
 
 const DecisionList = ({ decisions }) => (
   <div>
-    {
-      decisions.length == 0 ?
-        <DecisionListEmptyState /> :
-        <CardGroup>
-          <DecisionCards decisions={decisions} />
-        </CardGroup>
-    }
+    <CardGroup>
+      <DecisionCards decisions={decisions} />
+    </CardGroup>
   </div>
 )
 
