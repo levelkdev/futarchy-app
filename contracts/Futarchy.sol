@@ -229,6 +229,10 @@ contract Futarchy is AragonApp, IForwarder {
       public
       returns (uint[2] yesCosts, uint[2] noCosts)
     {
+      // prevent buying short and long for the same outcome
+      require(yesPurchaseAmounts[0] == 0 || yesPurchaseAmounts[1] == 0);
+      require(noPurchaseAmounts[0] == 0 || noPurchaseAmounts[1] == 0);
+
       // set necessary contracts
       CategoricalEvent categoricalEvent = decisions[decisionId].futarchyOracle.categoricalEvent();
       StandardMarket yesMarket = decisions[decisionId].futarchyOracle.markets(0);

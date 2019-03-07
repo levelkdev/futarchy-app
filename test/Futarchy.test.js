@@ -53,8 +53,9 @@ const TWO = 2 * 10 ** 18
 
 contract('Futarchy', (accounts) => {
   let APP_MANAGER_ROLE
-  let futarchyBase
+  let daoFactory, futarchyBase
   let futarchy, token, priceOracleFactory, futarchyOracleFactory, lmsrMarketMaker
+  let futarchyOracleFactoryFull, futarchyOracleFactoryMock
   let executionTarget
 
   const root = accounts[0]
@@ -486,6 +487,17 @@ contract('Futarchy', (accounts) => {
       await token.approve(futarchy.address, TWENTY, {from: account2})
       await futarchy.buyMarketPositions(0, TWENTY, [THREE, 0], [0, THREE], {from: account2})
       expect((await account2DecisionBalances()).yesShort).to.equal(THREE)
+    })
+
+    it('fails trying to buy both short and long for the same outcome', async () => {
+      // yes
+      await assertRevert(async () => {
+        await futarchy.buyMarketPositions(0, TWENTY, [FIVE, FIVE], [0, FIVE], {from: root})
+      })
+      // no
+      await assertRevert(async () => {
+        await futarchy.buyMarketPositions(0, TWENTY, [FIVE, 0], [FIVE, FIVE], {from: root})
+      })
     })
 
     describe('when trader is trading again on the same market', async () => {
