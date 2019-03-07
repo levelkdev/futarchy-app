@@ -9,12 +9,13 @@ import {
   Text
 } from '@aragon/ui'
 import DecisionsTableRows from './DecisionsTableRows'
-import DecisionQuestionContainer from '../../containers/DecisionQuestionContainer'
+import DecisionQuestionLinkContainer from '../../containers/DecisionQuestionLinkContainer'
+import DecisionResolveTimeContainer from '../../containers/DecisionResolveTimeContainer'
+import DecisionCloseTimeContainer from '../../containers/DecisionCloseTimeContainer'
 import DecisionPredictedPricesContainer from '../../containers/DecisionPredictedPricesContainer'
 import DecisionAmountRiskedContainer from '../../containers/DecisionAmountRiskedContainer'
 import DecisionPotentialValuesContainer from '../../containers/DecisionPotentialValuesContainer'
 import DecisionPotentialGainLossContainer from '../../containers/DecisionPotentialGainLossContainer'
-import ShowPanelButtonContainer from '../../containers/ShowPanelButtonContainer'
 
 const OpenDecisionsTable = ({ decisionIds }) => (
   <Table
@@ -25,9 +26,8 @@ const OpenDecisionsTable = ({ decisionIds }) => (
         <TableHeader title="Closes" />
         <TableHeader title="Market Predictions" />
         <TableHeader title="You Risked" />
-        <TableHeader title="Potential Value" />
-        <TableHeader title="Potential Gain/Loss %" />
-        <TableHeader title="Actions" />
+        <TableHeader title="Potential Returns" />
+        <TableHeader title="Potential Gain/Loss" />
       </TableRow>
     }
   >
@@ -35,13 +35,13 @@ const OpenDecisionsTable = ({ decisionIds }) => (
       {decisionIds.map(decisionId => (
         <TableRow key={decisionId}>
           <TopAlignedCell>
-            <DecisionQuestionContainer decisionId={decisionId} />
+            <DecisionQuestionLinkContainer decisionId={decisionId} />
           </TopAlignedCell>
           <TopAlignedCell>
-            <Text>...</Text>
+            <DecisionResolveTimeContainer decisionId={decisionId} />
           </TopAlignedCell>
           <TopAlignedCell>
-            <Text>...</Text>
+            <DecisionCloseTimeContainer decisionId={decisionId} />
           </TopAlignedCell>
           <TopAlignedCell width="150">
             <DecisionPredictedPricesContainer decisionId={decisionId} />
@@ -54,14 +54,6 @@ const OpenDecisionsTable = ({ decisionIds }) => (
           </TopAlignedCell>
           <TopAlignedCell width="150">
             <DecisionPotentialGainLossContainer decisionId={decisionId} />
-          </TopAlignedCell>
-          <TopAlignedCell>
-            <ShowPanelButtonContainer
-              panelName="redeemWinnings"
-              panelContext={{ decisionId }}
-            >
-              Redeem Winnings
-            </ShowPanelButtonContainer >
           </TopAlignedCell>
         </TableRow>
       ))}

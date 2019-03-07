@@ -13,8 +13,8 @@
     "decisionId": 0,
     "from": 0,
     "tokenAmount": 870914276369035300,
-    "yesPrediction": "LONG",
-    "noPrediction": "LONG"
+    "yesPrediction": "SHORT",
+    "noPrediction": "SHORT"
   },
   {
     "type": "buy",
@@ -262,6 +262,14 @@
   {
     "type": "buy",
     "decisionId": 2,
+    "from": 0,
+    "tokenAmount": 9224598492127382000,
+    "yesPrediction": "SHORT",
+    "noPrediction": "LONG"
+  },
+  {
+    "type": "buy",
+    "decisionId": 2,
     "from": 4,
     "tokenAmount": 1009291698911710200,
     "yesPrediction": "SHORT",
@@ -307,5 +315,61 @@
   {
     "type": "advanceTime",
     "seconds": 259200
+  },
+  {
+    "type": "buy",
+    "decisionId": 4,
+    "from": 3,
+    "tokenAmount": 1000000000000000000,
+    "yesPrediction": "SHORT",
+    "noPrediction": "SHORT"
+  },
+  {
+    "type": "buy",
+    "decisionId": 3,
+    "from": 4,
+    "tokenAmount": 1000000000000000000,
+    "yesPrediction": "SHORT",
+    "noPrediction": "SHORT"
+  },
+  {
+    "type": "advanceTime",
+    "seconds": 7200
+  },
+  {
+    "type": "buy",
+    "decisionId": 4,
+    "from": 0,
+    "tokenAmount": 100000000000000000000,
+    "yesPrediction": "LONG",
+    "noPrediction": "LONG"
+  },
+  {
+    "type": "buy",
+    "decisionId": 3,
+    "from": 0,
+    "tokenAmount": 100000000000000000000,
+    "yesPrediction": "LONG",
+    "noPrediction": "LONG"
+  },
+  {
+    "type": "buy",
+    "decisionId": 4,
+    "from": 3,
+    "tokenAmount": 1000000000000000000000,
+    "yesPrediction": "LONG",
+    "noPrediction": "LONG"
+  },
+  {
+    "type": "buy",
+    "decisionId": 3,
+    "from": 4,
+    "tokenAmount": 1000000000000000000000,
+    "yesPrediction": "LONG",
+    "noPrediction": "LONG"
+  },
+  {
+    "type": "advanceTime",
+    "seconds": 7200
   }
 ]

@@ -3,8 +3,6 @@ const advanceTime = require('../utilities/advanceTime')
 const getFutarchyContract = require('../utilities/getFutarchyContract')
 const calcOutcomeTokenCount = require('../utilities/calcOutcomeTokenCount')
 
-const tokenAmountAdjustment = 10000
-
 module.exports = async (callback) => {
   const ERC20 = artifacts.require('ERC20')
   const FutarchyOracle = artifacts.require('FutarchyOracle')
@@ -64,11 +62,13 @@ module.exports = async (callback) => {
           const noOutcomeIndex = noPrediction == 'SHORT' ? 0 : 1
           const buyer = accounts[from]
 
+          let tokenAmountAdjustment = tokenAmount * 0.000001
+
           console.log(
             `Buying YES-${yesPrediction} / NO-${noPrediction} ` +
             `on Decision ${decisionId} ` +
             `for ${tokenAmount / 10 ** 18} TKN ` +
-            `+ ${tokenAmountAdjustment} extra ` +
+            `+ ${tokenAmountAdjustment / 10 ** 18} extra ` +
             `from ${buyer}`
           )
 
