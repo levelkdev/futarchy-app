@@ -12,10 +12,10 @@ import DecisionsTableRows from './DecisionsTableRows'
 import DecisionQuestionLinkContainer from '../../containers/DecisionQuestionLinkContainer'
 import DecisionResolveTimeContainer from '../../containers/DecisionResolveTimeContainer'
 import DecisionCloseTimeContainer from '../../containers/DecisionCloseTimeContainer'
-import DecisionPredictedPricesContainer from '../../containers/DecisionPredictedPricesContainer'
+import DecisionResultContainer from '../../containers/DecisionResultContainer'
 import DecisionAmountRiskedContainer from '../../containers/DecisionAmountRiskedContainer'
-import DecisionPotentialValuesContainer from '../../containers/DecisionPotentialValuesContainer'
-import DecisionPotentialGainLossContainer from '../../containers/DecisionPotentialGainLossContainer'
+import DecisionWinningMarketReturnsContainer from '../../containers/DecisionWinningMarketReturnsContainer'
+import DecisionWinningMarketGainLossContainer from '../../containers/DecisionWinningMarketGainLossContainer'
 import ShowPanelButtonContainer from '../../containers/ShowPanelButtonContainer'
 
 const FinalDecisionsTable = ({ decisionIds }) => (
@@ -25,7 +25,7 @@ const FinalDecisionsTable = ({ decisionIds }) => (
         <TableHeader title="Question" />
         <TableHeader title="Resolved" />
         <TableHeader title="Closed" />
-        <TableHeader title="Market Predictions" />
+        <TableHeader title="Decision" />
         <TableHeader title="You Risked" />
         <TableHeader title="Returns" />
         <TableHeader title="Gain/Loss" />
@@ -45,17 +45,17 @@ const FinalDecisionsTable = ({ decisionIds }) => (
           <TopAlignedCell>
             <DecisionCloseTimeContainer decisionId={decisionId} />
           </TopAlignedCell>
-          <TopAlignedCell width="150">
-            <DecisionPredictedPricesContainer decisionId={decisionId} />
+          <TopAlignedCell>
+            <DecisionResultContainer decisionId={decisionId} />
           </TopAlignedCell>
           <TopAlignedCell>
             <DecisionAmountRiskedContainer decisionId={decisionId} />
           </TopAlignedCell>
-          <TopAlignedCell width="150">
-            <DecisionPotentialValuesContainer decisionId={decisionId} />
+          <TopAlignedCell>
+            <DecisionWinningMarketReturnsContainer decisionId={decisionId} />
           </TopAlignedCell>
-          <TopAlignedCell width="150">
-            <DecisionPotentialGainLossContainer decisionId={decisionId} />
+          <TopAlignedCell>
+            <DecisionWinningMarketGainLossContainer decisionId={decisionId} />
           </TopAlignedCell>
           <TopAlignedCell>
             <ShowPanelButtonContainer

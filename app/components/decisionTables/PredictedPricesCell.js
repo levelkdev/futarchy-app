@@ -7,16 +7,16 @@ import EtherDisplaySymbol from '../EtherDisplaySymbol'
 import MarketNameStyled from './MarketNameStyled'
 
 const PredictedPricesCell = ({
-  yesMarketPredictedPrice,
-  noMarketPredictedPrice
+  yesMarketAveragePricePredicted,
+  noMarketAveragePricePredicted
 }) => (
   <div>
     <PredictedPrice
       decisionMarketType={decisionMarketTypes.YES}
-      price={yesMarketPredictedPrice} />
+      price={yesMarketAveragePricePredicted} />
     <PredictedPrice
       decisionMarketType={decisionMarketTypes.NO}
-      price={noMarketPredictedPrice} />
+      price={noMarketAveragePricePredicted} />
   </div>
 )
 

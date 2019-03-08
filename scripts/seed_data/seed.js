@@ -55,7 +55,6 @@ module.exports = async (callback) => {
           await token.approve(app.address, marketFundAmount)
           console.log(`app.newDecision(${executionScript}, ${metadata}, ${lowerBound}, ${upperBound})`)
           await app.newDecision(executionScript, metadata, lowerBound, upperBound)
-          console.log('')
           break
         case 'buy':
           const yesOutcomeIndex = yesPrediction == 'SHORT' ? 0 : 1
@@ -109,6 +108,11 @@ module.exports = async (callback) => {
 
           await app.sellMarketPositions(decisionId, { from: seller })
           console.log('sold positions')
+          break
+        case 'setDecision':
+          console.log(`Set decision for decision ${decisionId}`)
+          await app.setDecision(decisionId)
+          console.log(`Decision set for decision ${decisionId}`)
           break
         case 'advanceTime':
           await advanceTime(web3, data.seconds)

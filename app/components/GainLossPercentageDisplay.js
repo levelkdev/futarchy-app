@@ -2,8 +2,11 @@ import React from 'react'
 import { theme } from '@aragon/ui'
 import styled from 'styled-components'
 
+// empty `<span></span>` is needed for UpArrow and DownArrow to render correctly
+
 const GainLossPercentageDisplay = ({ percentage }) => (
   <GainLossPercentageDisplayStyled percentage={percentage}>
+    <span></span>
     <GainLossArrow value={percentage} />
     {formatPercentage(percentage)}
   </GainLossPercentageDisplayStyled>
