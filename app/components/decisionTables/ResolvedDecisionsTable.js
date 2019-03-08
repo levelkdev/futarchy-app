@@ -12,7 +12,7 @@ import DecisionsTableRows from './DecisionsTableRows'
 import DecisionQuestionLinkContainer from '../../containers/DecisionQuestionLinkContainer'
 import DecisionResolveTimeContainer from '../../containers/DecisionResolveTimeContainer'
 import DecisionCloseTimeContainer from '../../containers/DecisionCloseTimeContainer'
-import DecisionPredictedPricesContainer from '../../containers/DecisionPredictedPricesContainer'
+import DecisionResultContainer from '../../containers/DecisionResultContainer'
 import DecisionAmountRiskedContainer from '../../containers/DecisionAmountRiskedContainer'
 import DecisionPotentialValuesContainer from '../../containers/DecisionPotentialValuesContainer'
 import DecisionPotentialGainLossContainer from '../../containers/DecisionPotentialGainLossContainer'
@@ -25,7 +25,7 @@ const ResolvedDecisionsTable = ({ decisionIds }) => (
         <TableHeader title="Question" />
         <TableHeader title="Resolved" />
         <TableHeader title="Closes" />
-        <TableHeader title="Market Predictions" />
+        <TableHeader title="Decision" />
         <TableHeader title="You Risked" />
         <TableHeader title="Returns" />
         <TableHeader title="Gain/Loss" />
@@ -45,8 +45,8 @@ const ResolvedDecisionsTable = ({ decisionIds }) => (
           <TopAlignedCell>
             <DecisionCloseTimeContainer decisionId={decisionId} />
           </TopAlignedCell>
-          <TopAlignedCell width="150">
-            <DecisionPredictedPricesContainer decisionId={decisionId} />
+          <TopAlignedCell>
+            <DecisionResultContainer decisionId={decisionId} />
           </TopAlignedCell>
           <TopAlignedCell>
             <DecisionAmountRiskedContainer decisionId={decisionId} />
