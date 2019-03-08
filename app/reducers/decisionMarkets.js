@@ -1,11 +1,13 @@
 import _ from 'lodash'
 import { ONE } from '../constants/values'
 import decisionStatuses from '../constants/decisionStatuses'
+import getWinningMarket from './computed/getWinningMarket'
 
 const decisionMarkets = (state = [], action) => {
+  let returnState = state
   switch (action.type) {
     case 'NEW_DECISION_TX_PENDING':
-      return [
+      returnState = [
         ...state,
         ...(
           _.find(state, { question: action.question }) ?
@@ -16,9 +18,10 @@ const decisionMarkets = (state = [], action) => {
             }]
         )
       ]
+      break
     case 'START_DECISION_EVENT':
       const { returnValues, blocktime } = action
-      return _.sortBy([
+      returnState = _.sortBy([
         ..._.filter(
           state,
           decision => !(decision.pending && decision.question == returnValues.metadata)
@@ -43,9 +46,10 @@ const decisionMarkets = (state = [], action) => {
           })
         }
       ], decision => decision.startDate ? parseInt(decision.startDate) * -1 : 0)
+      break
     case 'DECISION_DATA_LOADED':
       const { decisionId, decisionData } = action
-      return state.map(decision => {
+      returnState = state.map(decision => {
           if  (decision.decisionId == decisionId) {
             decision.passed = decisionData.passed
             decision.resolved = decisionData.resolved
@@ -53,8 +57,9 @@ const decisionMarkets = (state = [], action) => {
           }
           return decision
       })
+      break
     case 'AVG_DECISION_MARKET_PRICES_LOADED':
-      return state.map(decision => {
+      returnState = state.map(decision => {
         if (decision.decisionId == action.decisionId) {
           decision.yesMarketPrice = calcPriceAsPercentage(action.yesMarketPrice),
           decision.noMarketPrice = calcPriceAsPercentage(action.noMarketPrice),
@@ -71,9 +76,10 @@ const decisionMarkets = (state = [], action) => {
         }
         return decision
       })
+      break
     case 'MARGINAL_PRICES_LOADED':
       // TODO: refactor logic from AVG_DECISION_MARKET_PRICES_LOADED and write tests
-      return state.map(decision => {
+      returnState = state.map(decision => {
         if (decision.decisionId == action.decisionId) {
           decision.yesMarketMarginalPrice = calcPriceAsPercentage(action.yesMarginalPrice),
           decision.noMarketMarginalPrice = calcPriceAsPercentage(action.noMarginalPrice),
@@ -90,8 +96,9 @@ const decisionMarkets = (state = [], action) => {
         }
         return decision
       })
+      break
     case 'YES_NO_MARKET_DATA_LOADED':
-      return state.map(decision => {
+      returnState = state.map(decision => {
         if (decision.decisionId == action.decisionId) {
           decision.yesMarketFee = action.yesMarketFee,
           decision.noMarketFee = action.noMarketFee,
@@ -104,9 +111,10 @@ const decisionMarkets = (state = [], action) => {
         }
         return decision
       })
+      break
     case 'PROP_VALUE_LOADED':
       if (action.prop == 'blocktime') {
-        return state.map(decision => {
+        returnState = state.map(decision => {
           decision.status = getStatus({
             blocktime: action.value,
             decisionResolutionDate: decision.decisionResolutionDate,
@@ -114,11 +122,10 @@ const decisionMarkets = (state = [], action) => {
           })
           return decision
         })
-      } else {
-        return state
       }
+      break
     case 'NET_OUTCOME_TOKENS_SOLD_FOR_DECISION_LOADED':
-      return state.map(decision => {
+      returnState = state.map(decision => {
         if (decision.id == action.decisionId) {
           if ( action.marketIndex == 0 ) {
             decision.yesMarketShortOutcomeTokensSold = action.shortOutcomeTokensSold,
@@ -129,9 +136,17 @@ const decisionMarkets = (state = [], action) => {
           }
         }
       })
-    default:
-      return state
+      break
   }
+  return addComputedProps(returnState)
+}
+
+function addComputedProps(decisionArray) {
+  return decisionArray.map(decision => {
+    const winningMarket = getWinningMarket(decision)
+    if (typeof(winningMarket) !== 'undefined') decision.winningMarket = winningMarket
+    return decision
+  })
 }
 
 function getStatus ({
