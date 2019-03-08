@@ -1,9 +1,8 @@
 import React from 'react'
 import _ from 'lodash'
 import { connect } from 'react-redux'
+import decisionStatuses from '../constants/decisionStatuses'
 import MarketCircles from '../components/MarketCircles'
-import decisionStatuses from'../constants/decisionStatuses'
-import decisionMarketTypes from'../constants/decisionMarketTypes'
 
 const findDecisionById = (decisions, decisionId) => _.find(
   decisions,
@@ -17,7 +16,7 @@ const mapStateToProps = (state, ownProps) => {
     noDisplayPrice: decision.noMarketPredictedPrice,
     yesPercentage: decision.yesMarketPrice,
     noPercentage: decision.noMarketPrice,
-    marketWinner: decision.winningMarket
+    marketWinner: decision.status !== decisionStatuses.OPEN && decision.winningMarket
   }
 }
 

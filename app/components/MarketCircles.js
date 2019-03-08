@@ -1,7 +1,6 @@
 import React from 'react'
 import formatPrice from '../util/formatPrice'
 import decisionMarketTypes from'../constants/decisionMarketTypes'
-import { Text } from '@aragon/ui'
 
 const OUTER_CIRCLE_DIAMETER = 180
 const OUTER_CIRCLE_RADIUS = OUTER_CIRCLE_DIAMETER / 2
@@ -13,7 +12,6 @@ const TEXT_BOTTOM_MARGIN = 3
 const YES_COLOR = "#80aedc"
 const NO_COLOR = "#38cad0"
 const LOSER_CIRCLE_COLOR = "#DAEAEF"
-const LOSER_TEXT_COLOR = "#A9A9A9"
 
 const MarketCircles = ({
   yesDisplayPrice,
