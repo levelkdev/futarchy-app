@@ -6,29 +6,12 @@ import {
   decisionDataLoaded
 } from '../actions'
 import decisionMarkets from './decisionMarkets'
+import decisionStatuses from '../constants/decisionStatuses'
+import mockDecision from '../test/mockDecision'
 
 const ONE = 0x10000000000000000
 const SEVENTY_FIVE_PERCENT = (ONE * 0.75) + ''
 const FIFTY_PERCENT = (ONE * 0.50) + ''
-
-const mockDecision = (
-  n,
-  pending = false,
-  status = null,
-  decisionResolutionDate = '100',
-  priceResolutionDate = '200',
-  startDate = '1000'
-) => {
-  return {
-    decisionId: `mock_decision_id_${n}`,
-    question: `mock_question_${n}`,
-    pending,
-    status,
-    decisionResolutionDate,
-    priceResolutionDate,
-    startDate
-  }
-}
 
 describe('decisionMarkets', () => {
   describe('newDecisionTxPending', () => {
@@ -45,20 +28,23 @@ describe('decisionMarkets', () => {
       {
         when: 'when there are existing decisions',
         should: 'should add a pending decision after the existing decisions',
-        state: [mockDecision(0), mockDecision(1)],
+        state: [
+          mockDecision({ decisionId: 0 }),
+          mockDecision({ decisionId: 1 })
+        ],
         action: newDecisionTxPending({ txHash: 'mock_tx_hash', question: 'mock_question'}),
         expected: [
-          mockDecision(0),
-          mockDecision(1),
+          mockDecision({ decisionId: 0 }),
+          mockDecision({ decisionId: 1 }),
           { decisionId: 'mock_tx_hash', question: 'mock_question', pending: true }
         ]
       },
       {
         when: 'when the decision already exists in state',
         should: 'should not add the pending decision',
-        state: [mockDecision(0)],
+        state: [mockDecision({ decisionId: 0 })],
         action: newDecisionTxPending({ txHash: 'mock_tx_hash', question: 'mock_question_0'}),
-        expected: [mockDecision(0)]
+        expected: [mockDecision({ decisionId: 0 })]
       }
     ].forEach(({ when, should, state, action, expected }) => {
       describe(when, () => {
@@ -94,7 +80,7 @@ describe('decisionMarkets', () => {
       {
         when: 'when there are existing decisions',
         should: 'should add the new decision without removing existing decisions',
-        state: [mockDecision(0)],
+        state: [mockDecision({ decisionId: 0 })],
         action: {
           type: 'START_DECISION_EVENT',
           returnValues: {
@@ -112,7 +98,7 @@ describe('decisionMarkets', () => {
       {
         when: 'when there is a pending decision with the same question as the event metadata',
         should: 'should remove the pending decision and add the new decision',
-        state: [mockDecision(88, true)],
+        state: [mockDecision({ decisionId: 88, pending: true })],
         action: {
           type: 'START_DECISION_EVENT',
           returnValues: {
@@ -129,7 +115,7 @@ describe('decisionMarkets', () => {
       {
         when: 'when there is a pending decision with a different question from the event metadata',
         should: 'should not remove the pending decision, but should add the new decision',
-        state: [mockDecision(99, true)],
+        state: [mockDecision({ decisionId: 99, pending: true })],
         action: {
           type: 'START_DECISION_EVENT',
           returnValues: {
@@ -159,12 +145,12 @@ describe('decisionMarkets', () => {
           }
         },
         expected: [
-          { index: 0, props: { status: 'OPEN' } }
+          { index: 0, props: { status: decisionStatuses.OPEN } }
         ]
       },
       {
         when: 'when the decision action blocktime is greater than decisionResolutionDate but less than priceResolutionDate',
-        should: 'should set status to RESOLVEd',
+        should: 'should set status to RESOLVED',
         state: [],
         action: { 
           type: 'START_DECISION_EVENT',
@@ -177,7 +163,7 @@ describe('decisionMarkets', () => {
           }
         },
         expected: [
-          { index: 0, props: { status: 'RESOLVED' } }
+          { index: 0, props: { status: decisionStatuses.RESOLVED } }
         ]
       },
       {
@@ -195,7 +181,7 @@ describe('decisionMarkets', () => {
           }
         },
         expected: [
-          { index: 0, props: { status: 'CLOSED' } }
+          { index: 0, props: { status: decisionStatuses.CLOSED } }
         ]
       },
       {
@@ -219,7 +205,7 @@ describe('decisionMarkets', () => {
       {
         when: 'when decision start time is greater than existing decisions',
         should: 'should add the decision at the start of the array',
-        state: [mockDecision(98), mockDecision(99)],
+        state: [mockDecision({ decisionId: 98 }), mockDecision({ decisionId: 99 })],
         action: { 
           type: 'START_DECISION_EVENT',
           blocktime: null,
@@ -258,7 +244,7 @@ describe('decisionMarkets', () => {
       {
         when: 'when there is an existing decision with no avg price data',
         should: 'should return state with new price data',
-        state: [mockDecision(0), mockDecision(123)],
+        state: [mockDecision({ decisionId: 0 }), mockDecision({ decisionId: 123 })],
         action: avgDecisionMarketPricesLoaded({
           decisionId: 'mock_decision_id_123',
           yesMarketPrice: SEVENTY_FIVE_PERCENT,
@@ -273,8 +259,8 @@ describe('decisionMarkets', () => {
       {
         when: 'when there is an existing decision with avg price data',
         should: 'should return state with new price data',
-        state: [mockDecision(0), {
-          ...mockDecision(123),
+        state: [mockDecision({ decisionId: 0 }), {
+          ...mockDecision({ decisionId: 123 }),
           ...{
             yesMarketPrice: 0.01,
             noMarketPrice: 0.99
@@ -294,8 +280,8 @@ describe('decisionMarkets', () => {
       {
         when: 'when there is an existing decision with upper and lower bound',
         should: 'should return state with calculated price predictions',
-        state: [mockDecision(0), {
-          ...mockDecision(123),
+        state: [mockDecision({ decisionId: 0 }), {
+          ...mockDecision({ decisionId: 123 }),
           ...{
             lowerBound: '1000',
             upperBound: '2000'
@@ -325,7 +311,7 @@ describe('decisionMarkets', () => {
 
     describe('when there is no existing decision', () => {
       it('should not change state', () => {
-        const state = [mockDecision(0), mockDecision(1)]
+        const state = [mockDecision({ decisionId: 0 }), mockDecision({ decisionId: 1 })]
         const action = avgDecisionMarketPricesLoaded({
           decisionId: 'mock_decision_id_123',
           yesMarketPrice: SEVENTY_FIVE_PERCENT,
@@ -341,7 +327,7 @@ describe('decisionMarkets', () => {
       {
         when: 'when there is a matching decision',
         should: 'should return state with yes and no market data added to the decision',
-        state: [mockDecision(0), mockDecision(123)],
+        state: [mockDecision({ decisionId: 0 }), mockDecision({ decisionId: 123 })],
         action: yesNoMarketDataLoaded({
           decisionId: 'mock_decision_id_123',
           yesMarketFee: '1',
@@ -382,7 +368,7 @@ describe('decisionMarkets', () => {
       {
         when: 'when there is an existing decision with no decision struct data',
         should: 'should return state with new struct data',
-        state: [mockDecision(0), mockDecision(123)],
+        state: [mockDecision({ decisionId: 0 }), mockDecision({ decisionId: 123 })],
         action: decisionDataLoaded({
           decisionId: 'mock_decision_id_123',
           decisionData: {
@@ -399,8 +385,8 @@ describe('decisionMarkets', () => {
       {
         when: 'when there is an existing decision with struct data',
         should: 'should return state with new struct data',
-        state: [mockDecision(0), {
-          ...mockDecision(123),
+        state: [mockDecision({ decisionId: 0 }), {
+          ...mockDecision({ decisionId: 123 }),
           ...{
             resolved: false,
             passed: false
@@ -434,9 +420,24 @@ describe('decisionMarkets', () => {
   describe('when blocktime value is loaded', () => {
     it('should update statuses for existing decisions', () => {
       const state = [
-        mockDecision(0, false, null, '500', '600'),
-        mockDecision(1, false, null, '700', '800'),
-        mockDecision(1, false, null, '900', '1000')
+        mockDecision({
+          decisionId: 0,
+          pending: false,
+          decisionResolutionDate: '500',
+          priceResolutionDate: '600'
+        }),
+        mockDecision({
+          decisionId: 1,
+          pending: false,
+          decisionResolutionDate: '700',
+          priceResolutionDate: '800'
+        }),
+        mockDecision({
+          decisionId: 1,
+          pending: false,
+          decisionResolutionDate: '900',
+          priceResolutionDate: '1000'
+        })
       ]
       const action = {
         type: 'PROP_VALUE_LOADED',
@@ -444,9 +445,9 @@ describe('decisionMarkets', () => {
         value: '750'
       }
       const actualState = decisionMarkets(state, action)
-      assert.equal(actualState[0].status, 'CLOSED')
-      assert.equal(actualState[1].status, 'RESOLVED')
-      assert.equal(actualState[2].status, 'OPEN')
+      assert.equal(actualState[0].status, decisionStatuses.CLOSED)
+      assert.equal(actualState[1].status, decisionStatuses.RESOLVED)
+      assert.equal(actualState[2].status, decisionStatuses.OPEN)
     })
   })
 })
