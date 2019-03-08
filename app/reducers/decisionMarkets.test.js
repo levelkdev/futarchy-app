@@ -247,13 +247,13 @@ describe('decisionMarkets', () => {
         state: [mockDecision({ decisionId: 0 }), mockDecision({ decisionId: 123 })],
         action: avgDecisionMarketPricesLoaded({
           decisionId: 'mock_decision_id_123',
-          yesMarketPrice: SEVENTY_FIVE_PERCENT,
-          noMarketPrice: FIFTY_PERCENT
+          yesMarketAveragePricePercentage: SEVENTY_FIVE_PERCENT,
+          noMarketAveragePricePercentage: FIFTY_PERCENT
         }),
         marketIndex: 1,
         expectedProps: {
-          yesMarketPrice: 0.75,
-          noMarketPrice: 0.50
+          yesMarketAveragePricePercentage: 0.75,
+          noMarketAveragePricePercentage: 0.50
         }
       },
       {
@@ -262,19 +262,19 @@ describe('decisionMarkets', () => {
         state: [mockDecision({ decisionId: 0 }), {
           ...mockDecision({ decisionId: 123 }),
           ...{
-            yesMarketPrice: 0.01,
-            noMarketPrice: 0.99
+            yesMarketAveragePricePercentage: 0.01,
+            noMarketAveragePricePercentage: 0.99
           }
         }],
         action: avgDecisionMarketPricesLoaded({
           decisionId: 'mock_decision_id_123',
-          yesMarketPrice: SEVENTY_FIVE_PERCENT,
-          noMarketPrice: FIFTY_PERCENT
+          yesMarketAveragePricePercentage: SEVENTY_FIVE_PERCENT,
+          noMarketAveragePricePercentage: FIFTY_PERCENT
         }),
         marketIndex: 1,
         expectedProps: {
-          yesMarketPrice: 0.75,
-          noMarketPrice: 0.50
+          yesMarketAveragePricePercentage: 0.75,
+          noMarketAveragePricePercentage: 0.50
         }
       },
       {
@@ -289,13 +289,13 @@ describe('decisionMarkets', () => {
         }],
         action: avgDecisionMarketPricesLoaded({
           decisionId: 'mock_decision_id_123',
-          yesMarketPrice: SEVENTY_FIVE_PERCENT,
-          noMarketPrice: FIFTY_PERCENT
+          yesMarketAveragePricePercentage: SEVENTY_FIVE_PERCENT,
+          noMarketAveragePricePercentage: FIFTY_PERCENT
         }),
         marketIndex: 1,
         expectedProps: {
-          yesMarketPredictedPrice: 1750,
-          noMarketPredictedPrice: 1500
+          yesMarketAveragePricePredicted: 1750,
+          noMarketAveragePricePredicted: 1500
         }
       }
     ].forEach(({ when, should, state, action, marketIndex, expectedProps }) => {
@@ -314,8 +314,8 @@ describe('decisionMarkets', () => {
         const state = [mockDecision({ decisionId: 0 }), mockDecision({ decisionId: 1 })]
         const action = avgDecisionMarketPricesLoaded({
           decisionId: 'mock_decision_id_123',
-          yesMarketPrice: SEVENTY_FIVE_PERCENT,
-          noMarketPrice: FIFTY_PERCENT
+          yesMarketAveragePricePercentage: SEVENTY_FIVE_PERCENT,
+          noMarketAveragePricePercentage: FIFTY_PERCENT
         })
         assert.deepEqual(decisionMarkets(state, action), state)
       })

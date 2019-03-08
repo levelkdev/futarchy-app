@@ -5,8 +5,8 @@ const mockDecision = ({
   decisionResolutionDate = '100',
   priceResolutionDate = '200',
   startDate = '1000',
-  yesMarketPrice,
-  noMarketPrice,
+  yesMarketAveragePricePercentage,
+  noMarketAveragePricePercentage,
   resolved,
   passed
 }) => {
@@ -18,8 +18,8 @@ const mockDecision = ({
     decisionResolutionDate,
     priceResolutionDate,
     startDate,
-    yesMarketPrice,
-    noMarketPrice,
+    yesMarketAveragePricePercentage,
+    noMarketAveragePricePercentage,
     resolved,
     passed
   }

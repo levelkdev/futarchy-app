@@ -61,15 +61,15 @@ const decisionMarkets = (state = [], action) => {
     case 'AVG_DECISION_MARKET_PRICES_LOADED':
       returnState = state.map(decision => {
         if (decision.decisionId == action.decisionId) {
-          decision.yesMarketPrice = calcPriceAsPercentage(action.yesMarketPrice),
-          decision.noMarketPrice = calcPriceAsPercentage(action.noMarketPrice),
-          decision.yesMarketPredictedPrice = calcPredictedPrice(
-            decision.yesMarketPrice,
+          decision.yesMarketAveragePricePercentage = calcPriceAsPercentage(action.yesMarketAveragePricePercentage),
+          decision.noMarketAveragePricePercentage = calcPriceAsPercentage(action.noMarketAveragePricePercentage),
+          decision.yesMarketAveragePricePredicted = calcPredictedPrice(
+            decision.yesMarketAveragePricePercentage,
             decision.lowerBound,
             decision.upperBound
           )
-          decision.noMarketPredictedPrice = calcPredictedPrice(
-            decision.noMarketPrice,
+          decision.noMarketAveragePricePredicted = calcPredictedPrice(
+            decision.noMarketAveragePricePercentage,
             decision.lowerBound,
             decision.upperBound
           )
@@ -81,15 +81,15 @@ const decisionMarkets = (state = [], action) => {
       // TODO: refactor logic from AVG_DECISION_MARKET_PRICES_LOADED and write tests
       returnState = state.map(decision => {
         if (decision.decisionId == action.decisionId) {
-          decision.yesMarketMarginalPrice = calcPriceAsPercentage(action.yesMarginalPrice),
-          decision.noMarketMarginalPrice = calcPriceAsPercentage(action.noMarginalPrice),
-          decision.yesMarketMarginalPredictedPrice = calcPredictedPrice(
-            decision.yesMarketMarginalPrice,
+          decision.yesMarketMarginalPricePercentage = calcPriceAsPercentage(action.yesMarketMarginalPricePercentage),
+          decision.noMarketMarginalPricePercentage = calcPriceAsPercentage(action.noMarketMarginalPricePercentage),
+          decision.yesMarketMarginalPricePredicted = calcPredictedPrice(
+            decision.yesMarketMarginalPricePercentage,
             decision.lowerBound,
             decision.upperBound
           )
-          decision.noMarketMarginalPredictedPrice = calcPredictedPrice(
-            decision.noMarketMarginalPrice,
+          decision.noMarketMarginalPricePredicted = calcPredictedPrice(
+            decision.noMarketMarginalPricePercentage,
             decision.lowerBound,
             decision.upperBound
           )

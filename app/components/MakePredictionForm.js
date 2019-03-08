@@ -79,13 +79,13 @@ const MakePredictionForm = createReduxForm(({
     <ShortLongSelector
       marketKey="yes"
       marketName="YES"
-      predictedPrice={decision.yesMarketMarginalPredictedPrice}
+      predictedPrice={decision.yesMarketMarginalPricePredicted}
     />
 
     <ShortLongSelector
       marketKey="no"
       marketName="NO"
-      predictedPrice={decision.noMarketMarginalPredictedPrice}
+      predictedPrice={decision.noMarketMarginalPricePredicted}
     />
 
     <br />

@@ -3,8 +3,8 @@ import decisionMarketTypes from '../../constants/decisionMarketTypes'
 const getWinningMarket = decision => {
   if (decision.resolved) {
     return decision.passed ? decisionMarketTypes.YES : decisionMarketTypes.NO
-  } else if (decision.yesMarketPrice && decision.noMarketPrice) {
-    return decision.yesMarketPrice > decision.noMarketPrice ?
+  } else if (decision.yesMarketAveragePricePercentage && decision.noMarketAveragePricePercentage) {
+    return decision.yesMarketAveragePricePercentage > decision.noMarketAveragePricePercentage ?
       decisionMarketTypes.YES : decisionMarketTypes.NO
   }
 }

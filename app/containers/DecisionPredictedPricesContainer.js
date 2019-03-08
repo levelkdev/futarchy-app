@@ -6,8 +6,8 @@ import PredictedPricesCell from '../components/decisionTables/PredictedPricesCel
 const mapStateToProps = (state, ownProps) => {
   const decision = decisionById(state.decisionMarkets, ownProps.decisionId)
   return {
-    yesMarketPredictedPrice: decision.yesMarketPredictedPrice,
-    noMarketPredictedPrice: decision.noMarketPredictedPrice
+    yesMarketAveragePricePredicted: decision.yesMarketAveragePricePredicted,
+    noMarketAveragePricePredicted: decision.noMarketAveragePricePredicted
   }
 }
 

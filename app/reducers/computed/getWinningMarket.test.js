@@ -9,8 +9,8 @@ describe('getWinningMarket()', () => {
       when: 'when resolve is `false`, status is not OPEN, and `yes` price is highest',
       should: 'should set winningMarket to YES',
       input: mockDecision({
-        yesMarketPrice: 0.2,
-        noMarketPrice: 0.1
+        yesMarketAveragePricePercentage: 0.2,
+        noMarketAveragePricePercentage: 0.1
       }),
       output: decisionMarketTypes.YES
     },
@@ -18,8 +18,8 @@ describe('getWinningMarket()', () => {
       when: 'when resolve is `false`, status is not OPEN, and `NO` market price is highest',
       should: 'should set winningMarket to NO',
       input: mockDecision({
-        yesMarketPrice: 0.1,
-        noMarketPrice: 0.2,
+        yesMarketAveragePricePercentage: 0.1,
+        noMarketAveragePricePercentage: 0.2,
         resolved: false,
         passed: false
       }),
@@ -29,8 +29,8 @@ describe('getWinningMarket()', () => {
       when: 'when resolve=`true` and passed=`true`, but `NO` market price is highest',
       should: 'should set winningMarket to YES',
       input: mockDecision({
-        yesMarketPrice: 0.1,
-        noMarketPrice: 0.2,
+        yesMarketAveragePricePercentage: 0.1,
+        noMarketAveragePricePercentage: 0.2,
         resolved: true,
         passed: true 
       }),
@@ -40,8 +40,8 @@ describe('getWinningMarket()', () => {
       when: 'when resolve=`true` and passed=`false`, but `YES` market price is highest',
       should: 'should set winningMarket to NO',
       input: mockDecision({
-        yesMarketPrice: 0.2,
-        noMarketPrice: 0.1,
+        yesMarketAveragePricePercentage: 0.2,
+        noMarketAveragePricePercentage: 0.1,
         resolved: true,
         passed: false
       }),

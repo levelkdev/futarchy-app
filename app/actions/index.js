@@ -20,11 +20,15 @@ export const redeemWinningsTxPending = ({ txHash }) => ({
   txHash
 })
 
-export const avgDecisionMarketPricesLoaded = ({ decisionId, yesMarketPrice, noMarketPrice }) => ({
+export const avgDecisionMarketPricesLoaded = ({
+  decisionId,
+  yesMarketAveragePricePercentage,
+  noMarketAveragePricePercentage
+}) => ({
   type: 'AVG_DECISION_MARKET_PRICES_LOADED',
   decisionId,
-  yesMarketPrice,
-  noMarketPrice
+  yesMarketAveragePricePercentage,
+  noMarketAveragePricePercentage
 })
 
 export const netOutcomeTokensSoldForDecisionLoaded = ({ decisionId, marketIndex, shortOutcomeTokensSold, longOutcomeTokensSold }) => ({
@@ -64,11 +68,11 @@ export const decisionDataLoaded = ({ decisionId, decisionData }) => ({
   decisionId
 })
 
-export const marginalPricesLoaded = ({ decisionId, yesMarginalPrice, noMarginalPrice }) => ({
+export const marginalPricesLoaded = ({ decisionId, yesMarketMarginalPricePercentage, noMarketMarginalPricePercentage }) => ({
   type: 'MARGINAL_PRICES_LOADED',
   decisionId,
-  yesMarginalPrice,
-  noMarginalPrice
+  yesMarketMarginalPricePercentage,
+  noMarketMarginalPricePercentage
 })
 
 export const showPanel = ({ panelName, panelContext }) => ({
@@ -222,8 +226,8 @@ export const fetchYesNoMarketData = ({ decisionId, futarchyOracleAddress }) => d
     //       in the market circles. could be refactored at some point.
     dispatch(avgDecisionMarketPricesLoaded({
       decisionId,
-      yesMarketPrice: yesAveragePrice,
-      noMarketPrice: noAveragePrice
+      yesMarketAveragePricePercentage: yesAveragePrice,
+      noMarketAveragePricePercentage: noAveragePrice
     }))
     dispatch(yesNoMarketDataLoaded({
       decisionId,
@@ -248,8 +252,8 @@ export const fetchMarginalPrices = ({ decisionId }) => dispatch => {
     // index 1 = YES_LONG, index 3 = NO_LONG
     dispatch(marginalPricesLoaded({
       decisionId,
-      yesMarginalPrice: marginalPrices[1],
-      noMarginalPrice: marginalPrices[3]
+      yesMarketMarginalPricePercentage: marginalPrices[1],
+      noMarketMarginalPricePercentage: marginalPrices[3]
     }))
   },
   errorMessage => {
