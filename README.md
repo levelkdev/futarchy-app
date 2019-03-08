@@ -55,6 +55,10 @@ Starts the devchain with `--reset`, which deletes existing ganache snapshots
 
 **NOTE: aragon caches event data using indexdb. You need to clear your browser cache after the devchain is reset
 
+## Debug Mode
+
+Run `npm run start:app:debug` (instead of `npm run start:app`) to log all activity in the client. This will log info about all Aragon smart contract events, calls, and transactions.
+
 ## Sandbox Setup (for Component UI development)
 
 Use this to develop components without having to depend on the "backend" smart contract environment:

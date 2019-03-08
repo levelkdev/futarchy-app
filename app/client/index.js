@@ -1,3 +1,4 @@
+import { logDebug, logError } from '../util/logger'
 import contractCall from './contractCall'
 import contractFn from './contractFn'
 import MiniMeToken from './MiniMeToken'
@@ -9,11 +10,11 @@ export const accounts = async () => {
   return new Promise((resolve, reject) => {
     window.aragonClient.accounts().subscribe(
       accounts => {
-        console.log('client.accounts(): ', accounts)
+        logDebug('client.accounts(): ', accounts)
         resolve(accounts)
       },
       err => {
-        console.error('client.accounts(): Error: ', err)
+        logError('client.accounts(): Error: ', err)
         reject(err)
       }
     )
