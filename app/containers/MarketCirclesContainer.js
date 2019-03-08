@@ -17,21 +17,7 @@ const mapStateToProps = (state, ownProps) => {
     noDisplayPrice: decision.noMarketPredictedPrice,
     yesPercentage: decision.yesMarketPrice,
     noPercentage: decision.noMarketPrice,
-    marketWinner: getMarketWinner(decision)
-  }
-}
-
-function getMarketWinner (decision) {
-  switch (decision.status) {
-    case decisionStatuses.OPEN:
-      return null
-    case decisionStatuses.RESOLVED:
-    case decisionStatuses.CLOSED:
-      if (decision.yesMarketPrice > decision.noMarketPrice) {
-        return decisionMarketTypes.YES;
-      } else {
-        return decisionMarketTypes.NO;
-      }
+    marketWinner: decision.winningMarket
   }
 }
 
