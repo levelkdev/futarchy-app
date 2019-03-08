@@ -27,6 +27,7 @@ const StyledTime = styled.div`
 
 const StyledTimeframe = styled.div`
   font-size: 12px;
+  padding-top: 3px;
 `
 
 export default TimeframeCell

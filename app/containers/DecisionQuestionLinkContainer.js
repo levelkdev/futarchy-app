@@ -1,9 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import styled from 'styled-components'
-import { Link } from 'react-router-dom'
 import decisionById from '../reducers/computed/decisionById'
-import { Text } from '@aragon/ui'
+import QuestionLinkCell from '../components/decisionTables/QuestionLinkCell'
 
 
 const mapStateToProps = (state, ownProps) => {
@@ -14,20 +12,6 @@ const mapStateToProps = (state, ownProps) => {
   }
 }
 
-const QuestionLink = ({
-  question,
-  decisionId
-}) => (
-  <LinkStyled to={`/decision/${decisionId}`}>
-    <Text>{question}</Text>
-  </LinkStyled>
-)
-
 export default connect(
   mapStateToProps
-)(QuestionLink)
-
-const LinkStyled = styled(Link)`
-  text-decoration: none;
-  cursor: pointer;
-`
+)(QuestionLinkCell)
