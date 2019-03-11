@@ -1,11 +1,19 @@
 import React from 'react'
-import { LineChart } from '@aragon/ui'
+import { Line } from 'react-chartjs-2'
 
-const MarketPricesLineChart = ({ yesPrices, noPrices}) => {
-  const lines = [yesPrices, noPrices]
-  return (
-    <LineChart lines={lines} />
-  )
+const MarketPricesLineChart = ({ times, yesPrices, noPrices}) => {
+  console.log('TIMES: ', times)
+  const data = {
+    labels: times,
+    datasets: [{
+      label: 'YES',
+      data: yesPrices
+    }, {
+      label: 'NO',
+      data: noPrices
+    }]
+  }
+  return <Line data={data} />
 }
 
 export default MarketPricesLineChart

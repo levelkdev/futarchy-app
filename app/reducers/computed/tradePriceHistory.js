@@ -1,11 +1,23 @@
 import _ from 'lodash'
+import calcPriceFromPercentage from '../../util/calcPriceFromPercentage'
+import decisionById from './decisionById'
 
-const tradePriceHistory = ({ decisionId, trades: allTrades, increment, now }) => {
+const tradePriceHistory = ({
+  decisionId,
+  decisions,
+  trades: allTrades,
+  increment,
+  now
+}) => {
   let returnValues = {
     yesHistory: [],
     noHistory: [],
     timeRange: { lower: null, upper: null }
   }
+
+  const decision = decisionById(decisions, decisionId)
+  const { lowerBound, upperBound } = decision
+
   const trades = _.sortBy(
     _.filter(allTrades, trade => parseInt(trade.decisionId) == parseInt(decisionId)),
     trade => parseInt(trade.tradeTime)
@@ -39,12 +51,14 @@ const tradePriceHistory = ({ decisionId, trades: allTrades, increment, now }) =>
 
     returnValues.yesHistory.push({
       timeRange,
-      price: avgPrices.yesPrice
+      pricePercentage: avgPrices.yesPrice,
+      price: calcPriceFromPercentage(avgPrices.yesPrice, lowerBound, upperBound)
     })
 
     returnValues.noHistory.push({
       timeRange,
-      price: avgPrices.noPrice
+      pricePercentage: avgPrices.noPrice,
+      price: calcPriceFromPercentage(avgPrices.noPrice, lowerBound, upperBound)
     })
 
     timePointer += increment

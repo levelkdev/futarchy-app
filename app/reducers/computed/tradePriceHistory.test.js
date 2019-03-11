@@ -33,6 +33,14 @@ const mockNoMatchTrades = [
   mockTrade('1', '1500003603', .99, .99)
 ]
 
+const mockDecisions = [
+  {
+    decisionId: 0,
+    lowerBound: '0',
+    upperBound: '100'
+  }
+]
+
 const currentTime = 1500010000
 
 const expectedYesHistory = [
@@ -41,21 +49,24 @@ const expectedYesHistory = [
       lower: 1500000000,
       upper: 1500003599
     },
-    price: .51
+    pricePercentage: .51,
+    price: 51
   },
   {
     timeRange: {
       lower: 1500003600,
       upper: 1500007199
     },
-    price: .75
+    pricePercentage: .75,
+    price: 75
   },
   {
     timeRange: {
       lower: 1500007200,
       upper: 1500010000
     },
-    price: .75
+    pricePercentage: .75,
+    price: 75
   }
 ]
 
@@ -65,21 +76,24 @@ const expectedNoHistory = [
       lower: 1500000000,
       upper: 1500003599
     },
-    price: .61
+    pricePercentage: .61,
+    price: 61
   },
   {
     timeRange: {
       lower: 1500003600,
       upper: 1500007199
     },
-    price: .85
+    pricePercentage: .85,
+    price: 85
   },
   {
     timeRange: {
       lower: 1500007200,
       upper: 1500010000
     },
-    price: .85
+    pricePercentage: .85,
+    price: 85
   }
 ]
 
@@ -89,6 +103,7 @@ describe('tradePriceHistory', () => {
     beforeEach(() => {
       hist = tradePriceHistory({
         decisionId: 0,
+        decisions: mockDecisions,
         trades: mockTrades,
         increment: hourIncrement,
         now: currentTime
@@ -114,6 +129,7 @@ describe('tradePriceHistory', () => {
     beforeEach(() => {
       hist = tradePriceHistory({
         decisionId: 0,
+        decisions: mockDecisions,
         trades: mockNoMatchTrades,
         increment: hourIncrement,
         now: currentTime
