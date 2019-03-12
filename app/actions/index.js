@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import decisionById from '../reducers/computed/decisionById'
 import calcOutcomeTokenPurchaseAmounts from '../util/calcOutcomeTokenPurchaseAmounts'
-import decimalToWeiInt from '../util/decimalToWeiInt'
 import client from '../client'
 
 export const newDecisionTxPending = ({ question, txHash }) => ({

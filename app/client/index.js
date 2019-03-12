@@ -121,6 +121,7 @@ export const buyMarketPositions = async (
   //       have to be set higher, which would be something that the user would need
   //       to know about before signing.
   collateralAmount = parseInt(collateralAmount) + (parseInt(collateralAmount) * 0.01)
+  collateralAmount = web3.toWei(collateralAmount.toString(), 'wei')
 
   const transactionOptions = {
     token: { address, value: collateralAmount }
