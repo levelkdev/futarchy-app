@@ -1,7 +1,7 @@
 import React from 'react'
 import { Field, reduxForm } from 'redux-form'
 import formatBalance from '../util/formatBalance'
-import decimalToWeiInt from '../util/decimalToWeiInt'
+import numberToWei from '../util/numberToWei'
 import EtherDisplaySymbol from './EtherDisplaySymbol'
 import TokenSymbolDisplay from './TokenSymbolDisplay'
 import { Button, Info, Text, Badge, DropDown } from '@aragon/ui'
@@ -49,7 +49,7 @@ const MakePredictionForm = createReduxForm(({
     if (typeof(values.noPredictionChoiceIndex) === 'undefined') {
       values.noPredictionChoiceIndex = dropDownDefault
     }
-    values.collateralAmount = decimalToWeiInt(values.collateralAmount)
+    values.collateralAmount = numberToWei(values.collateralAmount)
     executeBuy({
       decisionId: decision.decisionId,
       ...values
