@@ -26,7 +26,13 @@ describe('formatPrice', () => {
       should: 'should round to 2 decimal places after the leading zeros',
       price: 0.00123456,
       expected: "0.0012"
-    }
+    },
+    {
+      when: 'when given 0',
+      should: 'should return 0',
+      price: 0,
+      expected: "0"
+    },
   ].forEach(({ when, should, price, expected }) => {
     describe(when, () => {
       it(should, () => {

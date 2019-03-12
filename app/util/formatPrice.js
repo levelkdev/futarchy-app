@@ -1,6 +1,8 @@
 export default price => {
   let roundedPrice
-  if (price >= 10000) {
+  if (price == 0) {
+    roundedPrice = 0
+  } else if (price >= 10000) {
     roundedPrice = roundTo(price)
   } else if (price >= 1) {
     roundedPrice = roundTo(price, 2)
