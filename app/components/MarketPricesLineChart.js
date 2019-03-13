@@ -1,4 +1,5 @@
 import React from 'react'
+import _ from 'lodash'
 import { Line } from 'react-chartjs-2'
 import {
   YES_COLOR,
@@ -7,14 +8,16 @@ import {
   NO_LIGHT_COLOR
 } from '../constants/colorValues'
 import formatPredictedValue from '../util/formatPredictedValue'
+import { shortMonthDay } from '../util/formatDateTime'
 
 const MarketPricesLineChart = ({
-  timeLabels,
+  times,
   yesPrices,
   noPrices,
   yMin,
   yMax
 }) => {
+  const timeLabels = _.map(times, t => shortMonthDay(t))
   const options = {
     maintainAspectRatio: false,
     scales: {

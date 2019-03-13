@@ -24,7 +24,7 @@ const mapStateToProps = (state, ownProps) => {
   })
 
   return {
-    timeLabels: _.map(hist.yesHistory, (_, index) => `Day ${index + 1}`),
+    times: _.map(hist.yesHistory, point => point.start),
     yesPrices: _.map(hist.yesHistory, point => point.price),
     noPrices: _.map(hist.noHistory, point => point.price),
     yMin: lowerBound,
