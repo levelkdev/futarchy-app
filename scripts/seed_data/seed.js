@@ -26,7 +26,7 @@ module.exports = async (callback) => {
     const marketFundAmount = await app.marketFundAmount()
   
     const lowerBound = 0
-    const upperBound = 1000
+    const upperBound = 25 * 10 ** 18
 
     const tradesData = require('./data/data_' + dataFileId + '.json')
     let yesMarket, noMarket

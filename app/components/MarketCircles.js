@@ -1,5 +1,4 @@
 import React from 'react'
-import formatPrice from '../util/formatPrice'
 import { YES_COLOR, NO_COLOR } from '../constants/colorValues'
 import decisionMarketTypes from '../constants/decisionMarketTypes'
 import formatPredictedValue from '../util/formatPredictedValue'
@@ -106,7 +105,7 @@ const Circle = ({ angle, diameter, color, nameText, priceText, isYes, loser }) =
             fontFamily="overpass,sans-serif"
             fontSize={`${priceFontSize}px`}
             textAnchor="middle"
-            fill={fontColor}>{formatPredictedValue(formatPrice(priceText))}</text>
+            fill={fontColor}>{formatPredictedValue(priceText)}</text>
         ): <text x={xOffset} y={yOffset + priceTextOffset}
           fontFamily="overpass,sans-serif"
           fontSize={`${priceFontSize}px`}
