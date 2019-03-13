@@ -77,12 +77,14 @@ const MakePredictionForm = createReduxForm(({
     </StyledRow>
 
     <ShortLongSelector
+      decision={decision}
       marketKey="yes"
       marketName="YES"
       predictedPrice={decision.yesMarketMarginalPricePredicted}
     />
 
     <ShortLongSelector
+      decision={decision}
       marketKey="no"
       marketName="NO"
       predictedPrice={decision.noMarketMarginalPricePredicted}
@@ -95,6 +97,7 @@ const MakePredictionForm = createReduxForm(({
 ))
 
 const ShortLongSelector = ({
+  decision,
   marketKey,
   marketName,
   predictedPrice
@@ -105,11 +108,14 @@ const ShortLongSelector = ({
     <br />
     <StyledFlexContainer>
       <div>
+      { (decision.status == 'RESOLVED' && decision.winningMarket != marketName) ?
+        <StyledClosedMarket> Losing market is closed </StyledClosedMarket> :
         <Field
           name={`${marketKey}PredictionChoiceIndex`}
           component={DropDownField}
           defaultValue={dropDownDefault}
         />
+      }
       </div>
       <StyledMarketInfo>
         <StyledMarketPrice>
@@ -154,6 +160,11 @@ const StyledBadge = styled(Badge) `
   color: white;
   font-weight: 400;
   margin-right: 6px;
+`
+
+const StyledClosedMarket = styled.span`
+  color: #b30606;
+  margin-left: 10px;
 `
 
 const StyledFlexContainer = styled.div`

@@ -26,7 +26,7 @@ const mapDispatchToProps = dispatch => ({
       yesPredictionChoiceIndex,
       noPredictionChoiceIndex
     } = values
-    
+
     dispatch(buyMarketPositions({
       decisionId,
       collateralAmount,
