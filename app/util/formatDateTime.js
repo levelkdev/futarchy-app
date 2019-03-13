@@ -1,5 +1,14 @@
 import moment from 'moment'
 
-export const shortDate = timestamp => moment(Number(timestamp) * 1000).format('YYYY.DD.MM')
-export const date = timestamp => moment(Number(timestamp) * 1000).format('LL')
-export const time = timestamp => moment(Number(timestamp) * 1000).format('LT')
+export const shortMonthDay = formatFn('MMM D')
+export const shortDate = formatFn('YYYY.DD.MM')
+export const date = formatFn('LL')
+export const time = formatFn('LT')
+
+function formatFn(formatString) {
+  return blocktime => blocktimeToMoment(blocktime).format(formatString)
+}
+
+function blocktimeToMoment (blocktime) {
+  return moment(Number(blocktime) * 1000)
+}

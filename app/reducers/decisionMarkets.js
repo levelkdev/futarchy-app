@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import { ONE } from '../constants/values'
+import calcPriceFromPercentage from '../util/calcPriceFromPercentage'
 import decisionStatuses from '../constants/decisionStatuses'
 import getWinningMarket from './computed/getWinningMarket'
 
@@ -63,12 +64,12 @@ const decisionMarkets = (state = [], action) => {
         if (decision.decisionId == action.decisionId) {
           decision.yesMarketAveragePricePercentage = calcPriceAsPercentage(action.yesMarketAveragePricePercentage),
           decision.noMarketAveragePricePercentage = calcPriceAsPercentage(action.noMarketAveragePricePercentage),
-          decision.yesMarketAveragePricePredicted = calcPredictedPrice(
+          decision.yesMarketAveragePricePredicted = calcPriceFromPercentage(
             decision.yesMarketAveragePricePercentage,
             decision.lowerBound,
             decision.upperBound
           )
-          decision.noMarketAveragePricePredicted = calcPredictedPrice(
+          decision.noMarketAveragePricePredicted = calcPriceFromPercentage(
             decision.noMarketAveragePricePercentage,
             decision.lowerBound,
             decision.upperBound
@@ -83,12 +84,12 @@ const decisionMarkets = (state = [], action) => {
         if (decision.decisionId == action.decisionId) {
           decision.yesMarketMarginalPricePercentage = calcPriceAsPercentage(action.yesMarketMarginalPricePercentage),
           decision.noMarketMarginalPricePercentage = calcPriceAsPercentage(action.noMarketMarginalPricePercentage),
-          decision.yesMarketMarginalPricePredicted = calcPredictedPrice(
+          decision.yesMarketMarginalPricePredicted = calcPriceFromPercentage(
             decision.yesMarketMarginalPricePercentage,
             decision.lowerBound,
             decision.upperBound
           )
-          decision.noMarketMarginalPricePredicted = calcPredictedPrice(
+          decision.noMarketMarginalPricePredicted = calcPriceFromPercentage(
             decision.noMarketMarginalPricePercentage,
             decision.lowerBound,
             decision.upperBound
@@ -174,12 +175,6 @@ function getStatus ({
 
 function calcPriceAsPercentage (price) {
   return parseInt(price) / ONE
-}
-
-function calcPredictedPrice (pricePercentage, lowerBound, upperBound) {
-  const lowerBoundInt = parseInt(lowerBound)
-  const upperBoundInt = parseInt(upperBound)
-  return lowerBoundInt + ((upperBoundInt - lowerBoundInt) * pricePercentage)
 }
 
 export default decisionMarkets

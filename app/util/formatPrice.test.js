@@ -33,10 +33,24 @@ describe('formatPrice', () => {
       price: 0,
       expected: "0"
     },
-  ].forEach(({ when, should, price, expected }) => {
+    {
+      when: 'when given a maxDecimals value',
+      should: 'should not include more decimals than the max',
+      price: 0.123456,
+      maxDecimals: 2,
+      expected: "0.12"
+    },
+    {
+      when: 'when given a maxDecimals value of zero',
+      should: 'should not include any decimals',
+      price: 0.123456,
+      maxDecimals: 0,
+      expected: "0"
+    }
+  ].forEach(({ when, should, price, maxDecimals, expected }) => {
     describe(when, () => {
       it(should, () => {
-        assert.equal(formatPrice(price), expected)
+        assert.equal(formatPrice(price, maxDecimals), expected)
       })
     })
   })

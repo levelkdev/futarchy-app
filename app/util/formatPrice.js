@@ -1,15 +1,16 @@
-export default price => {
+export default (price, maxDecimals) => {
+  const maxDecimalsDefined = parseInt(maxDecimals) >= 0
   let roundedPrice
   if (price == 0) {
     roundedPrice = 0
   } else if (price >= 10000) {
     roundedPrice = roundTo(price)
   } else if (price >= 1) {
-    roundedPrice = roundTo(price, 2)
+    roundedPrice = roundTo(price, maxDecimalsDefined ? maxDecimals : 2)
   } else if (price >= 0.01) {
-    roundedPrice = roundTo(price, 3)
+    roundedPrice = roundTo(price, maxDecimalsDefined ? maxDecimals : 3)
   } else if (price < 0.01) {
-    roundedPrice = roundTo(price, magnitude(price) + 2)
+    roundedPrice = roundTo(price, maxDecimalsDefined ? maxDecimals : magnitude(price) + 2)
   }
   return roundedPrice + ''
 }

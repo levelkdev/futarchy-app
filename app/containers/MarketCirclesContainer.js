@@ -12,11 +12,11 @@ const findDecisionById = (decisions, decisionId) => _.find(
 const mapStateToProps = (state, ownProps) => {
   const decision = findDecisionById(state.decisionMarkets, ownProps.decisionId)
   return {
-    yesDisplayPrice: decision.yesMarketAveragePricePredicted,
-    noDisplayPrice: decision.noMarketAveragePricePredicted,
-    yesPercentage: decision.yesMarketAveragePricePercentage,
-    noPercentage: decision.noMarketAveragePricePercentage,
-    marketWinner: decision.status !== decisionStatuses.OPEN && decision.winningMarket
+    yesDisplayPrice: decision && decision.yesMarketAveragePricePredicted,
+    noDisplayPrice: decision && decision.noMarketAveragePricePredicted,
+    yesPercentage: decision && decision.yesMarketAveragePricePercentage,
+    noPercentage: decision && decision.noMarketAveragePricePercentage,
+    marketWinner: decision && decision.status !== decisionStatuses.OPEN && decision.winningMarket
   }
 }
 
