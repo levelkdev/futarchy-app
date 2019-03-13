@@ -1,18 +1,59 @@
 import React from 'react'
 import { Line } from 'react-chartjs-2'
+import {
+  YES_COLOR,
+  YES_LIGHT_COLOR,
+  NO_COLOR,
+  NO_LIGHT_COLOR
+} from '../constants/colorValues'
+import formatPredictedValue from '../util/formatPredictedValue'
 
-const MarketPricesLineChart = ({ timeLabels, yesPrices, noPrices}) => {
+const MarketPricesLineChart = ({
+  timeLabels,
+  yesPrices,
+  noPrices,
+  yMin,
+  yMax
+}) => {
+  const options = {
+    maintainAspectRatio: false,
+    scales: {
+      yAxes: [{
+        ticks: {
+          callback: val => formatPredictedValue(val),
+          maxTicksLimit: 5,
+          min: yMin,
+          max: yMax
+        }
+      }]
+    }
+  }
+
   const data = {
     labels: timeLabels,
     datasets: [{
       label: 'YES',
-      data: yesPrices
+      data: yesPrices,
+      borderWidth: 1,
+      backgroundColor: YES_LIGHT_COLOR,
+      borderColor: YES_COLOR,
     }, {
       label: 'NO',
-      data: noPrices
+      data: noPrices,
+      borderWidth: 1,
+      backgroundColor: NO_LIGHT_COLOR,
+      borderColor: NO_COLOR,
     }]
   }
-  return <Line data={data} />
+
+  return (
+    <Line
+      data={data}
+      options={options}
+      width={1000}
+      height={300}
+    />
+  )
 }
 
 export default MarketPricesLineChart

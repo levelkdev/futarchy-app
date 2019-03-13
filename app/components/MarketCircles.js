@@ -1,6 +1,8 @@
 import React from 'react'
 import formatPrice from '../util/formatPrice'
-import decisionMarketTypes from'../constants/decisionMarketTypes'
+import { YES_COLOR, NO_COLOR } from '../constants/colorValues'
+import decisionMarketTypes from '../constants/decisionMarketTypes'
+import formatPredictedValue from '../util/formatPredictedValue'
 
 const OUTER_CIRCLE_DIAMETER = 180
 const OUTER_CIRCLE_RADIUS = OUTER_CIRCLE_DIAMETER / 2
@@ -9,8 +11,6 @@ const CIRCLE_NAME_MAX_FONT_SIZE = 48
 const CIRCLE_PRICE_MAX_FONT_SIZE = 21
 const MIN_FONT_SIZE = 10
 const TEXT_BOTTOM_MARGIN = 3
-const YES_COLOR = "#80aedc"
-const NO_COLOR = "#38cad0"
 const LOSER_CIRCLE_COLOR = "#DAEAEF"
 
 const MarketCircles = ({
@@ -106,7 +106,7 @@ const Circle = ({ angle, diameter, color, nameText, priceText, isYes, loser }) =
             fontFamily="overpass,sans-serif"
             fontSize={`${priceFontSize}px`}
             textAnchor="middle"
-            fill={fontColor}>{`${formatPrice(priceText)} ETH`}</text>
+            fill={fontColor}>{formatPredictedValue(formatPrice(priceText))}</text>
         ): <text x={xOffset} y={yOffset + priceTextOffset}
           fontFamily="overpass,sans-serif"
           fontSize={`${priceFontSize}px`}
