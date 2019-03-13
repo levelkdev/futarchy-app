@@ -19,15 +19,16 @@ const tradePriceHistory = ({
   }
 
   const decision = decisionById(decisions, decisionId)
-  const { lowerBound, upperBound } = decision
-
   const trades = _.sortBy(
     _.filter(allTrades, trade => parseInt(trade.decisionId) == parseInt(decisionId)),
     trade => parseInt(trade.tradeTime)
   )
-  if (trades.length == 0) {
+
+  if (trades.length == 0 || !decision) {
     return returnValues
   }
+
+  const { lowerBound, upperBound } = decision
   const startTime = parseInt(decision.startDate)
   const endTime = parseInt(decision.priceResolutionDate)
   

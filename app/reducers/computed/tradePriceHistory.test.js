@@ -200,4 +200,25 @@ describe('tradePriceHistory', () => {
       assert.deepEqual(hist.noHistory, [])
     })
   })
+
+  describe('when there is no matching decision', () => {
+    let hist
+    beforeEach(() => {
+      hist = tradePriceHistory({
+        decisionId: 0,
+        decisions: [],
+        trades: mockTrades,
+        increment: timeIncrement,
+        now: currentTime
+      })
+    })
+
+    it('should return empty arrays for YES-LONG prices', () => {
+      assert.deepEqual(hist.yesHistory, [])
+    })
+
+    it('should return empty arrays for NO-LONG prices', () => {
+      assert.deepEqual(hist.noHistory, [])
+    })
+  })
 })
