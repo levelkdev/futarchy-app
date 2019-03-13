@@ -13,87 +13,126 @@ const mockTrade = (
   noLongMarginalPrice
 })
 
-const hourIncrement = 3600
+const timeIncrement = 10
+const currentTime = 45
 
 const mockTrades = [
-  // hour 1
-  mockTrade('0', '1500000000', .5, .6),
-  mockTrade('0', '1500000001', .51, .61),
-  mockTrade('1', '1500000002', .99, .99),
-  mockTrade('0', '1500000002', .52, .62),
-  // hour 2
-  mockTrade('0', '1500003601', .7, .8),
-  mockTrade('0', '1500003602', .75, .85),
-  mockTrade('1', '1500003603', .99, .99),
-  mockTrade('0', '1500003604', .8, .9)
+  // 0 - 10
+  // no trades
+
+  // 10 - 20
+  mockTrade('0', '11', .5, .6),
+  mockTrade('0', '12', .51, .61),
+  mockTrade('1', '13', .99, .99),
+  mockTrade('0', '14', .52, .62),
+
+  // 20 - 30
+  // no trades
+
+  // 30 - 40
+  mockTrade('0', '31', .7, .8),
+  mockTrade('0', '32', .75, .85),
+  mockTrade('1', '33', .99, .99),
+  mockTrade('0', '34', .8, .9)
+
+  // 40 - 50
+  // no trades
+
+  // 50 - 60
+  // no trades
 ]
 
 const mockNoMatchTrades = [
-  mockTrade('1', '1500000002', .99, .99),
-  mockTrade('1', '1500003603', .99, .99)
+  mockTrade('1', '99', .99, .99),
+  mockTrade('1', '99', .99, .99)
 ]
 
 const mockDecisions = [
   {
     decisionId: 0,
     lowerBound: '0',
-    upperBound: '100'
+    upperBound: '100',
+    startDate: '0',
+    decisionResolutionDate: '30',
+    priceResolutionDate: '60'
   }
 ]
 
-const currentTime = 1500010000
-
 const expectedYesHistory = [
   {
-    timeRange: {
-      lower: 1500000000,
-      upper: 1500003599
-    },
+    start: 0,
+    duration: 10,
+    pricePercentage: .5,
+    price: 50
+  },
+  {
+    start: 10,
+    duration: 10,
     pricePercentage: .51,
     price: 51
   },
   {
-    timeRange: {
-      lower: 1500003600,
-      upper: 1500007199
-    },
+    start: 20,
+    duration: 10,
+    pricePercentage: .51,
+    price: 51
+  },
+  {
+    start: 30,
+    duration: 10,
     pricePercentage: .75,
     price: 75
   },
   {
-    timeRange: {
-      lower: 1500007200,
-      upper: 1500010000
-    },
+    start: 40,
+    duration: 10,
     pricePercentage: .75,
     price: 75
+  },
+  {
+    start: 50,
+    duration: 10,
+    pricePercentage: null,
+    price: null
   }
 ]
 
 const expectedNoHistory = [
   {
-    timeRange: {
-      lower: 1500000000,
-      upper: 1500003599
-    },
+    start: 0,
+    duration: 10,
+    pricePercentage: .5,
+    price: 50
+  },
+  {
+    start: 10,
+    duration: 10,
     pricePercentage: .61,
     price: 61
   },
   {
-    timeRange: {
-      lower: 1500003600,
-      upper: 1500007199
-    },
+    start: 20,
+    duration: 10,
+    pricePercentage: .61,
+    price: 61
+  },
+  {
+    start: 30,
+    duration: 10,
     pricePercentage: .85,
     price: 85
   },
   {
-    timeRange: {
-      lower: 1500007200,
-      upper: 1500010000
-    },
+    start: 40,
+    duration: 10,
     pricePercentage: .85,
     price: 85
+  },
+  {
+    start: 50,
+    duration: 10,
+    pricePercentage: null,
+    price: null
   }
 ]
 
@@ -105,23 +144,40 @@ describe('tradePriceHistory', () => {
         decisionId: 0,
         decisions: mockDecisions,
         trades: mockTrades,
-        increment: hourIncrement,
+        increment: timeIncrement,
         now: currentTime
       })
     })
-
-    it('should return average prices over the given time increment for YES-LONG prices', () => {
-      assert.deepEqual(hist.yesHistory, expectedYesHistory)
+    
+    it('should assume .5 starting point if there are no trades for the first time increment', () => {
+      assert.deepEqual(hist.yesHistory[0], expectedYesHistory[0])
+      assert.deepEqual(hist.noHistory[0], expectedNoHistory[0])
+    })
+    
+    it('should return the average of trades within the time increment', () => {
+      assert.deepEqual(hist.yesHistory[1], expectedYesHistory[1])
+      assert.deepEqual(hist.yesHistory[3], expectedYesHistory[3])
+      assert.deepEqual(hist.noHistory[1], expectedNoHistory[1])
+      assert.deepEqual(hist.noHistory[3], expectedNoHistory[3])
+    })
+    
+    it('should use the average from the previous increment for increments with no trades', () => {
+      assert.deepEqual(hist.yesHistory[2], expectedYesHistory[2])
+      assert.deepEqual(hist.yesHistory[4], expectedYesHistory[4])
+      assert.deepEqual(hist.noHistory[2], expectedNoHistory[2])
+      assert.deepEqual(hist.noHistory[4], expectedNoHistory[4])
+    })
+    
+    it('should set null price values for increments after the current time', () => {
+      assert.deepEqual(hist.yesHistory[5], expectedYesHistory[5])
+      assert.deepEqual(hist.noHistory[5], expectedNoHistory[5])
     })
 
-    it('should return average prices over the given time increment for NO-LONG prices', () => {
-      assert.deepEqual(hist.noHistory, expectedNoHistory)
+    it('should not create an increment after priceResolutionDate', () => {
+      assert.equal(hist.yesHistory[6], undefined)
+      assert.equal(hist.noHistory[6], undefined)
     })
 
-    it('should return the trade time range', () => {
-      assert.equal(hist.timeRange.lower, 1500000000)
-      assert.equal(hist.timeRange.upper, currentTime)
-    })
   })
 
   describe('when given an array with no matching trades', () => {
@@ -131,7 +187,7 @@ describe('tradePriceHistory', () => {
         decisionId: 0,
         decisions: mockDecisions,
         trades: mockNoMatchTrades,
-        increment: hourIncrement,
+        increment: timeIncrement,
         now: currentTime
       })
     })
@@ -142,11 +198,6 @@ describe('tradePriceHistory', () => {
 
     it('should return empty arrays for NO-LONG prices', () => {
       assert.deepEqual(hist.noHistory, [])
-    })
-
-    it('should return null values for time ranges', () => {
-      assert.equal(hist.timeRange.lower, null)
-      assert.equal(hist.timeRange.upper, null)
     })
   })
 })

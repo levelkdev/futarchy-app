@@ -1,3 +1,7 @@
+/**
+ * Returns a summary of past trade prices, averged by time increments
+ */
+
 import _ from 'lodash'
 import calcPriceFromPercentage from '../../util/calcPriceFromPercentage'
 import decisionById from './decisionById'
@@ -11,8 +15,7 @@ const tradePriceHistory = ({
 }) => {
   let returnValues = {
     yesHistory: [],
-    noHistory: [],
-    timeRange: { lower: null, upper: null }
+    noHistory: []
   }
 
   const decision = decisionById(decisions, decisionId)
@@ -25,16 +28,14 @@ const tradePriceHistory = ({
   if (trades.length == 0) {
     return returnValues
   }
-  const firstTradeTime = parseInt(trades[0].tradeTime)
-
-  returnValues.timeRange.lower = firstTradeTime
-  returnValues.timeRange.upper = now
+  const startTime = parseInt(decision.startDate)
+  const endTime = parseInt(decision.priceResolutionDate)
   
-  let timePointer = firstTradeTime
+  let timePointer = startTime
   let lastYesPriceAvg = .5
   let lastNoPriceAvg = .5
 
-  while(timePointer <= now) {
+  while(timePointer < endTime) {
     let avgPrices = getAveragePricesOverRange(trades, timePointer, timePointer + increment)
     if (!avgPrices.yesPrice) avgPrices.yesPrice = lastYesPriceAvg
     else lastYesPriceAvg = avgPrices.yesPrice
@@ -42,23 +43,28 @@ const tradePriceHistory = ({
     if (!avgPrices.noPrice) avgPrices.noPrice = lastNoPriceAvg
     else lastNoPriceAvg = avgPrices.noPrice
 
-    const nextPointer = timePointer + increment
-
-    const timeRange = {
-      lower: timePointer,
-      upper: nextPointer > now ? now : nextPointer - 1
+    let yesPrice = null
+    let noPrice = null
+    if (timePointer >= now) {
+      avgPrices.yesPrice = null
+      avgPrices.noPrice = null
+    } else {
+      yesPrice = calcPriceFromPercentage(avgPrices.yesPrice, lowerBound, upperBound)
+      noPrice = calcPriceFromPercentage(avgPrices.noPrice, lowerBound, upperBound)
     }
 
     returnValues.yesHistory.push({
-      timeRange,
+      start: timePointer,
+      duration: increment,
       pricePercentage: avgPrices.yesPrice,
-      price: calcPriceFromPercentage(avgPrices.yesPrice, lowerBound, upperBound)
+      price: yesPrice
     })
 
     returnValues.noHistory.push({
-      timeRange,
+      start: timePointer,
+      duration: increment,
       pricePercentage: avgPrices.noPrice,
-      price: calcPriceFromPercentage(avgPrices.noPrice, lowerBound, upperBound)
+      price: noPrice
     })
 
     timePointer += increment

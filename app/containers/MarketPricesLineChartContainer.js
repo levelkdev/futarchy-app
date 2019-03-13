@@ -19,7 +19,7 @@ const mapStateToProps = (state, ownProps) => {
   })
 
   return {
-    times: _.map(hist.yesHistory, point => point.timeRange.lower),
+    timeLabels: _.map(hist.yesHistory, (_, index) => `Day ${index + 1}`),
     yesPrices: _.map(hist.yesHistory, point => point.price),
     noPrices: _.map(hist.noHistory, point => point.price)
   }

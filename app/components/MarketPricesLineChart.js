@@ -1,10 +1,9 @@
 import React from 'react'
 import { Line } from 'react-chartjs-2'
 
-const MarketPricesLineChart = ({ times, yesPrices, noPrices}) => {
-  console.log('TIMES: ', times)
+const MarketPricesLineChart = ({ timeLabels, yesPrices, noPrices}) => {
   const data = {
-    labels: times,
+    labels: timeLabels,
     datasets: [{
       label: 'YES',
       data: yesPrices
