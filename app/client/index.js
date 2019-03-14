@@ -148,6 +148,17 @@ export const redeemWinnings = async (decisionId) => {
   )
 }
 
+export const calculateWinnings = async(decisionId, shortTokenAmount, longTokenAmount) => {
+  const futarchyOracleAddress  = contractFn(
+      window.aragonClient,
+      'client',
+      'decisions',
+      decisionId
+    )
+  const futarchyOracle = FutarchyOracle(window.aragonClient, futarchyOracleAddress)
+  const scalarEvent = ScalarEvent(window.aragonClient, )
+}
+
 export const yesNoMarketData = async (futarchyOracleAddress) => {
   const futarchyOracle = FutarchyOracle(window.aragonClient, futarchyOracleAddress)
   const markets = await futarchyOracle.markets()

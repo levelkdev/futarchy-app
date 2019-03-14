@@ -19,10 +19,19 @@ export const redeemWinningsTxPending = ({ txHash }) => ({
   txHash
 })
 
+export const fetchWinningsAmountPending = () => ({
+  type: 'FETCH_WINNINGS_AMOUNT_PENDING'
+})
+
+export const fetchWinningsAmountSuccess = (winningsAmount) => ({
+  type: 'FETCH_WINNINGS_AMOUNT_SUCCESS',
+  winningsAmount
+})
+
 export const avgDecisionMarketPricesLoaded = ({
   decisionId,
-  yesMarketAveragePricePercentage,
-  noMarketAveragePricePercentage
+  yesMarketPrice,
+  noMarketPrice
 }) => ({
   type: 'AVG_DECISION_MARKET_PRICES_LOADED',
   decisionId,
@@ -178,9 +187,7 @@ export const buyMarketPositions = ({
   })
 }
 
-export const redeemWinnings = (
-  decisionId
-) => dispatch => {
+export const redeemWinnings = (decisionId) => dispatch => {
   return client.redeemWinnings(decisionId).then(txHash => {
     dispatch(redeemWinningsTxPending({txHash}))
   }, err => {
