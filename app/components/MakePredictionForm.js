@@ -37,7 +37,6 @@ const MakePredictionForm = createReduxForm(({
   pristine,
   submitting,
   tokenBalance,
-  validate,
   error,
   submitFailed
 }) => (
