@@ -2,10 +2,9 @@ import React from 'react'
 import { Field, reduxForm } from 'redux-form'
 import formatBalance from '../util/formatBalance'
 import numberToWei from '../util/numberToWei'
-import EtherDisplaySymbol from './EtherDisplaySymbol'
 import TokenSymbolDisplay from './TokenSymbolDisplay'
 import { Button, Info, Text, Badge, DropDown } from '@aragon/ui'
-import formatPrice from '../util/formatPrice'
+import formatPredictedValue from '../util/formatPredictedValue'
 import styled from 'styled-components'
 
 const dropDownItems = [
@@ -119,7 +118,7 @@ const ShortLongSelector = ({
       </div>
       <StyledMarketInfo>
         <StyledMarketPrice>
-          {formatPrice(predictedPrice)} <EtherDisplaySymbol />
+          {formatPredictedValue(predictedPrice)}
         </StyledMarketPrice>
         <StyledMarketPrediction>Current market prediction</StyledMarketPrediction>
       </StyledMarketInfo>

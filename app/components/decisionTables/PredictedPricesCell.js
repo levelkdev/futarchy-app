@@ -3,7 +3,6 @@ import styled from 'styled-components'
 import { Text } from '@aragon/ui'
 import decisionMarketTypes from '../../constants/decisionMarketTypes'
 import formatPredictedValue from '../../util/formatPredictedValue'
-import EtherDisplaySymbol from '../EtherDisplaySymbol'
 import MarketNameStyled from './MarketNameStyled'
 
 const PredictedPricesCell = ({
@@ -25,7 +24,7 @@ const PredictedPrice = ({ decisionMarketType, price }) => (
     <Text size="xsmall">
       <MarketNameStyled type={decisionMarketType} />
       <PriceStyled>
-        <Bold>{formatPredictedValue(price)}</Bold>&nbsp;<EtherDisplaySymbol />
+        <Bold>{formatPredictedValue(price)}</Bold>
       </PriceStyled>
     </Text>
   </div>
