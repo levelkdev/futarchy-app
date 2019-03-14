@@ -5,6 +5,7 @@ import toWei from '../util/toWei'
 import TokenSymbolDisplay from './TokenSymbolDisplay'
 import { Button, Info, Text, Badge, DropDown } from '@aragon/ui'
 import formatPredictedValue from '../util/formatPredictedValue'
+import decisionStatuses from '../constants/decisionStatuses'
 import styled from 'styled-components'
 
 const dropDownItems = [
@@ -106,7 +107,7 @@ const ShortLongSelector = ({
     <br />
     <StyledFlexContainer>
       <div>
-      { (decision.status == 'RESOLVED' && decision.winningMarket != marketName) ?
+      { (decision.status == decisionStatuses.RESOLVED && decision.winningMarket != marketName) ?
         <StyledClosedMarket> Losing market is closed </StyledClosedMarket> :
         <Field
           name={`${marketKey}PredictionChoiceIndex`}
