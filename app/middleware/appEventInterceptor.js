@@ -1,6 +1,8 @@
 import _ from 'lodash'
+import decisionBalancesById from '../reducers/computed/decisionBalancesById'
 import {
   fetchDecisionData,
+  fetchTraderReturns,
   fetchTraderDecisionBalances
 } from '../actions'
 
@@ -39,12 +41,31 @@ const appEventInterceptor = store => next => action => {
           store.dispatch(
             fetchTraderDecisionBalances({
               decisionId: state.decisionMarkets[i].decisionId,
-              trader: action.value[0]
+              trader: action.value[0],
             })
           )
         }
       }
       break
+      case 'FETCH_TRADER_DECISION_BALANCES_SUCCESS':
+      case 'AVG_DECISION_MARKET_PRICES_LOADED':
+        for(let i in state.decisionMarkets) {
+          let decisionBalance = decisionBalancesById(state.decisionBalances, i)
+
+          if (
+            state.decisionMarkets[i].winningMarket &&
+            !decisionBalance.esimatedReturns &&
+            !decisionBalance.pending
+          ){
+            store.dispatch(fetchTraderReturns({
+              decisionId: state.decisionMarkets[i].decisionId,
+              trader: state.accounts[0],
+              decisionStatus: state.decisionMarkets[i].status,
+              winningMarket: state.decisionMarkets[i].winningMarket
+            }))
+          }
+        }
+        break
   }
 
   const result = next(action)

@@ -36,6 +36,7 @@ const decisionMarkets = (state = [], action) => {
           startDate: returnValues.startDate,
           decisionResolutionDate: returnValues.decisionResolutionDate,
           priceResolutionDate: returnValues.priceResolutionDate,
+          futarchyOracleAddress: returnValues.futarchyOracle,
 
           // TODO: get the actual status based on time until the trading period is over.
           //       and the oracle's resolution date. We need to add the resolution period

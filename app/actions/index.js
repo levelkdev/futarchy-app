@@ -30,8 +30,8 @@ export const fetchWinningsAmountSuccess = (winningsAmount) => ({
 
 export const avgDecisionMarketPricesLoaded = ({
   decisionId,
-  yesMarketPrice,
-  noMarketPrice
+  yesMarketAveragePricePercentage,
+  noMarketAveragePricePercentage
 }) => ({
   type: 'AVG_DECISION_MARKET_PRICES_LOADED',
   decisionId,
@@ -313,6 +313,11 @@ export const fetchTraderDecisionBalances = ({ decisionId, trader }) => dispatch 
       // TODO: dispatch error action, to show something to the user
     }
   )
+}
+
+export const fetchTraderReturns = ({ decisionId, trader, decisionStatus, winningMarket, futarchyOracle }) => async dispatch => {
+  console.log("IN!!!", decisionStatus, winningMarket, decisionId)
+  console.log(await client.estimatedReturns(decisionId, trader, decisionStatus, winningMarket))
 }
 
 export const fetchInitData = () => async (dispatch, getState) => {
