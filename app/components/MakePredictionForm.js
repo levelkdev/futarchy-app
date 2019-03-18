@@ -5,7 +5,7 @@ import { Button, Text, Badge, DropDown } from '@aragon/ui'
 import formatBalance from '../util/formatBalance'
 import formatPredictedValue from '../util/formatPredictedValue'
 import toWei from '../util/toWei'
-import TokenSymbolDisplay from './TokenSymbolDisplay'
+import { date, time } from '../util/formatDateTime'
 import decisionStatuses from '../constants/decisionStatuses'
 import positions from '../constants/positions'
 import TokenSymbolDisplay from './TokenSymbolDisplay'
@@ -57,8 +57,6 @@ const MakePredictionForm = createReduxForm(({
     })
   })}>
     <StyledRow>
-      <StyledSmallCaps>question</StyledSmallCaps>
-      <br />
       <StyledText size="large">{decision.question}</StyledText>
       <br />
     </StyledRow>
@@ -76,6 +74,18 @@ const MakePredictionForm = createReduxForm(({
         {formatBalance(tokenBalance)} <TokenSymbolDisplay /> Available
       </StyledAccountBalance>
     </AllocateTokensSection>
+
+    <MetricQuestion>
+      <Phrase>What will</Phrase>
+      <BoldPhrase><SuccessMetricDisplay /></BoldPhrase>
+      <Phrase>be on</Phrase>
+      <BoldPhrase>{date(decision.priceResolutionDate)}</BoldPhrase>
+      <Text size="xsmall">
+        <Phrase>at</Phrase>
+        <Phrase>{time(decision.priceResolutionDate)}</Phrase>
+        <Phrase>?</Phrase>
+      </Text>
+    </MetricQuestion>
 
     <SelectorSection>
       <ShortLongSelector
@@ -148,6 +158,7 @@ const DropDownField = (field) => {
 
 const PositionDropDownItem = ({ predictedPrice, position }) => (
   <StyledSmallCaps>
+    <Phrase>I predict</Phrase>
     <BoldPhrase><SuccessMetricDisplay /></BoldPhrase>
     <Phrase>will be</Phrase>
     <BoldPhrase>{choiceDisplayTextByPosition[position]}</BoldPhrase>
@@ -169,6 +180,13 @@ const ErrorSection = ({ error }) => {
     </React.Fragment>
   )
 }
+
+const MetricQuestion = styled.div`
+  font-size: 16px;
+  margin: 30px 0;
+  font-weight: 500;
+  color: #98A0A2;
+`
 
 const StyledAccountBalance = styled.div`
   width: 100%;
