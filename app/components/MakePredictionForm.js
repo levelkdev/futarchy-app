@@ -16,7 +16,7 @@ const choiceDisplayTextByPosition = {
   [positions.SHORT]: 'less than'
 }
 
-const dropDownDefault = 0
+const dropDownDefault = 2
 
 const noSelectedPosition = position => {
   return position == undefined || position == 0
