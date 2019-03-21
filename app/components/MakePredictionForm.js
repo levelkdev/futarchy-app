@@ -1,7 +1,7 @@
 import React from 'react'
 import { Field, reduxForm } from 'redux-form'
 import formatBalance from '../util/formatBalance'
-import numberToWei from '../util/numberToWei'
+import toWei from '../util/toWei'
 import TokenSymbolDisplay from './TokenSymbolDisplay'
 import { Button, Info, Text, Badge, DropDown } from '@aragon/ui'
 import formatPredictedValue from '../util/formatPredictedValue'
@@ -48,7 +48,7 @@ const MakePredictionForm = createReduxForm(({
     if (typeof(values.noPredictionChoiceIndex) === 'undefined') {
       values.noPredictionChoiceIndex = dropDownDefault
     }
-    values.collateralAmount = numberToWei(values.collateralAmount)
+    values.collateralAmount = toWei(values.collateralAmount)
     executeBuy({
       decisionId: decision.decisionId,
       ...values
