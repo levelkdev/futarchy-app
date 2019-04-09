@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import decisionBalancesById from '../reducers/computed/decisionBalancesById'
+import findPerformanceTotal from '../reducers/computed/findPerformanceTotal'
 import {
   fetchDecisionData,
   fetchTraderReturns,
@@ -51,17 +52,23 @@ const appEventInterceptor = store => next => action => {
       case 'AVG_DECISION_MARKET_PRICES_LOADED':
         for(let i in state.decisionMarkets) {
           let decisionBalance = decisionBalancesById(state.decisionBalances, i)
+          let performanceTotals = findPerformanceTotal(state.performance, i, state.accounts[0])
+          console.log('state!!', state)
 
           if (
             state.decisionMarkets[i].winningMarket &&
-            !decisionBalance.esimatedReturns &&
+            state.decisionMarkets[i].status == 'CLOSED'
             !decisionBalance.pending
           ){
+            const marketName = state.decisionMarkets[i].winningMarket.toLowerCase()
             store.dispatch(fetchTraderReturns({
               decisionId: state.decisionMarkets[i].decisionId,
               trader: state.accounts[0],
+              longBalance: decisionBalance[`${marketName}Long`],
+              shortBalance: decisionBalance[`${marketName}Short`],
               decisionStatus: state.decisionMarkets[i].status,
-              winningMarket: state.decisionMarkets[i].winningMarket
+              winningMarket: state.decisionMarkets[i].winningMarket,
+              futarchyOracleAddr: state.decisionMarkets[i].futarchyOracleAddress
             }))
           }
         }

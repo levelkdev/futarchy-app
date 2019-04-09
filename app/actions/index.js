@@ -315,9 +315,17 @@ export const fetchTraderDecisionBalances = ({ decisionId, trader }) => dispatch 
   )
 }
 
-export const fetchTraderReturns = ({ decisionId, trader, decisionStatus, winningMarket, futarchyOracle }) => async dispatch => {
-  console.log("IN!!!", decisionStatus, winningMarket, decisionId)
-  console.log(await client.estimatedReturns(decisionId, trader, decisionStatus, winningMarket))
+export const fetchTraderReturns = ({
+  decisionId,
+  trader,
+  longBalance,
+  shortBalance,
+  potentialProfit,
+  decisionStatus,
+  winningMarket,
+  futarchyOracleAddr
+}) => async dispatch => {
+  console.log(await client.estimatedReturns(decisionId, trader, longBalance, shortBalance, potentialProfit, decisionStatus, winningMarket, futarchyOracleAddr))
 }
 
 export const fetchInitData = () => async (dispatch, getState) => {

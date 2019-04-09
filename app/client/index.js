@@ -4,6 +4,8 @@ import contractFn from './contractFn'
 import MiniMeToken from './MiniMeToken'
 import FutarchyOracle from './FutarchyOracle'
 import StandardMarketWithPriceLogger from './StandardMarketWithPriceLogger'
+import LMSRMarketMaker from './LMSRMarketMaker'
+import ScalarEvent from './ScalarEvent'
 import traderDecisionHash from '../util/traderDecisionHash'
 
 export const accounts = async () => {
@@ -148,16 +150,35 @@ export const redeemWinnings = async (decisionId) => {
   )
 }
 
-export const estimatedReturns = async(decisionId, trader, decisionStatus, winningMarket) => {
-  console.log('HEY CALC!')
-  // const futarchyOracleAddress  = contractFn(
-  //     window.aragonClient,
-  //     'client',
-  //     'decisions',
-  //     decisionId
-  //   )
-  // const futarchyOracle = FutarchyOracle(window.aragonClient, futarchyOracleAddress)
-  // const scalarEvent = ScalarEvent(window.aragonClient, )
+export const estimatedReturns = async (
+  decisionId,
+  trader,
+  longBalance,
+  shortBalance,
+  potentialProfit,
+  decisionStatus,
+  winningMarket,
+  futarchyOracleAddress
+) => {
+  const marketIndex = winningMarket == "YES" ? 0 : 1
+  const futarchyOracle = FutarchyOracle(window.aragonClient, futarchyOracleAddress)
+  const winningMarketAddr = (await futarchyOracle.markets())[marketIndex]
+  const standardMarket = StandardMarketWithPriceLogger(window.aragonClient, winningMarketAddr)
+
+  if (decisionStatus == 'RESOLVED') {
+    const marketMakerAddr = await standardMarket.marketMaker()
+    const marketMaker = LMSRMarketMaker(window.aragonClient, marketMakerAddr).lmsrMarketMaker
+    console.log('marketMaker!', marketMaker)
+    console.log(winningMarketAddr)
+    const sellReturns = await marketMaker.calcNetCost(winningMarketAddr,[1,2])
+    console.log('sellReturns!', sellReturns)
+
+  }
+
+
+
+  const scalarEventAddr = await standardMarket.eventContract()
+  const scalarEvent = ScalarEvent(window.aragonClient, scalarEventAddr)
 }
 
 export const yesNoMarketData = async (futarchyOracleAddress) => {
