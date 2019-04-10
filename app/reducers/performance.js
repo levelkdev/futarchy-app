@@ -54,20 +54,20 @@ const yesNoMarketDataLoadedReducer = (state, action) => {
   return state.map(totals => {
     if (totals.decisionId == action.decisionId) {
       const {
-        yesShort,
-        yesLong,
-        noShort,
-        noLong
+        yesShortProfit,
+        yesLongProfit,
+        noShortProfit,
+        noLongProfit
       } = calcProfits({
         action,
         totals
       })
-      totals.yesShortPotentialProfit = yesShort
-      totals.yesLongPotentialProfit = yesLong
-      totals.noShortPotentialProfit = noShort
-      totals.noLongPotentialProfit = noLong
-      totals.yesPotentialProfit = yesShort + yesLong
-      totals.noPotentialProfit = noShort + noLong
+      totals.yesShortPotentialProfit = yesShortProfit
+      totals.yesLongPotentialProfit = yesLongProfit
+      totals.noShortPotentialProfit = noShortProfit
+      totals.noLongPotentialProfit = noLongProfit
+      totals.yesPotentialProfit = yesShortProfit + yesLongProfit
+      totals.noPotentialProfit = noShortProfit + noLongProfit
       totals.yesGainLoss = totals.yesPotentialProfit - totals.yesCostBasis
       totals.noGainLoss = totals.noPotentialProfit - totals.noCostBasis
       totals.totalPotentialProfit = totals.yesPotentialProfit + totals.noPotentialProfit
@@ -112,10 +112,10 @@ const calcProfits = ({ action, totals }) => {
     feeFactor: noMarketFee
   })
   return {
-    yesShort: yesProfits.short,
-    yesLong: yesProfits.long,
-    noShort: noProfits.short,
-    noLong: noProfits.long
+    yesShortProfit: yesProfits.short,
+    yesLongProfit: yesProfits.long,
+    noShorProfitt: noProfits.short,
+    noLongProfit: noProfits.long
   }
 }
 
@@ -152,22 +152,23 @@ const calcProfitForMarket = ({
 const newTotals = (trader, decisionId) => ({
   trader,
   decisionId,
-  yesCostBasis: 0,
-  noCostBasis: 0,
-  yesShortBalance: 0,
-  yesLongBalance: 0,
-  noShortBalance: 0,
-  noLongBalance: 0,
-  yesShortPotentialProfit: 0,
-  yesLongPotentialProfit: 0,
-  noShortPotentialProfit: 0,
-  noLongPotentialProfit: 0,
-  yesPotentialProfit: 0,
-  noPotentialProfit: 0,
-  yesGainLoss: 0,
-  noGainLoss: 0,
-  totalPotentialProfit: 0,
-  totalGainLoss: 0
+  yesCostBasis: 0,              // aggregate TKN spent on YES purchases
+  noCostBasis: 0,               // aggregate TKN spent on NO purchases
+  yesShortBalance: 0,           // current yesShort Balance
+  yesLongBalance: 0,            // current yesLong Balance
+  noShortBalance: 0,            // current noShort Balance
+  noLongBalance: 0,             // current noLong Balance
+  yesShortPotentialProfit: 0,   // total YES received if yesShortBalance is sold
+  yesLongPotentialProfit: 0,    // total YES received if yesLongBalance is sold
+  noShortPotentialProfit: 0,    // total NO received if noShortBalance is sold
+  noLongPotentialProfit: 0,     // total NO received if noLongBalance is sold
+  yesPotentialProfit: 0,        // yesShortPotentialProfit + yesLongPotentialProfit
+  noPotentialProfit: 0,         // noShortPotentialProfit + noLongPotentialProfit
+  yesGainLoss: 0,               // yesPotentialProfit - yesCostBasis
+  noGainLoss: 0,                // noPotentialProfit - noCostBasis
+  totalPotentialProfit: 0,      // yesPotentialProfit + noPotentialProfit
+                                // (hypothetical value since only YES *or* NO will have value after resolution)
+  totalGainLoss: 0              // gainLoss for YES and NO combined. (also hypothetical for same reason --^)
 })
 
 function sumTokenValueArray(tokenVals) {

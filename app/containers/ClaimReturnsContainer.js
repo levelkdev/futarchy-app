@@ -2,17 +2,14 @@ import _ from 'lodash'
 import React from 'react'
 import { connect } from 'react-redux'
 import { redeemWinnings } from '../actions'
+import decisionById from '../reducers/computed/decisionById'
+import performanceByIdAndTrader from '../reducers/computed/performanceByIdAndTrader'
+import formatBalance from '../util/formatBalance'
 import ClaimReturnsForm from '../components/ClaimReturnsForm'
 
-
-const findDecisionById = (decisions, decisionId) => _.find(
-  decisions,
-  { decisionId }
-)
-
-const getReturnsAmount = (decisionBalances, decisionId, passed) => {
-  let targetDecisionBalances = _.find(decisionBalances, { decisionId })
-  return passed ? targetDecisionBalances.yesCollateral : targetDecisionBalances.noCollateral
+const getReturnsAmount = (decision, performance) => {
+  let winningMarket = decision.winningMarket.toLowerCase()
+  return formatBalance(performance[`${winningMarket}PotentialProfit`])
 }
 
 const mapDispatchToProps = dispatch => ({
@@ -20,17 +17,22 @@ const mapDispatchToProps = dispatch => ({
 })
 
 const mapStateToProps = state => {
-  let targetDecision = findDecisionById(
+  let targetDecision = decisionById(
     state.decisionMarkets,
     state.sidePanel.panelContext.decisionId
+  )
+
+  let targetPerforance = performanceByIdAndTrader(
+    state.performance,
+    state.sidePanel.panelContext.decisionId,
+    state.accounts[0]
   )
 
   return {
     decision: targetDecision,
     returnsAmount: getReturnsAmount(
-      state.decisionBalances,
-      state.sidePanel.panelContext.decisionId,
-      targetDecision.passed
+      targetDecision,
+      targetPerforance
     ),
     decisionPassed: targetDecision.passed
   }
