@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import _ from 'lodash'
 import { hidePanel, buyMarketPositions } from '../actions'
+import outcomeTokenIndexes from '../constants/outcomeTokenIndexes'
 
 import MakePredictionForm from '../components/MakePredictionForm'
 
@@ -38,11 +39,22 @@ const mapDispatchToProps = dispatch => ({
   }
 })
 
-function predictionChoiceToOutcomeIndex (choice) {
-  if (choice === 1) {
-    return 0
-  } else if (choice === 2) {
-    return 1
+const choices = {
+  MORE: 'MORE',
+  LESS: 'LESS'
+}
+
+const choiceByIndex = {
+  0: choices.MORE,
+  1: choices.LESS
+}
+
+function predictionChoiceToOutcomeIndex (choiceIndex) {
+  const choice = choiceByIndex[choiceIndex]
+  if (choice === choices.LESS) {
+    return outcomeTokenIndexes.SHORT
+  } else if (choice === choices.MORE) {
+    return outcomeTokenIndexes.LONG
   } else {
     return null
   }
