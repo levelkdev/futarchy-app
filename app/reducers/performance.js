@@ -5,6 +5,8 @@ const performance = (state = [], action) => {
   switch (action.type) {
     case 'BUY_MARKET_POSITIONS_EVENT':
       return buyMarketPositionsReducer(state, action)
+    case 'SELL_MARKET_POSITIONS_EVENT':
+      return sellMarketPositionsReducer(state, action)
     case 'YES_NO_MARKET_DATA_LOADED':
       return yesNoMarketDataLoadedReducer(state, action)
     default:
@@ -17,6 +19,7 @@ const buyMarketPositionsReducer = (state, action) => {
   let {
     decisionId,
     trader,
+    collateralAmount,
     yesCosts,
     noCosts,
     yesPurchaseAmounts,
@@ -31,6 +34,8 @@ const buyMarketPositionsReducer = (state, action) => {
 
   totals.yesCostBasis += sumTokenValueArray(yesCosts)
   totals.noCostBasis += sumTokenValueArray(noCosts)
+  totals.yesBalance += (parseInt(collateralAmount) - parseInt(yesCosts))
+  totals.noBalance += (parseInt(collateralAmount) - parseInt(noCosts))
   totals.yesShortBalance += parseInt(yesPurchaseAmounts[0])
   totals.yesLongBalance += parseInt(yesPurchaseAmounts[1])
   totals.noShortBalance += parseInt(noPurchaseAmounts[0])
@@ -48,6 +53,37 @@ const buyMarketPositionsReducer = (state, action) => {
       return t
     }
   })
+}
+
+const sellMarketPositionsReducer = (state, action) => {
+    const { returnValues } = action
+    let { trader, decisionId } = returnValues
+    let totals = _.find(state, { trader, decisionId })
+
+    totals.yesBalance += returnValues.yesCollateralReceived
+    totals.noBalance += returnValues.noCollateralReceived
+    totals.yesShortBalance = 0
+    totals.yesLongBalance = 0
+    totals.noShortBalance = 0
+    totals.noLongBalance = 0
+    totals.yesShortPotentialProfit = 0
+    totals.yesLongPotentialProfit = 0
+    totals.noShortPotentialProfit = 0
+    totals.noLongPotentialProfit = 0
+    totals.yesPotentialProfit = 0
+    totals.noPotentialProfit = 0
+    totals.yesGainLoss = 0
+    totals.noGainLoss = 0
+    totals.totalPotentialProfit = 0
+    totals.totalGainLoss = 0
+
+    return state.map(t => {
+      if (t.trader == trader && t.decisionId == decisionId) {
+        return totals
+      } else {
+        return t
+      }
+    })
 }
 
 const yesNoMarketDataLoadedReducer = (state, action) => {
@@ -154,6 +190,8 @@ const newTotals = (trader, decisionId) => ({
   decisionId,
   yesCostBasis: 0,              // aggregate TKN spent on YES purchases
   noCostBasis: 0,               // aggregate TKN spent on NO purchases
+  yesBalance: 0,                // current YES token balance
+  noBalance: 0,                 // current NO token balance
   yesShortBalance: 0,           // current yesShort Balance
   yesLongBalance: 0,            // current yesLong Balance
   noShortBalance: 0,            // current noShort Balance
