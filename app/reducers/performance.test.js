@@ -13,11 +13,36 @@ const mockTradesAction_Decision23_trader11 = {
   }
 }
 
+const mockTradesAction_Sell_Decision23_trader11 = {
+  type: 'SELL_MARKET_POSITIONS_EVENT',
+  returnValues: {
+    decisionId: '23',
+    trader: 'trader_11',
+    marginalPrices: ['0', '2', '1', '0'],
+    noCollateralReceived: '3',
+    noMarketPositions: ['-1, 0'],
+    yesCollateralReceived: '4',
+    yesMarketPositions: ['0', '-8']
+  }
+}
+
+const mockTradesAction_Rewards_Decision23_trader11 = {
+  type: 'REDEEM_SCALAR_WINNINGS_EVENT',
+  passed: true,
+  returnValues: {
+    decisionId: '23',
+    trader: 'trader_11',
+    winnings: '52'
+  }
+}
+
 const mockTotal = (
   decisionId,
   trader,
   yesCostBasis,
   noCostBasis,
+  yesCollateralBalance,
+  noCollateralBalance,
   yesShortBalance,
   yesLongBalance,
   noShortBalance,
@@ -27,6 +52,8 @@ const mockTotal = (
   trader,
   yesCostBasis,
   noCostBasis,
+  yesCollateralBalance,
+  noCollateralBalance,
   yesShortBalance,
   yesLongBalance,
   noShortBalance,
@@ -41,8 +68,8 @@ describe('performance', () => {
     beforeEach(() => {
       result = performance(
         [
-          mockTotal('23', 'trader_09', 100, 200, 300, 400, 500, 600),
-          mockTotal('23', 'trader_11', 100, 200, 300, 400, 500, 600)
+          mockTotal('23', 'trader_09', 100, 200, 50, 60, 300, 400, 500, 600),
+          mockTotal('23', 'trader_11', 100, 200, 50, 60, 300, 400, 500, 600)
         ],
         mockTradesAction_Decision23_trader11
       )
@@ -134,7 +161,204 @@ describe('performance', () => {
     it('should add a total with noLongBalance set for the correct trader and decision', () => {
       assert.equal(result[1].noLongBalance, 6)
     })
+  })
 
+  describe('when given a SELL_MARKET_POSITIONS_EVENT action', () => {
+    let result, yesCollateralBalance, noCollateralBalance
+
+    beforeEach(() => {
+      yesCollateralBalance = 50
+      noCollateralBalance = 60
+
+      result = performance(
+        [
+          mockTotal('23', 'trader_09', 100, 200, yesCollateralBalance, noCollateralBalance, 300, 400, 500, 600),
+          mockTotal('23', 'trader_11', 100, 200, yesCollateralBalance, noCollateralBalance, 300, 400, 500, 600)
+        ],
+        mockTradesAction_Sell_Decision23_trader11
+      )
+    })
+
+    it('should add yesCollateralReceived onto yesCollateralBalance', () => {
+      let yesReceived = mockTradesAction_Sell_Decision23_trader11.returnValues.yesCollateralReceived
+      assert.equal(result[1].yesCollateralBalance, yesCollateralBalance + parseInt(yesReceived))
+    })
+
+    it('should add noCollateralReceived onto noCollateralBalance', () => {
+      let noReceived = mockTradesAction_Sell_Decision23_trader11.returnValues.noCollateralReceived
+      assert.equal(result[1].noCollateralBalance, noCollateralBalance + parseInt(noReceived))
+    })
+
+    it('should reset yesShortBalance to 0', () => {
+      assert.equal(result[1].yesShortBalance, 0)
+    })
+
+    it('should reset yesLongBalance to 0', () => {
+      assert.equal(result[1].yesLongBalance, 0)
+    })
+
+    it('should reset noShortBalance to 0', () => {
+      assert.equal(result[1].noShortBalance, 0)
+    })
+
+    it('should reset noLongBalance to 0', () => {
+      assert.equal(result[1].noLongBalance, 0)
+    })
+
+    it('should reset yesShortPotentialProfit to 0', () => {
+      assert.equal(result[1].yesShortPotentialProfit, 0)
+    })
+
+    it('should reset yesLongPotentialProfit to 0', () => {
+      assert.equal(result[1].yesLongPotentialProfit, 0)
+    })
+
+    it('should reset noShortPotentialProfit to 0', () => {
+      assert.equal(result[1].noShortPotentialProfit, 0)
+    })
+
+    it('should reset noLongPotentialProfit to 0', () => {
+      assert.equal(result[1].noLongPotentialProfit, 0)
+    })
+
+    it('should reset yesPotentialProfit to 0', () => {
+      assert.equal(result[1].yesPotentialProfit, 0)
+    })
+
+    it('should reset noPotentialProfit to 0', () => {
+      assert.equal(result[1].noPotentialProfit, 0)
+    })
+
+    it('should reset yesGainLoss to 0', () => {
+      assert.equal(result[1].yesGainLoss, 0)
+    })
+
+    it('should reset noGainLoss to 0', () => {
+      assert.equal(result[1].noGainLoss, 0)
+    })
+
+    it('should reset totalPotentialProfit to 0', () => {
+      assert.equal(result[1].totalPotentialProfit, 0)
+    })
+
+    it('should reset totalGainLoss to 0', () => {
+      assert.equal(result[1].totalGainLoss, 0)
+    })
+  })
+
+  describe('when given a REDEEM_SCALAR_WINNINGS_EVENT action', () => {
+    let result, yesCollateralBalance, noCollateralBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance
+
+    beforeEach(() => {
+      yesCollateralBalance = 50
+      noCollateralBalance = 60
+      yesShortBalance = 300
+      yesLongBalance = 400
+      noShortBalance = 500
+      noLongBalance = 600
+
+      result = performance(
+        [
+          mockTotal('23', 'trader_09', 100, 200, yesCollateralBalance, noCollateralBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance),
+          mockTotal('23', 'trader_11', 100, 200, yesCollateralBalance, noCollateralBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance)
+        ],
+        mockTradesAction_Rewards_Decision23_trader11
+      )
+    })
+
+    describe('if decision was passed', () => {
+      it('should reset yesShortBalance to 0', () => {
+        assert.equal(result[1].yesShortBalance, 0)
+      })
+
+      it('should reset yesLongBalance to 0', () => {
+        assert.equal(result[1].yesLongBalance, 0)
+      })
+
+      it('should leave noShortBalance unaffected', () => {
+        assert.equal(result[1].noShortBalance, noShortBalance)
+      })
+
+      it('should leave noLongBalance unaffected', () => {
+        assert.equal(result[1].noLongBalance, noLongBalance)
+      })
+    })
+
+    describe('if decision failed', () => {
+      beforeEach(() => {
+        mockTradesAction_Rewards_Decision23_trader11.passed = false
+        result = performance(
+          [
+            mockTotal('23', 'trader_09', 100, 200, yesCollateralBalance, noCollateralBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance),
+            mockTotal('23', 'trader_11', 100, 200, yesCollateralBalance, noCollateralBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance)
+          ],
+          mockTradesAction_Rewards_Decision23_trader11
+        )
+      })
+      it('should leave yesShortBalance unaffected', () => {
+        assert.equal(result[1].yesShortBalance, yesShortBalance)
+      })
+
+      it('should leave yesLongBalance unaffected', () => {
+        assert.equal(result[1].yesLongBalance, yesLongBalance)
+      })
+
+      it('should reset noShortBalance to 0', () => {
+        assert.equal(result[1].noShortBalance, 0)
+      })
+
+      it('should reset  noLongBalance to 0', () => {
+        assert.equal(result[1].noLongBalance, 0)
+      })
+    })
+
+    it('should leave yesCollateralBalance unaffected', () => {
+      assert.equal(result[1].yesCollateralBalance, yesCollateralBalance)
+    })
+
+    it('should  leave noCollateralBalance unaffected', () => {
+      assert.equal(result[1].noCollateralBalance, noCollateralBalance)
+    })
+
+    it('should reset yesShortPotentialProfit to 0', () => {
+      assert.equal(result[1].yesShortPotentialProfit, 0)
+    })
+
+    it('should reset yesLongPotentialProfit to 0', () => {
+      assert.equal(result[1].yesLongPotentialProfit, 0)
+    })
+
+    it('should reset noShortPotentialProfit to 0', () => {
+      assert.equal(result[1].noShortPotentialProfit, 0)
+    })
+
+    it('should reset noLongPotentialProfit to 0', () => {
+      assert.equal(result[1].noLongPotentialProfit, 0)
+    })
+
+    it('should reset yesPotentialProfit to 0', () => {
+      assert.equal(result[1].yesPotentialProfit, 0)
+    })
+
+    it('should reset noPotentialProfit to 0', () => {
+      assert.equal(result[1].noPotentialProfit, 0)
+    })
+
+    it('should reset yesGainLoss to 0', () => {
+      assert.equal(result[1].yesGainLoss, 0)
+    })
+
+    it('should reset noGainLoss to 0', () => {
+      assert.equal(result[1].noGainLoss, 0)
+    })
+
+    it('should reset totalPotentialProfit to 0', () => {
+      assert.equal(result[1].totalPotentialProfit, 0)
+    })
+
+    it('should reset totalGainLoss to 0', () => {
+      assert.equal(result[1].totalGainLoss, 0)
+    })
   })
 
   // TODO: fix these tests, now that the POTENTIAL_PROFIT_DATA_LOADED action

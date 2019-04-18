@@ -4,7 +4,9 @@ import calcLMSRProfit from '../util/pmJS/calcLMSRProfit'
 const performance = (state = [], action) => {
   switch (action.type) {
     case 'BUY_MARKET_POSITIONS_EVENT':
-      return buyMarketPositionsReducer(state, action)
+    case 'SELL_MARKET_POSITIONS_EVENT':
+    case 'REDEEM_SCALAR_WINNINGS_EVENT':
+      return modifyTraderPositionsReducer(state, action)
     case 'YES_NO_MARKET_DATA_LOADED':
       return yesNoMarketDataLoadedReducer(state, action)
     default:
@@ -12,42 +14,112 @@ const performance = (state = [], action) => {
   }
 }
 
-const buyMarketPositionsReducer = (state, action) => {
+const modifyTraderPositionsReducer = (state, action) => {
+  const { returnValues } = action
+  let { trader, decisionId } = returnValues
+  let totals = _.find(state, { trader, decisionId })
+
+  if (!totals) {
+    totals = initialTotals(trader, decisionId)
+    state.push(totals)
+  }
+
+  let newTotals
+  switch (action.type) {
+    case 'BUY_MARKET_POSITIONS_EVENT':
+      newTotals = adjustForBuyPositions(totals, action)
+      break
+    case 'SELL_MARKET_POSITIONS_EVENT':
+      newTotals = adjustForSellPositions(totals, action)
+      break
+    case 'REDEEM_SCALAR_WINNINGS_EVENT':
+      newTotals = adjustForScalarWinnings(totals, action)
+      break
+  }
+
+  return state.map(t => {
+    if (t.trader == trader && t.decisionId == decisionId) {
+      return newTotals
+    } else {
+      return t
+    }
+  })
+}
+
+const adjustForBuyPositions = (totals, action) => {
   const { returnValues } = action
   let {
     decisionId,
     trader,
+    collateralAmount,
     yesCosts,
     noCosts,
     yesPurchaseAmounts,
     noPurchaseAmounts
   } = returnValues
 
-  let totals = _.find(state, { trader, decisionId })
-  if (!totals) {
-    totals = newTotals(trader, decisionId)
-    state.push(totals)
-  }
+  let newTotals = totals
 
-  totals.yesCostBasis += sumTokenValueArray(yesCosts)
-  totals.noCostBasis += sumTokenValueArray(noCosts)
-  totals.yesShortBalance += parseInt(yesPurchaseAmounts[0])
-  totals.yesLongBalance += parseInt(yesPurchaseAmounts[1])
-  totals.noShortBalance += parseInt(noPurchaseAmounts[0])
-  totals.noLongBalance += parseInt(noPurchaseAmounts[1])
+  newTotals.yesCostBasis += sumTokenValueArray(yesCosts)
+  newTotals.noCostBasis += sumTokenValueArray(noCosts)
+  newTotals.yesCollateralBalance += (parseInt(collateralAmount) - parseInt(yesCosts))
+  newTotals.noCollateralBalance += (parseInt(collateralAmount) - parseInt(noCosts))
+  newTotals.yesShortBalance += parseInt(yesPurchaseAmounts[0])
+  newTotals.yesLongBalance += parseInt(yesPurchaseAmounts[1])
+  newTotals.noShortBalance += parseInt(noPurchaseAmounts[0])
+  newTotals.noLongBalance += parseInt(noPurchaseAmounts[1])
 
   if (typeof(action.yesMarketFee) != 'undefined') {
     // TODO: calc potential profits here the same way it's done in
     //       the yesNoMarketDataLoadedReducer
   }
 
-  return state.map(t => {
-    if (t.trader == trader && t.decisionId == decisionId) {
-      return totals
-    } else {
-      return t
-    }
-  })
+  return newTotals
+}
+
+const adjustForSellPositions = (totals, action) => {
+  const { returnValues } = action
+  let newTotals = totals
+
+  newTotals.yesCollateralBalance += parseInt(returnValues.yesCollateralReceived)
+  newTotals.noCollateralBalance += parseInt(returnValues.noCollateralReceived)
+  newTotals.yesShortBalance = 0
+  newTotals.yesLongBalance = 0
+  newTotals.noShortBalance = 0
+  newTotals.noLongBalance = 0
+  newTotals.yesShortPotentialProfit = 0
+  newTotals.yesLongPotentialProfit = 0
+  newTotals.noShortPotentialProfit = 0
+  newTotals.noLongPotentialProfit = 0
+  newTotals.yesPotentialProfit = 0
+  newTotals.noPotentialProfit = 0
+  newTotals.yesGainLoss = 0
+  newTotals.noGainLoss = 0
+  newTotals.totalPotentialProfit = 0
+  newTotals.totalGainLoss = 0
+
+  return newTotals
+}
+
+const adjustForScalarWinnings = (totals, action) => {
+  let newTotals = totals
+  let winningMarket = action.passed ? 'yes' : 'no'
+  const { returnValues } = action
+
+  newTotals[`${winningMarket}ShortBalance`] = 0
+  newTotals[`${winningMarket}LongBalance`] = 0
+  newTotals.yesShortPotentialProfit = 0
+  newTotals.yesLongPotentialProfit = 0
+  newTotals.noShortPotentialProfit = 0
+  newTotals.noLongPotentialProfit = 0
+  newTotals.yesPotentialProfit = 0
+  newTotals.noPotentialProfit = 0
+  newTotals.yesGainLoss = 0
+  newTotals.noGainLoss = 0
+  newTotals.totalPotentialProfit = 0
+  newTotals.totalGainLoss = 0
+
+  return newTotals
 }
 
 const yesNoMarketDataLoadedReducer = (state, action) => {
@@ -149,11 +221,13 @@ const calcProfitForMarket = ({
   }
 }
 
-const newTotals = (trader, decisionId) => ({
+const initialTotals = (trader, decisionId) => ({
   trader,
   decisionId,
   yesCostBasis: 0,              // aggregate TKN spent on YES purchases
   noCostBasis: 0,               // aggregate TKN spent on NO purchases
+  yesCollateralBalance: 0,      // current YES token balance
+  noCollateralBalance: 0,       // current NO token balance
   yesShortBalance: 0,           // current yesShort Balance
   yesLongBalance: 0,            // current yesLong Balance
   noShortBalance: 0,            // current noShort Balance

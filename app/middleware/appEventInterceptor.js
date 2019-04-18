@@ -8,6 +8,7 @@ const appEventInterceptor = store => next => action => {
   const state = store.getState()
   switch (action.type) {
     case 'BUY_MARKET_POSITIONS_EVENT':
+    case 'REDEEM_SCALAR_WINNINGS_EVENT':
       action = addDecisionDataToAction({
         decisions: state.decisionMarkets,
         decisionId: action.returnValues.decisionId,
@@ -57,16 +58,11 @@ export const addDecisionDataToAction = ({ decisions, decisionId, action }) => {
 
   return {
     ...action,
+    passed: decision ? decision.passed : null,
     lowerBound: decision ? decision.lowerBound : null,
     upperBound: decision ? decision.upperBound : null,
     yesMarketFee: decision ? decision.yesMarketFee : null,
     noMarketFee: decision ? decision.noMarketFee : null,
-    yesMarketFunding: decision ? decision.yesMarketFunding : null,
-    noMarketFunding: decision ? decision.noMarketFunding : null,
-    yesShortOutcomeTokensSold: decision ? decision.yesShortOutcomeTokensSold : null,
-    yesLongOutcomeTokensSold: decision ? decision.yesLongOutcomeTokensSold : null,
-    noShortOutcomeTokensSold: decision ? decision.noShortOutcomeTokensSold : null,
-    noLongOutcomeTokensSold: decision ? decision.noLongOutcomeTokensSold : null
   }
 }
 
