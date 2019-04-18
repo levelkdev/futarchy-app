@@ -25,7 +25,6 @@ const modifyTraderPositionsReducer = (state, action) => {
   }
 
   let newTotals
-  console.log(action.type)
   switch (action.type) {
     case 'BUY_MARKET_POSITIONS_EVENT':
       newTotals = adjustForBuyPositions(totals, action)
@@ -82,8 +81,8 @@ const adjustForSellPositions = (totals, action) => {
   const { returnValues } = action
   let newTotals = totals
 
-  newTotals.yesBalance += returnValues.yesCollateralReceived
-  newTotals.noBalance += returnValues.noCollateralReceived
+  newTotals.yesBalance += parseInt(returnValues.yesCollateralReceived)
+  newTotals.noBalance += parseInt(returnValues.noCollateralReceived)
   newTotals.yesShortBalance = 0
   newTotals.yesLongBalance = 0
   newTotals.noShortBalance = 0
