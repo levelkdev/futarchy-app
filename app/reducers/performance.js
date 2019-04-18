@@ -62,8 +62,8 @@ const adjustForBuyPositions = (totals, action) => {
 
   newTotals.yesCostBasis += sumTokenValueArray(yesCosts)
   newTotals.noCostBasis += sumTokenValueArray(noCosts)
-  newTotals.yesBalance += (parseInt(collateralAmount) - parseInt(yesCosts))
-  newTotals.noBalance += (parseInt(collateralAmount) - parseInt(noCosts))
+  newTotals.yesCollateralBalance += (parseInt(collateralAmount) - parseInt(yesCosts))
+  newTotals.noCollateralBalance += (parseInt(collateralAmount) - parseInt(noCosts))
   newTotals.yesShortBalance += parseInt(yesPurchaseAmounts[0])
   newTotals.yesLongBalance += parseInt(yesPurchaseAmounts[1])
   newTotals.noShortBalance += parseInt(noPurchaseAmounts[0])
@@ -81,8 +81,8 @@ const adjustForSellPositions = (totals, action) => {
   const { returnValues } = action
   let newTotals = totals
 
-  newTotals.yesBalance += parseInt(returnValues.yesCollateralReceived)
-  newTotals.noBalance += parseInt(returnValues.noCollateralReceived)
+  newTotals.yesCollateralBalance += parseInt(returnValues.yesCollateralReceived)
+  newTotals.noCollateralBalance += parseInt(returnValues.noCollateralReceived)
   newTotals.yesShortBalance = 0
   newTotals.yesLongBalance = 0
   newTotals.noShortBalance = 0
@@ -226,8 +226,8 @@ const initialTotals = (trader, decisionId) => ({
   decisionId,
   yesCostBasis: 0,              // aggregate TKN spent on YES purchases
   noCostBasis: 0,               // aggregate TKN spent on NO purchases
-  yesBalance: 0,                // current YES token balance
-  noBalance: 0,                 // current NO token balance
+  yesCollateralBalance: 0,      // current YES token balance
+  noCollateralBalance: 0,       // current NO token balance
   yesShortBalance: 0,           // current yesShort Balance
   yesLongBalance: 0,            // current yesLong Balance
   noShortBalance: 0,            // current noShort Balance

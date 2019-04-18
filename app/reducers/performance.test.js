@@ -41,8 +41,8 @@ const mockTotal = (
   trader,
   yesCostBasis,
   noCostBasis,
-  yesBalance,
-  noBalance,
+  yesCollateralBalance,
+  noCollateralBalance,
   yesShortBalance,
   yesLongBalance,
   noShortBalance,
@@ -52,8 +52,8 @@ const mockTotal = (
   trader,
   yesCostBasis,
   noCostBasis,
-  yesBalance,
-  noBalance,
+  yesCollateralBalance,
+  noCollateralBalance,
   yesShortBalance,
   yesLongBalance,
   noShortBalance,
@@ -164,29 +164,29 @@ describe('performance', () => {
   })
 
   describe('when given a SELL_MARKET_POSITIONS_EVENT action', () => {
-    let result, yesBalance, noBalance
+    let result, yesCollateralBalance, noCollateralBalance
 
     beforeEach(() => {
-      yesBalance = 50
-      noBalance = 60
+      yesCollateralBalance = 50
+      noCollateralBalance = 60
 
       result = performance(
         [
-          mockTotal('23', 'trader_09', 100, 200, yesBalance, noBalance, 300, 400, 500, 600),
-          mockTotal('23', 'trader_11', 100, 200, yesBalance, noBalance, 300, 400, 500, 600)
+          mockTotal('23', 'trader_09', 100, 200, yesCollateralBalance, noCollateralBalance, 300, 400, 500, 600),
+          mockTotal('23', 'trader_11', 100, 200, yesCollateralBalance, noCollateralBalance, 300, 400, 500, 600)
         ],
         mockTradesAction_Sell_Decision23_trader11
       )
     })
 
-    it('should add yesCollateralReceived onto yesBalance', () => {
+    it('should add yesCollateralReceived onto yesCollateralBalance', () => {
       let yesReceived = mockTradesAction_Sell_Decision23_trader11.returnValues.yesCollateralReceived
-      assert.equal(result[1].yesBalance, yesBalance + parseInt(yesReceived))
+      assert.equal(result[1].yesCollateralBalance, yesCollateralBalance + parseInt(yesReceived))
     })
 
-    it('should add noCollateralReceived onto noBalance', () => {
+    it('should add noCollateralReceived onto noCollateralBalance', () => {
       let noReceived = mockTradesAction_Sell_Decision23_trader11.returnValues.noCollateralReceived
-      assert.equal(result[1].noBalance, noBalance + parseInt(noReceived))
+      assert.equal(result[1].noCollateralBalance, noCollateralBalance + parseInt(noReceived))
     })
 
     it('should reset yesShortBalance to 0', () => {
@@ -247,11 +247,11 @@ describe('performance', () => {
   })
 
   describe('when given a REDEEM_SCALAR_WINNINGS_EVENT action', () => {
-    let result, yesBalance, noBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance
+    let result, yesCollateralBalance, noCollateralBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance
 
     beforeEach(() => {
-      yesBalance = 50
-      noBalance = 60
+      yesCollateralBalance = 50
+      noCollateralBalance = 60
       yesShortBalance = 300
       yesLongBalance = 400
       noShortBalance = 500
@@ -259,8 +259,8 @@ describe('performance', () => {
 
       result = performance(
         [
-          mockTotal('23', 'trader_09', 100, 200, yesBalance, noBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance),
-          mockTotal('23', 'trader_11', 100, 200, yesBalance, noBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance)
+          mockTotal('23', 'trader_09', 100, 200, yesCollateralBalance, noCollateralBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance),
+          mockTotal('23', 'trader_11', 100, 200, yesCollateralBalance, noCollateralBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance)
         ],
         mockTradesAction_Rewards_Decision23_trader11
       )
@@ -289,8 +289,8 @@ describe('performance', () => {
         mockTradesAction_Rewards_Decision23_trader11.passed = false
         result = performance(
           [
-            mockTotal('23', 'trader_09', 100, 200, yesBalance, noBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance),
-            mockTotal('23', 'trader_11', 100, 200, yesBalance, noBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance)
+            mockTotal('23', 'trader_09', 100, 200, yesCollateralBalance, noCollateralBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance),
+            mockTotal('23', 'trader_11', 100, 200, yesCollateralBalance, noCollateralBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance)
           ],
           mockTradesAction_Rewards_Decision23_trader11
         )
@@ -312,12 +312,12 @@ describe('performance', () => {
       })
     })
 
-    it('should leave yesBalance unaffected', () => {
-      assert.equal(result[1].yesBalance, yesBalance)
+    it('should leave yesCollateralBalance unaffected', () => {
+      assert.equal(result[1].yesCollateralBalance, yesCollateralBalance)
     })
 
-    it('should  leave noBalance unaffected', () => {
-      assert.equal(result[1].noBalance, noBalance)
+    it('should  leave noCollateralBalance unaffected', () => {
+      assert.equal(result[1].noCollateralBalance, noCollateralBalance)
     })
 
     it('should reset yesShortPotentialProfit to 0', () => {
