@@ -97,17 +97,22 @@ const adjustForSellPositions = (totals, action) => {
   newTotals.noGainLoss = 0
   newTotals.totalPotentialProfit = 0
   newTotals.totalGainLoss = 0
-
+  newTotals.yesTotalReturns += parseInt(returnValues.yesCollateralReceived)
+  newTotals.noTotalReturns += parseInt(returnValues.noCollateralReceived)
+  newTotals.yesRealizedGainLoss = newTotals.yesTotalReturns - parseInt(totals.yesCostBasis)
+  newTotals.noRealizedGainLoss = newTotals.noTotalReturns - parseInt(totals.noCostBasis)
+  console.log('yesCollateralReceived ', parseInt(returnValues.yesCollateralReceived))
   return newTotals
 }
 
 const adjustForScalarWinnings = (totals, action) => {
   let newTotals = totals
-  let winningMarket = action.passed ? 'yes' : 'no'
+  let market = action.passed ? 'yes' : 'no'
   const { returnValues } = action
+  const { winnings } = returnValues
 
-  newTotals[`${winningMarket}ShortBalance`] = 0
-  newTotals[`${winningMarket}LongBalance`] = 0
+  newTotals[`${market}ShortBalance`] = 0
+  newTotals[`${market}LongBalance`] = 0
   newTotals.yesShortPotentialProfit = 0
   newTotals.yesLongPotentialProfit = 0
   newTotals.noShortPotentialProfit = 0
@@ -118,6 +123,9 @@ const adjustForScalarWinnings = (totals, action) => {
   newTotals.noGainLoss = 0
   newTotals.totalPotentialProfit = 0
   newTotals.totalGainLoss = 0
+  newTotals[`${market}TotalReturns`] += parseInt(winnings)
+  newTotals[`${market}RealizedGainLoss`] =
+    newTotals[`${market}TotalReturns`] - totals[`${market}CostBasis`]
 
   return newTotals
 }
@@ -242,7 +250,11 @@ const initialTotals = (trader, decisionId) => ({
   noGainLoss: 0,                // noPotentialProfit - noCostBasis
   totalPotentialProfit: 0,      // yesPotentialProfit + noPotentialProfit
                                 // (hypothetical value since only YES *or* NO will have value after resolution)
-  totalGainLoss: 0              // gainLoss for YES and NO combined. (also hypothetical for same reason --^)
+  totalGainLoss: 0,             // gainLoss for YES and NO combined. (also hypothetical for same reason --^)
+  yesTotalReturns: 0,           // total revenue received back from yes prediction markets
+  noTotalReturns: 0,            // total revenue received back from no prediction markets
+  yesRealizedGainLoss: 0,       // total aggregate gains or losses from yes market
+  noRealizedGainLoss: 0         // total aggregate gains or losses from no market
 })
 
 function sumTokenValueArray(tokenVals) {
