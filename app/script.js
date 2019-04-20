@@ -1,6 +1,6 @@
 import '@babel/polyfill'
 import _ from 'lodash'
-import Aragon from '@aragon/client'
+import Aragon from '@aragon/api'
 import { logDebug } from './util/logger'
 
 const app = new Aragon()
