@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import calcLMSRProfit from '../util/pmJS/calcLMSRProfit'
+import calcGainLossPercentage from './computed/calcGainLossPercentage'
 
 const performance = (state = [], action) => {
   switch (action.type) {
@@ -101,7 +102,8 @@ const adjustForSellPositions = (totals, action) => {
   newTotals.noTotalReturns += parseInt(returnValues.noCollateralReceived)
   newTotals.yesRealizedGainLoss = newTotals.yesTotalReturns - parseInt(totals.yesCostBasis)
   newTotals.noRealizedGainLoss = newTotals.noTotalReturns - parseInt(totals.noCostBasis)
-  console.log('yesCollateralReceived ', parseInt(returnValues.yesCollateralReceived))
+  newTotals.yesRealizedGainLossPct = calcGainLossPercentage(totals.yesCostBasis, newTotals.yesTotalReturns)
+  newTotals.noRealizedGainLossPct = calcGainLossPercentage(totals.noCostBasis, newTotals.noTotalReturns)
   return newTotals
 }
 
@@ -126,7 +128,8 @@ const adjustForScalarWinnings = (totals, action) => {
   newTotals[`${market}TotalReturns`] += parseInt(winnings)
   newTotals[`${market}RealizedGainLoss`] =
     newTotals[`${market}TotalReturns`] - totals[`${market}CostBasis`]
-
+  newTotals[`${market}RealizedGainLossPct`] =
+    calcGainLossPercentage(totals[`${market}CostBasis`], newTotals[`${market}TotalReturns`])
   return newTotals
 }
 
@@ -254,7 +257,9 @@ const initialTotals = (trader, decisionId) => ({
   yesTotalReturns: 0,           // total revenue received back from yes prediction markets
   noTotalReturns: 0,            // total revenue received back from no prediction markets
   yesRealizedGainLoss: 0,       // total aggregate gains or losses from yes market
-  noRealizedGainLoss: 0         // total aggregate gains or losses from no market
+  noRealizedGainLoss: 0,        // total aggregate gains or losses from no market
+  yesRealizedGainLossPct: 0,
+  noRealizedGainLossPct: 0
 })
 
 function sumTokenValueArray(tokenVals) {

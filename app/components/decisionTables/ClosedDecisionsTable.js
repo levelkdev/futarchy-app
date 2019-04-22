@@ -15,6 +15,7 @@ import DecisionCloseTimeContainer from '../../containers/DecisionCloseTimeContai
 import DecisionResultContainer from '../../containers/DecisionResultContainer'
 import DecisionAmountRiskedContainer from '../../containers/DecisionAmountRiskedContainer'
 import DecisionWinningMarketReturnsContainer from '../../containers/DecisionWinningMarketReturnsContainer'
+import DecisionRealizedGainLossContainer from '../../containers/DecisionRealizedGainLossContainer'
 import DecisionWinningMarketGainLossContainer from '../../containers/DecisionWinningMarketGainLossContainer'
 import ShowPanelButtonContainer from '../../containers/ShowPanelButtonContainer'
 
@@ -28,7 +29,8 @@ const FinalDecisionsTable = ({ decisionIds }) => (
         <TableHeader title="Decision" />
         <TableHeader title="You Risked" />
         <TableHeader title="Returns" />
-        <TableHeader title="Gain/Loss" />
+        <TableHeader title="Realized Gain/Loss" />
+        <TableHeader title="Current Gain/Loss" />
         <TableHeader title="Actions" />
       </TableRow>
     }
@@ -53,6 +55,9 @@ const FinalDecisionsTable = ({ decisionIds }) => (
           </TopAlignedCell>
           <TopAlignedCell>
             <DecisionWinningMarketReturnsContainer decisionId={decisionId} />
+          </TopAlignedCell>
+          <TopAlignedCell>
+            <DecisionRealizedGainLossContainer decisionId={decisionId} />
           </TopAlignedCell>
           <TopAlignedCell>
             <DecisionWinningMarketGainLossContainer decisionId={decisionId} />
