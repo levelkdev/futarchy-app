@@ -197,7 +197,7 @@ const calcProfits = ({ action, totals }) => {
   return {
     yesShortProfit: yesProfits.short,
     yesLongProfit: yesProfits.long,
-    noShorProfitt: noProfits.short,
+    noShortProfit: noProfits.short,
     noLongProfit: noProfits.long
   }
 }
