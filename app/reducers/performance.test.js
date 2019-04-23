@@ -286,11 +286,6 @@ describe('performance', () => {
     })
   })
 
-// yesTotalReturns
-// noTotalReturns
-// yesRealizedGainLoss
-// noRealizedGainLoss
-
   describe('when given a REDEEM_SCALAR_WINNINGS_EVENT action', () => {
     let result, mockTotals, yesCollateralBalance, noCollateralBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance
 
