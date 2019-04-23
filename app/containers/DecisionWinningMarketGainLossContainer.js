@@ -16,11 +16,11 @@ const mapStateToProps = (state, ownProps) => {
   return {
     percentage: decision.winningMarket == decisionMarketTypes.YES ?
       calcGainLossPercentage(
-        perfTotal.yesCostBasis,
+        perfTotal.currentyesCollateralRisked,
         perfTotal.yesPotentialProfit
       ) :
       calcGainLossPercentage(
-        perfTotal.noCostBasis,
+        perfTotal.currentnoCollateralRisked,
         perfTotal.noPotentialProfit
       )
   }

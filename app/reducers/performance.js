@@ -63,6 +63,8 @@ const adjustForBuyPositions = (totals, action) => {
 
   newTotals.yesCostBasis += sumTokenValueArray(yesCosts)
   newTotals.noCostBasis += sumTokenValueArray(noCosts)
+  newTotals.currentyesCollateralRisked += sumTokenValueArray(yesCosts)
+  newTotals.currentnoCollateralRisked += sumTokenValueArray(noCosts)
   newTotals.yesCollateralBalance += (parseInt(collateralAmount) - parseInt(yesCosts))
   newTotals.noCollateralBalance += (parseInt(collateralAmount) - parseInt(noCosts))
   newTotals.yesShortBalance += parseInt(yesPurchaseAmounts[0])
@@ -82,6 +84,8 @@ const adjustForSellPositions = (totals, action) => {
   const { returnValues } = action
   let newTotals = totals
 
+  newTotals.currentyesCollateralRisked = 0
+  newTotals.currentnoCollateralRisked = 0
   newTotals.yesCollateralBalance += parseInt(returnValues.yesCollateralReceived)
   newTotals.noCollateralBalance += parseInt(returnValues.noCollateralReceived)
   newTotals.yesShortBalance = 0
@@ -113,6 +117,7 @@ const adjustForScalarWinnings = (totals, action) => {
   const { returnValues } = action
   const { winnings } = returnValues
 
+  newTotals[`current${market}CollateralRisked`] = 0
   newTotals[`${market}ShortBalance`] = 0
   newTotals[`${market}LongBalance`] = 0
   newTotals.yesShortPotentialProfit = 0
@@ -235,29 +240,31 @@ const calcProfitForMarket = ({
 const initialTotals = (trader, decisionId) => ({
   trader,
   decisionId,
-  yesCostBasis: 0,              // aggregate TKN spent on YES purchases
-  noCostBasis: 0,               // aggregate TKN spent on NO purchases
-  yesCollateralBalance: 0,      // current YES token balance
-  noCollateralBalance: 0,       // current NO token balance
-  yesShortBalance: 0,           // current yesShort Balance
-  yesLongBalance: 0,            // current yesLong Balance
-  noShortBalance: 0,            // current noShort Balance
-  noLongBalance: 0,             // current noLong Balance
-  yesShortPotentialProfit: 0,   // total YES received if yesShortBalance is sold
-  yesLongPotentialProfit: 0,    // total YES received if yesLongBalance is sold
-  noShortPotentialProfit: 0,    // total NO received if noShortBalance is sold
-  noLongPotentialProfit: 0,     // total NO received if noLongBalance is sold
-  yesPotentialProfit: 0,        // yesShortPotentialProfit + yesLongPotentialProfit
-  noPotentialProfit: 0,         // noShortPotentialProfit + noLongPotentialProfit
-  yesGainLoss: 0,               // yesPotentialProfit - yesCostBasis
-  noGainLoss: 0,                // noPotentialProfit - noCostBasis
-  totalPotentialProfit: 0,      // yesPotentialProfit + noPotentialProfit
-                                // (hypothetical value since only YES *or* NO will have value after resolution)
-  totalGainLoss: 0,             // gainLoss for YES and NO combined. (also hypothetical for same reason --^)
-  yesTotalReturns: 0,           // total revenue received back from yes prediction markets
-  noTotalReturns: 0,            // total revenue received back from no prediction markets
-  yesRealizedGainLoss: 0,       // total aggregate gains or losses from yes market
-  noRealizedGainLoss: 0,        // total aggregate gains or losses from no market
+  yesCostBasis: 0,                // aggregate TKN spent on YES purchases
+  noCostBasis: 0,                 // aggregate TKN spent on NO purchases
+  currentyesCollateralRisked: 0,  // current YES collateral risked
+  currentnoCollateralRisked: 0,   // current NO collateral risked
+  yesCollateralBalance: 0,        // current YES token balance
+  noCollateralBalance: 0,         // current NO token balance
+  yesShortBalance: 0,             // current yesShort Balance
+  yesLongBalance: 0,              // current yesLong Balance
+  noShortBalance: 0,              // current noShort Balance
+  noLongBalance: 0,               // current noLong Balance
+  yesShortPotentialProfit: 0,     // total YES received if yesShortBalance is sold
+  yesLongPotentialProfit: 0,      // total YES received if yesLongBalance is sold
+  noShortPotentialProfit: 0,      // total NO received if noShortBalance is sold
+  noLongPotentialProfit: 0,       // total NO received if noLongBalance is sold
+  yesPotentialProfit: 0,          // yesShortPotentialProfit + yesLongPotentialProfit
+  noPotentialProfit: 0,           // noShortPotentialProfit + noLongPotentialProfit
+  yesGainLoss: 0,                 // yesPotentialProfit - yesCostBasis
+  noGainLoss: 0,                  // noPotentialProfit - noCostBasis
+  totalPotentialProfit: 0,        // yesPotentialProfit + noPotentialProfit
+                                  // (hypothetical value since only YES *or* NO will have value after resolution)
+  totalGainLoss: 0,               // gainLoss for YES and NO combined. (also hypothetical for same reason --^)
+  yesTotalReturns: 0,             // total revenue received back from yes prediction markets
+  noTotalReturns: 0,              // total revenue received back from no prediction markets
+  yesRealizedGainLoss: 0,         // total aggregate gains or losses from yes market
+  noRealizedGainLoss: 0,          // total aggregate gains or losses from no market
   yesRealizedGainLossPct: 0,
   noRealizedGainLossPct: 0
 })

@@ -377,6 +377,19 @@
     "noPrediction": "SHORT"
   },
   {
+    "type": "sell",
+    "decisionId": 3,
+    "from": 0
+  },
+  {
+    "type": "buy",
+    "decisionId": 3,
+    "from": 0,
+    "tokenAmount": 1000000000000000000000,
+    "yesPrediction": "LONG",
+    "noPrediction": "SHORT"
+  },
+  {
     "type": "advanceTime",
     "seconds": 259200
   },
