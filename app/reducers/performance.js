@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import calcLMSRProfit from '../util/pmJS/calcLMSRProfit'
+import calcGainLossPercentage from './computed/calcGainLossPercentage'
 
 const performance = (state = [], action) => {
   switch (action.type) {
@@ -62,6 +63,8 @@ const adjustForBuyPositions = (totals, action) => {
 
   newTotals.yesCostBasis += sumTokenValueArray(yesCosts)
   newTotals.noCostBasis += sumTokenValueArray(noCosts)
+  newTotals.currentyesCollateralRisked += sumTokenValueArray(yesCosts)
+  newTotals.currentnoCollateralRisked += sumTokenValueArray(noCosts)
   newTotals.yesCollateralBalance += (parseInt(collateralAmount) - parseInt(yesCosts))
   newTotals.noCollateralBalance += (parseInt(collateralAmount) - parseInt(noCosts))
   newTotals.yesShortBalance += parseInt(yesPurchaseAmounts[0])
@@ -81,6 +84,8 @@ const adjustForSellPositions = (totals, action) => {
   const { returnValues } = action
   let newTotals = totals
 
+  newTotals.currentyesCollateralRisked = 0
+  newTotals.currentnoCollateralRisked = 0
   newTotals.yesCollateralBalance += parseInt(returnValues.yesCollateralReceived)
   newTotals.noCollateralBalance += parseInt(returnValues.noCollateralReceived)
   newTotals.yesShortBalance = 0
@@ -97,17 +102,24 @@ const adjustForSellPositions = (totals, action) => {
   newTotals.noGainLoss = 0
   newTotals.totalPotentialProfit = 0
   newTotals.totalGainLoss = 0
-
+  newTotals.yesTotalReturns += parseInt(returnValues.yesCollateralReceived)
+  newTotals.noTotalReturns += parseInt(returnValues.noCollateralReceived)
+  newTotals.yesRealizedGainLoss = newTotals.yesTotalReturns - parseInt(totals.yesCostBasis)
+  newTotals.noRealizedGainLoss = newTotals.noTotalReturns - parseInt(totals.noCostBasis)
+  newTotals.yesRealizedGainLossPct = calcGainLossPercentage(totals.yesCostBasis, newTotals.yesTotalReturns)
+  newTotals.noRealizedGainLossPct = calcGainLossPercentage(totals.noCostBasis, newTotals.noTotalReturns)
   return newTotals
 }
 
 const adjustForScalarWinnings = (totals, action) => {
   let newTotals = totals
-  let winningMarket = action.passed ? 'yes' : 'no'
+  let market = action.passed ? 'yes' : 'no'
   const { returnValues } = action
+  const { winnings } = returnValues
 
-  newTotals[`${winningMarket}ShortBalance`] = 0
-  newTotals[`${winningMarket}LongBalance`] = 0
+  newTotals[`current${market}CollateralRisked`] = 0
+  newTotals[`${market}ShortBalance`] = 0
+  newTotals[`${market}LongBalance`] = 0
   newTotals.yesShortPotentialProfit = 0
   newTotals.yesLongPotentialProfit = 0
   newTotals.noShortPotentialProfit = 0
@@ -118,7 +130,11 @@ const adjustForScalarWinnings = (totals, action) => {
   newTotals.noGainLoss = 0
   newTotals.totalPotentialProfit = 0
   newTotals.totalGainLoss = 0
-
+  newTotals[`${market}TotalReturns`] += parseInt(winnings)
+  newTotals[`${market}RealizedGainLoss`] =
+    newTotals[`${market}TotalReturns`] - totals[`${market}CostBasis`]
+  newTotals[`${market}RealizedGainLossPct`] =
+    calcGainLossPercentage(totals[`${market}CostBasis`], newTotals[`${market}TotalReturns`])
   return newTotals
 }
 
@@ -186,7 +202,7 @@ const calcProfits = ({ action, totals }) => {
   return {
     yesShortProfit: yesProfits.short,
     yesLongProfit: yesProfits.long,
-    noShorProfitt: noProfits.short,
+    noShortProfit: noProfits.short,
     noLongProfit: noProfits.long
   }
 }
@@ -224,25 +240,33 @@ const calcProfitForMarket = ({
 const initialTotals = (trader, decisionId) => ({
   trader,
   decisionId,
-  yesCostBasis: 0,              // aggregate TKN spent on YES purchases
-  noCostBasis: 0,               // aggregate TKN spent on NO purchases
-  yesCollateralBalance: 0,      // current YES token balance
-  noCollateralBalance: 0,       // current NO token balance
-  yesShortBalance: 0,           // current yesShort Balance
-  yesLongBalance: 0,            // current yesLong Balance
-  noShortBalance: 0,            // current noShort Balance
-  noLongBalance: 0,             // current noLong Balance
-  yesShortPotentialProfit: 0,   // total YES received if yesShortBalance is sold
-  yesLongPotentialProfit: 0,    // total YES received if yesLongBalance is sold
-  noShortPotentialProfit: 0,    // total NO received if noShortBalance is sold
-  noLongPotentialProfit: 0,     // total NO received if noLongBalance is sold
-  yesPotentialProfit: 0,        // yesShortPotentialProfit + yesLongPotentialProfit
-  noPotentialProfit: 0,         // noShortPotentialProfit + noLongPotentialProfit
-  yesGainLoss: 0,               // yesPotentialProfit - yesCostBasis
-  noGainLoss: 0,                // noPotentialProfit - noCostBasis
-  totalPotentialProfit: 0,      // yesPotentialProfit + noPotentialProfit
-                                // (hypothetical value since only YES *or* NO will have value after resolution)
-  totalGainLoss: 0              // gainLoss for YES and NO combined. (also hypothetical for same reason --^)
+  yesCostBasis: 0,                // aggregate TKN spent on YES purchases
+  noCostBasis: 0,                 // aggregate TKN spent on NO purchases
+  currentyesCollateralRisked: 0,  // current YES collateral risked
+  currentnoCollateralRisked: 0,   // current NO collateral risked
+  yesCollateralBalance: 0,        // current YES token balance
+  noCollateralBalance: 0,         // current NO token balance
+  yesShortBalance: 0,             // current yesShort Balance
+  yesLongBalance: 0,              // current yesLong Balance
+  noShortBalance: 0,              // current noShort Balance
+  noLongBalance: 0,               // current noLong Balance
+  yesShortPotentialProfit: 0,     // total YES received if yesShortBalance is sold
+  yesLongPotentialProfit: 0,      // total YES received if yesLongBalance is sold
+  noShortPotentialProfit: 0,      // total NO received if noShortBalance is sold
+  noLongPotentialProfit: 0,       // total NO received if noLongBalance is sold
+  yesPotentialProfit: 0,          // yesShortPotentialProfit + yesLongPotentialProfit
+  noPotentialProfit: 0,           // noShortPotentialProfit + noLongPotentialProfit
+  yesGainLoss: 0,                 // yesPotentialProfit - yesCostBasis
+  noGainLoss: 0,                  // noPotentialProfit - noCostBasis
+  totalPotentialProfit: 0,        // yesPotentialProfit + noPotentialProfit
+                                  // (hypothetical value since only YES *or* NO will have value after resolution)
+  totalGainLoss: 0,               // gainLoss for YES and NO combined. (also hypothetical for same reason --^)
+  yesTotalReturns: 0,             // total revenue received back from yes prediction markets
+  noTotalReturns: 0,              // total revenue received back from no prediction markets
+  yesRealizedGainLoss: 0,         // total aggregate gains or losses from yes market
+  noRealizedGainLoss: 0,          // total aggregate gains or losses from no market
+  yesRealizedGainLossPct: 0,
+  noRealizedGainLossPct: 0
 })
 
 function sumTokenValueArray(tokenVals) {

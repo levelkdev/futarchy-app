@@ -57,19 +57,24 @@ const mockTotal = (
   yesShortBalance,
   yesLongBalance,
   noShortBalance,
-  noLongBalance
+  noLongBalance,
+  yesTotalReturns: 0,
+  noTotalReturns: 0,
+  yesRealizedGainLoss: 0,
+  noRealizedGainLoss: 0
 })
 
 describe('performance', () => {
 
   describe('when given a BUY_MARKET_POSITIONS_EVENT action and a state with current totals', () => {
-    let result
+    let result, mockTotals
 
     beforeEach(() => {
+      mockTotals = mockTotal('23', 'trader_11', 100, 200, 50, 60, 300, 400, 500, 600)
       result = performance(
         [
           mockTotal('23', 'trader_09', 100, 200, 50, 60, 300, 400, 500, 600),
-          mockTotal('23', 'trader_11', 100, 200, 50, 60, 300, 400, 500, 600)
+          mockTotals
         ],
         mockTradesAction_Decision23_trader11
       )
@@ -161,19 +166,36 @@ describe('performance', () => {
     it('should add a total with noLongBalance set for the correct trader and decision', () => {
       assert.equal(result[1].noLongBalance, 6)
     })
+
+    it('should add a total with yesTotalReturns set to 0', () => {
+      assert.equal(result[1].yesTotalReturns, 0)
+    })
+
+    it('should add a total with noTotalReturns set to 0', () => {
+      assert.equal(result[1].noTotalReturns, 0)
+    })
+
+    it('should add a total with yesRealizedGainLoss set to 0', () => {
+      assert.equal(result[1].yesRealizedGainLoss, 0)
+    })
+
+    it('should add a total with noRealizedGainLoss set to 0', () => {
+      assert.equal(result[1].noRealizedGainLoss, 0)
+    })
   })
 
   describe('when given a SELL_MARKET_POSITIONS_EVENT action', () => {
-    let result, yesCollateralBalance, noCollateralBalance
+    let result, mockTotals, yesCollateralBalance, noCollateralBalance
 
     beforeEach(() => {
       yesCollateralBalance = 50
       noCollateralBalance = 60
+      mockTotals = mockTotal('23', 'trader_11', 100, 200, yesCollateralBalance, noCollateralBalance, 300, 400, 500, 600)
 
       result = performance(
         [
           mockTotal('23', 'trader_09', 100, 200, yesCollateralBalance, noCollateralBalance, 300, 400, 500, 600),
-          mockTotal('23', 'trader_11', 100, 200, yesCollateralBalance, noCollateralBalance, 300, 400, 500, 600)
+          Object.assign({}, mockTotals)
         ],
         mockTradesAction_Sell_Decision23_trader11
       )
@@ -244,10 +266,28 @@ describe('performance', () => {
     it('should reset totalGainLoss to 0', () => {
       assert.equal(result[1].totalGainLoss, 0)
     })
+
+    it('should add correct amount to yesTotalReturns', () => {
+      let yesReceived = parseInt(mockTradesAction_Sell_Decision23_trader11.returnValues.yesCollateralReceived)
+      assert.equal(result[1].yesTotalReturns, parseInt(mockTotals.yesTotalReturns) + yesReceived)
+    })
+
+    it('should add correct amount to noTotalReturns', () => {
+      let noReceived = mockTradesAction_Sell_Decision23_trader11.returnValues.noCollateralReceived
+      assert.equal(result[1].noTotalReturns, parseInt(mockTotals.noTotalReturns) + noReceived)
+    })
+
+    it('should correctly adjust yesRealizedGainLoss', () => {
+      assert.equal(result[1].yesRealizedGainLoss, result[1].yesTotalReturns - result[1].yesCostBasis)
+    })
+
+    it('should correctly adjust noRealizedGainLoss', () => {
+      assert.equal(result[1].noRealizedGainLoss, result[1].noTotalReturns - result[1].noCostBasis)
+    })
   })
 
   describe('when given a REDEEM_SCALAR_WINNINGS_EVENT action', () => {
-    let result, yesCollateralBalance, noCollateralBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance
+    let result, mockTotals, yesCollateralBalance, noCollateralBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance
 
     beforeEach(() => {
       yesCollateralBalance = 50
@@ -256,11 +296,12 @@ describe('performance', () => {
       yesLongBalance = 400
       noShortBalance = 500
       noLongBalance = 600
+      mockTotals = mockTotal('23', 'trader_11', 100, 200, yesCollateralBalance, noCollateralBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance)
 
       result = performance(
         [
           mockTotal('23', 'trader_09', 100, 200, yesCollateralBalance, noCollateralBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance),
-          mockTotal('23', 'trader_11', 100, 200, yesCollateralBalance, noCollateralBalance, yesShortBalance, yesLongBalance, noShortBalance, noLongBalance)
+          Object.assign({}, mockTotals)
         ],
         mockTradesAction_Rewards_Decision23_trader11
       )
@@ -281,6 +322,24 @@ describe('performance', () => {
 
       it('should leave noLongBalance unaffected', () => {
         assert.equal(result[1].noLongBalance, noLongBalance)
+      })
+
+      it('should add winnings to yesTotalReturns', () => {
+        let newYesTotalReturns = mockTradesAction_Rewards_Decision23_trader11.returnValues.winnings
+        assert.equal(result[1].yesTotalReturns, newYesTotalReturns)
+      })
+
+      it('should properly adjust yesRealizedGainLoss', () => {
+        let newYesRealizedGainLoss = result[1].yesTotalReturns - result[1].yesCostBasis
+        assert.equal(result[1].yesRealizedGainLoss, newYesRealizedGainLoss)
+      })
+
+      it('should not adjust noTotalReturns', () => {
+        assert.equal(result[1].noTotalReturns, mockTotals.noTotalReturns)
+      })
+
+      it('should not adjust noRealizedGainLoss', () => {
+        assert.equal(result[1].noRealizedGainLoss, mockTotals.noRealizedGainLoss)
       })
     })
 
@@ -309,6 +368,24 @@ describe('performance', () => {
 
       it('should reset  noLongBalance to 0', () => {
         assert.equal(result[1].noLongBalance, 0)
+      })
+
+      it('should add winnings to noTotalReturns', () => {
+        let newNoTotalReturns = mockTradesAction_Rewards_Decision23_trader11.returnValues.winnings
+        assert.equal(result[1].noTotalReturns, newNoTotalReturns)
+      })
+
+      it('should properly adjust noRealizedGainLoss', () => {
+        let newNoRealizedGainLoss = result[1].noTotalReturns - result[1].noCostBasis
+        assert.equal(result[1].noRealizedGainLoss, newNoRealizedGainLoss)
+      })
+
+      it('should not adjust yesTotalReturns', () => {
+        assert.equal(result[1].yesTotalReturns, mockTotals.yesTotalReturns)
+      })
+
+      it('should not adjust yesRealizedGainLoss', () => {
+        assert.equal(result[1].yesRealizedGainLoss, mockTotals.yesRealizedGainLoss)
       })
     })
 

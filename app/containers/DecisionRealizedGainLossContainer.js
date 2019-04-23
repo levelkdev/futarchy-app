@@ -2,8 +2,8 @@ import React from 'react'
 import { connect } from 'react-redux'
 import decisionMarketTypes from '../constants/decisionMarketTypes'
 import decisionById from '../reducers/computed/decisionById'
-import calcGainLossPercentage from '../reducers/computed/calcGainLossPercentage'
 import findPerformanceTotal from '../reducers/computed/findPerformanceTotal'
+import calcGainLossPercentage from '../reducers/computed/calcGainLossPercentage'
 import SingleGainLossPercentageCell from '../components/decisionTables/SingleGainLossPercentageCell'
 
 const mapStateToProps = (state, ownProps) => {
@@ -15,14 +15,8 @@ const mapStateToProps = (state, ownProps) => {
   )
   return {
     percentage: decision.winningMarket == decisionMarketTypes.YES ?
-      calcGainLossPercentage(
-        perfTotal.currentyesCollateralRisked,
-        perfTotal.yesPotentialProfit
-      ) :
-      calcGainLossPercentage(
-        perfTotal.currentnoCollateralRisked,
-        perfTotal.noPotentialProfit
-      )
+      perfTotal.yesRealizedGainLossPct :
+      perfTotal.noRealizedGainLossPct
   }
 }
 
