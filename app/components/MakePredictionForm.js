@@ -19,15 +19,26 @@ const choiceDisplayTextByPosition = {
 const dropDownDefault = 2
 
 const noSelectedPosition = position => {
-  return position == undefined || position == 0
+  return position == undefined || position == dropDownDefault
 }
 
 const validate = values => {
   let errors = {}
+  errors._error = {}
+
+  let error
   if (noSelectedPosition(values.yesPredictionChoiceIndex) && noSelectedPosition(values.noPredictionChoiceIndex)) {
-    const error = "You must take at least one market position"
-     errors._error = error
+     error = "You must take at least one market position"
+     errors._error.positions = error
   }
+  if (!values.collateralAmount) {
+    error = "You must enter token amount to risk"
+    errors._error.collateralAmount = error
+  }
+
+  // if no errors, errors._error must be undefined
+  errors = error == undefined ? {} : errors
+
   return errors
 }
 
@@ -73,7 +84,9 @@ const MakePredictionForm = createReduxForm(({
       <StyledAccountBalance>
         {formatBalance(tokenBalance)} <TokenSymbolDisplay /> Available
       </StyledAccountBalance>
+      {submitFailed && error.collateralAmount && <ErrorSection error={error.collateralAmount} />}
     </AllocateTokensSection>
+
 
     <MetricQuestion>
       <Phrase>What will</Phrase>
@@ -104,9 +117,9 @@ const MakePredictionForm = createReduxForm(({
         predictedPrice={decision.noMarketMarginalPricePredicted}
       />
     </SelectorSection>
+    {submitFailed && error.positions && <ErrorSection error={error.positions} />}
 
     <br />
-    {submitFailed && error && <ErrorSection error={error} />}
     <Button mode="strong" type="submit" wide disabled={pristine || submitting}>Make Prediction</Button>
   </form>
 ))
@@ -183,7 +196,7 @@ const ErrorSection = ({ error }) => {
 
 const MetricQuestion = styled.div`
   font-size: 16px;
-  margin: 30px 0;
+  margin: 30px 0 10px 0;
   font-weight: 500;
   color: #98A0A2;
 `
