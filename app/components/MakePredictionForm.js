@@ -22,6 +22,14 @@ const noSelectedPosition = position => {
   return position == undefined || position == dropDownDefault
 }
 
+const isMarketClosed = (decision, marketName) => {
+  return (
+    (decision.status == decisionStatuses.RESOLVED ||
+    decision.status == decisionStatuses.CLOSED) &&
+    decision.winningMarket != marketName
+  )
+}
+
 const validate = values => {
   let errors = {}
   errors._error = {}
@@ -137,7 +145,7 @@ const ShortLongSelector = ({
       <Phrase>:</Phrase>
     </StyledSmallCaps>
     <div>
-      {(decision.status == decisionStatuses.RESOLVED && decision.winningMarket != marketName) ?
+      { isMarketClosed(decision, marketName) ?
         <StyledClosedMarket> Losing market is closed </StyledClosedMarket> :
         <Field
           name={`${marketKey}PredictionChoiceIndex`}
