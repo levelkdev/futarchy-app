@@ -84,7 +84,7 @@ const MakePredictionForm = createReduxForm(({
       <StyledAccountBalance>
         {formatBalance(tokenBalance)} <TokenSymbolDisplay /> Available
       </StyledAccountBalance>
-      {submitFailed && error.collateralAmount && <ErrorSection error={error.collateralAmount} />}
+      {submitFailed && error && error.collateralAmount && <ErrorSection error={error.collateralAmount} />}
     </AllocateTokensSection>
 
 
@@ -117,7 +117,7 @@ const MakePredictionForm = createReduxForm(({
         predictedPrice={decision.noMarketMarginalPricePredicted}
       />
     </SelectorSection>
-    {submitFailed && error.positions && <ErrorSection error={error.positions} />}
+    {submitFailed && error && error.positions && <ErrorSection error={error.positions} />}
 
     <br />
     <Button mode="strong" type="submit" wide disabled={pristine || submitting}>Make Prediction</Button>
