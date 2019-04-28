@@ -1,3 +1,4 @@
+const fs = require('fs')
 const configForNetwork = require('./deployConfig/configForNetwork')
 const isLocalNetwork = require('./deployConfig/isLocalNetwork')
 const writeDeployConfig = require('./deployConfig/writeDeployConfig')
@@ -19,6 +20,8 @@ module.exports = async (
   const CategoricalEvent = artifacts.require('CategoricalEvent')
   const ScalarEvent = artifacts.require('ScalarEvent')
   const OutcomeToken = artifacts.require('OutcomeToken')
+  const DecisionLib = artifacts.require('DecisionLib')
+  const Futarchy = artifacts.require('Futarchy')
   const FutarchyOracle = artifacts.require('FutarchyOracle')
   const StandardMarketWithPriceLogger = artifacts.require('StandardMarketWithPriceLogger')
   const EventFactory = artifacts.require('EventFactory')
@@ -30,6 +33,19 @@ module.exports = async (
   try {
     console.log(`Deploying dependencies for "${network}" network`)
     console.log('')
+
+
+    // WORKAROUND: link the DecisionLib library using truffle's `link` function. This replaces
+    //             the `__DecisionLib___________________________` placeholder in the Futarchy
+    //             contract bytecode with the address of the deployed DecisionLib contract.
+    //             then copy this bytecode to `build/contracts/Futarchy.json` so it gets used
+    //             by the aragon CLI.
+    const decisionLib = await tryDeploy(
+      DecisionLib,
+      'DecisionLib'
+    )
+    await Futarchy.link('DecisionLib', decisionLib.address)
+    updateFutarchyBytecode_WORKAROUND(Futarchy.binary)
 
     const miniMeToken = await tryDeploy(
       MiniMeToken, 
@@ -140,4 +156,11 @@ module.exports = async (
     }
     return contractInstance
   }
+}
+
+function updateFutarchyBytecode_WORKAROUND (bytecode) {
+  const path = 'build/contracts/Futarchy.json'
+  let futarchyJSON = JSON.parse(fs.readFileSync(path))
+  futarchyJSON.bytecode = bytecode
+  fs.writeFileSync(path, JSON.stringify(futarchyJSON, null, 4))
 }
