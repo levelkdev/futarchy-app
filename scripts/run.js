@@ -4,6 +4,7 @@
 
 const execa = require('execa')
 const getAccounts = require('@aragon/os/scripts/helpers/get-accounts')
+const deployLib = require('./deploy_lib')
 const deployDeps = require('./deploy_deps')
 const distributeTokens = require('./distribute_tokens')
 
@@ -31,6 +32,9 @@ module.exports = async (
     }
 
     console.log(`owner: ${owner}`)
+    console.log('')
+
+    await deployLib(null, { artifacts, network })
     console.log('')
 
     const {

@@ -1,7 +1,4 @@
-const fs = require('fs')
-const configForNetwork = require('./deployConfig/configForNetwork')
-const isLocalNetwork = require('./deployConfig/isLocalNetwork')
-const writeDeployConfig = require('./deployConfig/writeDeployConfig')
+const tryDeployToNetwork = require('./utilities/tryDeployToNetwork')
 
 const globalArtifacts = this.artifacts // Not injected unless called directly via truffle
 const NULL_ADDRESS = '0x00'
@@ -20,32 +17,15 @@ module.exports = async (
   const CategoricalEvent = artifacts.require('CategoricalEvent')
   const ScalarEvent = artifacts.require('ScalarEvent')
   const OutcomeToken = artifacts.require('OutcomeToken')
-  const DecisionLib = artifacts.require('DecisionLib')
-  const Futarchy = artifacts.require('Futarchy')
   const FutarchyOracle = artifacts.require('FutarchyOracle')
   const StandardMarketWithPriceLogger = artifacts.require('StandardMarketWithPriceLogger')
   const EventFactory = artifacts.require('EventFactory')
   const StandardMarketWithPriceLoggerFactory = artifacts.require('StandardMarketWithPriceLoggerFactory')
   const FutarchyOracleFactory = artifacts.require('FutarchyOracleFactory')
 
-  let deployConfig = configForNetwork(network)
-
   try {
     console.log(`Deploying dependencies for "${network}" network`)
     console.log('')
-
-
-    // WORKAROUND: link the DecisionLib library using truffle's `link` function. This replaces
-    //             the `__DecisionLib___________________________` placeholder in the Futarchy
-    //             contract bytecode with the address of the deployed DecisionLib contract.
-    //             then copy this bytecode to `build/contracts/Futarchy.json` so it gets used
-    //             by the aragon CLI.
-    const decisionLib = await tryDeploy(
-      DecisionLib,
-      'DecisionLib'
-    )
-    await Futarchy.link('DecisionLib', decisionLib.address)
-    updateFutarchyBytecode_WORKAROUND(Futarchy.binary)
 
     const miniMeToken = await tryDeploy(
       MiniMeToken, 
@@ -139,28 +119,8 @@ module.exports = async (
     console.log('Error in scripts/deploy_deps.js: ', err)
   }
 
-  async function tryDeploy(contractArtifact, contractName, params = []) {
-    let contractInstance
-    const deployedAddress = deployConfig.dependencyContracts[contractName]
-    if (!deployedAddress) {
-      console.log(`Deploying ${contractName}...`)
-      contractInstance = await contractArtifact.new.apply(null, params)
-      console.log(`Deployed ${contractName}: ${contractInstance.address}`)
-      if (!isLocalNetwork(network)) {
-        deployConfig.dependencyContracts[contractName] = contractInstance.address
-        writeDeployConfig(network, deployConfig)
-      }
-    } else {
-      contractInstance = await contractArtifact.at(deployedAddress)
-      console.log(`${contractName} already deployed: ${deployedAddress}`)
-    }
-    return contractInstance
+  async function tryDeploy (contractArtifact, contractName, params = []) {
+    const resp = await tryDeployToNetwork(network, contractArtifact, contractName, params)
+    return resp
   }
-}
-
-function updateFutarchyBytecode_WORKAROUND (bytecode) {
-  const path = 'build/contracts/Futarchy.json'
-  let futarchyJSON = JSON.parse(fs.readFileSync(path))
-  futarchyJSON.bytecode = bytecode
-  fs.writeFileSync(path, JSON.stringify(futarchyJSON, null, 4))
 }
