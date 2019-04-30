@@ -43,9 +43,9 @@ const DecisionCard = ({ decision }) => (
 const DateDisplay = ({ decision }) => {
   switch (decision.status) {
     case decisionStatuses.OPEN:
-      return <Countdown end={Number(decision.decisionResolutionDate) * 1000} />
+      return <Countdown end={new Date(Number(decision.decisionResolutionDate) * 1000)} />
     case decisionStatuses.RESOLVED:
-      return <Countdown end={Number(decision.priceResolutionDate) * 1000} />
+      return <Countdown end={new Date(Number(decision.priceResolutionDate) * 1000)} />
     case decisionStatuses.CLOSED:
       return <DateTime timestamp={decision.priceResolutionDate} />
   }

@@ -1,4 +1,4 @@
-import web3Utils from 'web3-utils'
+import * as web3Utils from 'web3-utils'
 import leftPad from 'left-pad'
 
 const traderDecisionHash = (traderAddress, decisionId) => {
