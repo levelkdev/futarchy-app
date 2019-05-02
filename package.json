@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "description": "Aragon app for futarchy decisions",
   "dependencies": {
+    "@aragon/api": "1.1.0",
     "@aragon/apps-shared-minime": "1.0.0",
-    "@aragon/client": "1.1.1",
     "@aragon/kits-base": "1.0.0",
-    "@aragon/os": "4.0.1",
-    "@aragon/ui": "0.32.0",
+    "@aragon/os": "4.2.0",
+    "@aragon/ui": "0.35.1",
     "@gnosis.pm/pm-contracts": "github:levelkdev/pm-contracts#5dc005e8a146d556d8da7a9ee4b4f4f1bf8f8d5f",
     "@gnosis.pm/util-contracts": "2.0.0-alpha",
     "bignumber.js": "8.1.1",
@@ -26,11 +26,12 @@
     "redux": "4.0.1",
     "redux-form": "8.1.0",
     "redux-thunk": "2.3.0",
+    "rxjs-compat": "6.4.0",
     "styled-components": "4.1.3",
     "web3-utils": "1.0.0-beta.50"
   },
   "devDependencies": {
-    "@aragon/cli": "5.4.0-beta.1",
+    "@aragon/cli": "5.6.1",
     "@aragon/test-helpers": "1.0.1",
     "@babel/core": "7.3.4",
     "@babel/plugin-proposal-class-properties": "7.3.4",
@@ -45,7 +46,7 @@
     "parcel-bundler": "1.12.2"
   },
   "scripts": {
-    "deploy:staging:prepare": "truffle exec scripts/prepare.js --network rinkeby",
+    "deploy:staging:prepare": "rm -rf build && npm run compile && truffle exec scripts/prepare.js --network rinkeby",
     "deploy:staging:publish:major": "node scripts/publish.js staging major",
     "deploy:staging:publish:minor": "node scripts/publish.js staging minor",
     "deploy:staging:newFutarchyDAO": "truffle exec scripts/newFutarchyDAO.js --network rinkeby --environment staging",
@@ -56,7 +57,6 @@
     "start:sandbox": "http-server ./dist",
     "devchain": "aragon devchain",
     "devchain:reset": "aragon devchain --reset",
-    "deploy:deps:rpc": "truffle exec scripts/deploy_deps.js --network rpc",
     "test": "npm run test:contracts && npm run test:app",
     "test:contracts": "aragon contracts test",
     "test:app": "mocha --require app/test/testHelper.js 'app/**/*.test.js'",

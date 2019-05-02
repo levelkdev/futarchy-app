@@ -27,6 +27,7 @@ const Event = artifacts.require('Event')
 
 // local contracts
 const Futarchy = artifacts.require('Futarchy.sol')
+const DecisionLib = artifacts.require('DecisionLib.sol')
 const ExecutionTarget = artifacts.require('ExecutionTarget')
 
 const getContract = name => artifacts.require(name)
@@ -61,6 +62,12 @@ contract('Futarchy', (accounts) => {
   const account2 = accounts[1]
 
   before(async () => {
+    const fixed192x64Math = await Fixed192x64Math.new()
+    await LMSRMarketMaker.link('Fixed192x64Math', fixed192x64Math.address)
+
+    const decisionLib = await DecisionLib.new()
+    await Futarchy.link('DecisionLib', decisionLib.address);
+
     const kernelBase = await getContract('Kernel').new(true) // petrify immediately
     const aclBase = await getContract('ACL').new()
     const regFact = await EVMScriptRegistryFactory.new()
@@ -68,8 +75,6 @@ contract('Futarchy', (accounts) => {
     futarchyBase = await Futarchy.new()
     APP_MANAGER_ROLE = await kernelBase.APP_MANAGER_ROLE()
 
-    const fixed192x64Math = await Fixed192x64Math.new()
-    await LMSRMarketMaker.link('Fixed192x64Math', fixed192x64Math.address)
     priceOracleFactory = await CentralizedTimedOracleFactory.new()
     lmsrMarketMaker = await LMSRMarketMaker.new()
     futarchyOracleFactoryFull = await deployFutarchyMasterCopies()
@@ -919,6 +924,7 @@ contract('Futarchy', (accounts) => {
         const prevBalanceAcct2 = (await token.balanceOf(account2)).toNumber()
 
         await futarchy.redeemWinnings(0, { from: account2 })
+
         await futarchy.redeemWinnings(0, { from: root })
 
         const currentBalanceRoot = (await token.balanceOf(root)).toNumber()

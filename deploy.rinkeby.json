@@ -11,7 +11,8 @@
         "StandardMarketWithPriceLogger": "0x260357b8e3d93180858a95f5e3d4a2eda3e6a6ad",
         "EventFactory": "0x525cc4cc523e376a3952f31998aaf312fb9ee82d",
         "StandardMarketWithPriceLoggerFactory": "0x64cec831d0109c40a734384beaf011b9deeebd53",
-        "FutarchyOracleFactory": "0x1fad5ae333ef73ea9810bf90846cadbaabb72a36"
+        "FutarchyOracleFactory": "0x1fad5ae333ef73ea9810bf90846cadbaabb72a36",
+        "DecisionLib": "0xe1a3dfadc0566bef1bc067779f1088706089a277"
     },
     "tokensAllocated": {
         "0x44360017c1460BC0149946b4fad97665c25586b0": "1e+26",

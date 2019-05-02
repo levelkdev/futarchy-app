@@ -1,6 +1,4 @@
-const configForNetwork = require('./deployConfig/configForNetwork')
-const isLocalNetwork = require('./deployConfig/isLocalNetwork')
-const writeDeployConfig = require('./deployConfig/writeDeployConfig')
+const tryDeployToNetwork = require('./utilities/tryDeployToNetwork')
 
 const globalArtifacts = this.artifacts // Not injected unless called directly via truffle
 const NULL_ADDRESS = '0x00'
@@ -24,8 +22,6 @@ module.exports = async (
   const EventFactory = artifacts.require('EventFactory')
   const StandardMarketWithPriceLoggerFactory = artifacts.require('StandardMarketWithPriceLoggerFactory')
   const FutarchyOracleFactory = artifacts.require('FutarchyOracleFactory')
-
-  let deployConfig = configForNetwork(network)
 
   try {
     console.log(`Deploying dependencies for "${network}" network`)
@@ -123,21 +119,8 @@ module.exports = async (
     console.log('Error in scripts/deploy_deps.js: ', err)
   }
 
-  async function tryDeploy(contractArtifact, contractName, params = []) {
-    let contractInstance
-    const deployedAddress = deployConfig.dependencyContracts[contractName]
-    if (!deployedAddress) {
-      console.log(`Deploying ${contractName}...`)
-      contractInstance = await contractArtifact.new.apply(null, params)
-      console.log(`Deployed ${contractName}: ${contractInstance.address}`)
-      if (!isLocalNetwork(network)) {
-        deployConfig.dependencyContracts[contractName] = contractInstance.address
-        writeDeployConfig(network, deployConfig)
-      }
-    } else {
-      contractInstance = await contractArtifact.at(deployedAddress)
-      console.log(`${contractName} already deployed: ${deployedAddress}`)
-    }
-    return contractInstance
+  async function tryDeploy (contractArtifact, contractName, params = []) {
+    const resp = await tryDeployToNetwork(network, contractArtifact, contractName, params)
+    return resp
   }
 }
