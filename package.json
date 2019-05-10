@@ -74,6 +74,9 @@
     "dao:acl:create": "aragon dao acl create",
     "versions:staging": "aragon apm versions --environment staging",
     "ipfs": "aragon ipfs",
+    "ipfs:propagate": "node scripts/ipfs/propagate.js",
+    "ipfs:propagate:dist": "node scripts/ipfs/propagateDist.js",
+    "ipfs:archive:staging": "node scripts/ipfs/archive.js staging",
     "set:price": "truffle exec scripts/set_data/price.js --network rpc",
     "compile:truffle": "truffle compile"
   },

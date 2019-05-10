@@ -3,4 +3,5 @@ build
 .cache
 dist
 flattened_contracts
+ipfs_archives
 .node-xmlhttprequest-**
