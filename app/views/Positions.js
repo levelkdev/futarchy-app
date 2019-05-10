@@ -1,4 +1,5 @@
 import React from 'react'
+import { Info } from '@aragon/ui'
 import _ from 'lodash'
 import styled from 'styled-components'
 import decisionStatuses from '../constants/decisionStatuses'
@@ -7,8 +8,20 @@ import PerformanceTotalsContainer from '../containers/PerformanceTotalsContainer
 import MyDecisionsBadgeContainer from '../containers/MyDecisionsBadgeContainer'
 import DecisionsTableContainer from '../containers/DecisionsTableContainer'
 
-const Positions = () => (
+const Positions = ({ match }) => (
   <ViewElem>
+    {match.params.account == "undefined" ? <AccountError /> : <PositionsTables />}
+  </ViewElem>
+)
+
+const AccountError = () => (
+  <Info.Alert title="Please log into MetaMask">
+    To view your positions, make sure you are logged into MetaMask.
+  </Info.Alert>
+)
+
+const PositionsTables = () => (
+  <div>
     <TableTitle>My Totals</TableTitle>
     <PerformanceTotalsContainer />
     <br /><br />
@@ -26,8 +39,7 @@ const Positions = () => (
         <DecisionsTableContainer statusFilter={decisionState} />
       </DecisionSummarySection>
     ))}
-
-  </ViewElem>
+  </div>
 )
 
 const ViewElem = styled.div`

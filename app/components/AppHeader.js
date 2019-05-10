@@ -5,10 +5,10 @@ import { Link, NavLink } from 'react-router-dom'
 import { Text, theme } from '@aragon/ui'
 import ShowPanelButtonContainer from '../containers/ShowPanelButtonContainer'
 
-const AppHeader = ({ decision }) => (
+const AppHeader = ({ decision, account }) => (
   <AppHeaderStyled>
     <AlignLeft>
-      {decision ? <DecisionDetailsHeader /> : <TabsContainer />}
+      {decision ? <DecisionDetailsHeader /> : <TabsContainer account={account} />}
     </AlignLeft>
     <AlignRight>
       <NewDecisionButton>
@@ -20,13 +20,13 @@ const AppHeader = ({ decision }) => (
   </AppHeaderStyled>
 )
 
-const TabsContainer = () => (
+const TabsContainer = ({ account }) => (
   <div>
     <Text size="xlarge">Decisions</Text>
     <br />
     <TabsContainterStyled>
       <NavLinkStyled exact to="/">Markets</NavLinkStyled>
-      <NavLinkStyled exact to="/positions">My Positions</NavLinkStyled>
+      <NavLinkStyled exact to={`/positions/${account}`}>My Positions</NavLinkStyled>
     </TabsContainterStyled>
   </div>
 )
