@@ -14,7 +14,7 @@ const App = () => (
     <div>
       <AppHeaderContainer />
       
-      <AppInner publicUrl="/aragon-ui/">
+      <AppInner publicUrl="./aragon-ui/">
         <Route path="/" exact component={Home} />
         <Route path="/positions" exact component={Positions} />
         <Route path="/decision/:decisionId" component={DecisionDetail} />
