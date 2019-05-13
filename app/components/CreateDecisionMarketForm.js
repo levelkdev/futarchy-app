@@ -12,31 +12,44 @@ const CreateDecisionMarketForm = createReduxForm(({
   marketFundAmount,
   handleSubmit,
   createDecision
-}) => (
-  <form onSubmit={handleSubmit(createDecision)}>
-    <StyledInfo>
-      Creating a new decision requires {formatBalance(marketFundAmount)} {tokenSymbol()} to fund the decision markets.
-    </StyledInfo>
-    <StyledLabel htmlFor="question">Question</StyledLabel>
-    <StyledField
-      name="question" 
-      component="input" 
-      type="text" 
-      placeholder="Enter your question"
-    />
-    <br /><br />
-    <FundsContainer>
-      <Text>Funding required</Text>
-      <Text weight="bold">{formatBalance(marketFundAmount)} {tokenSymbol()}</Text>
-    </FundsContainer>
-    <FundsContainer>
-      <Text>Account Balance</Text>
-      <Text color="#21D48E">{formatBalance(tokenBalance)} {tokenSymbol()}</Text>
-    </FundsContainer>
-    <br /><br />
-      <Button mode="strong" type="submit" wide>Create Decision</Button>
-  </form>
-))
+}) => {
+  const insufficientBalance = tokenBalance < marketFundAmount
+  const marketFundAmountText = `${formatBalance(marketFundAmount)} ${tokenSymbol()}`
+  const tokenBalanceText = `${formatBalance(tokenBalance)} ${tokenSymbol()}`
+  return (
+    <form onSubmit={handleSubmit(createDecision)}>
+      {
+        insufficientBalance ?
+          <StyledAlert>
+            You need at least {marketFundAmountText} to create a decision.
+          </StyledAlert> :
+          <React.Fragment>
+            <StyledInfo>
+              Creating a new decision requires {marketFundAmountText} to fund the decision markets.
+            </StyledInfo>
+            <StyledLabel htmlFor="question">Question</StyledLabel>
+            <StyledField
+              name="question" 
+              component="input" 
+              type="text" 
+              placeholder="Enter your question"
+            />
+          </React.Fragment>
+      }
+      <br /><br />
+      <FundsContainer>
+        <Text>Funding required</Text>
+        <Text weight="bold">{marketFundAmountText}</Text>
+      </FundsContainer>
+      <FundsContainer>
+        <Text>Account Balance</Text>
+        <Text color="#21D48E">{tokenBalanceText}</Text>
+      </FundsContainer>
+      <br /><br />
+      <Button mode="strong" type="submit" wide disabled={insufficientBalance}>Create Decision</Button>
+    </form>
+  )
+})
 
 const StyledField = styled(Field)`
   padding: 8px;
@@ -60,7 +73,7 @@ const StyledInfo = styled(Info.Action)`
   margin: 16px 0;
 `
 
-const StyledPermissions = styled(Info.Permissions)`
+const StyledAlert = styled(Info.Alert)`
   margin: 16px 0;
 `
 
