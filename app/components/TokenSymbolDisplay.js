@@ -1,8 +1,6 @@
 import React from 'react'
+import tokenSymbol from '../util/tokenSymbol'
 
-// TODO: symbol will be different for every dapp,
-//       so we should move this text to a config param
-
-const TokenSymbolDisplay = () => <span>TKN</span>
+const TokenSymbolDisplay = () => <span>{tokenSymbol()}</span>
 
 export default TokenSymbolDisplay

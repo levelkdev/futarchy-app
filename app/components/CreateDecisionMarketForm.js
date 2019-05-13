@@ -1,8 +1,7 @@
 import React from 'react'
 import { Field, reduxForm } from 'redux-form'
 import { Button, Info, Text } from '@aragon/ui'
-
-
+import tokenSymbol from '../util/tokenSymbol'
 import formatBalance from '../util/formatBalance'
 import styled from 'styled-components'
 
@@ -16,7 +15,7 @@ const CreateDecisionMarketForm = createReduxForm(({
 }) => (
   <form onSubmit={handleSubmit(createDecision)}>
     <StyledInfo>
-      This should be a brief explanation of the cost associated with asking a question and how the Futarchy market works.
+      Creating a new decision requires {formatBalance(marketFundAmount)} {tokenSymbol()} to fund the decision markets.
     </StyledInfo>
     <StyledLabel htmlFor="question">Question</StyledLabel>
     <StyledField
@@ -28,16 +27,13 @@ const CreateDecisionMarketForm = createReduxForm(({
     <br /><br />
     <FundsContainer>
       <Text>Funding required</Text>
-      <Text weight="bold">{formatBalance(marketFundAmount)} TKN</Text>
+      <Text weight="bold">{formatBalance(marketFundAmount)} {tokenSymbol()}</Text>
     </FundsContainer>
     <FundsContainer>
       <Text>Account Balance</Text>
-      <Text color="#21D48E">{formatBalance(tokenBalance)}</Text>
+      <Text color="#21D48E">{formatBalance(tokenBalance)} {tokenSymbol()}</Text>
     </FundsContainer>
     <br /><br />
-      <StyledPermissions>
-        Questions placed on the Futarchy Market resolve after 16 days.
-      </StyledPermissions>
       <Button mode="strong" type="submit" wide>Create Decision</Button>
   </form>
 ))
