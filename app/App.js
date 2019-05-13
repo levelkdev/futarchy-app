@@ -13,10 +13,10 @@ const App = () => (
   <Router>
     <div>
       <AppHeaderContainer />
-      
+
       <AppInner publicUrl="./aragon-ui/">
         <Route path="/" exact component={Home} />
-        <Route path="/positions" exact component={Positions} />
+        <Route path="/positions/:account" exact component={Positions} />
         <Route path="/decision/:decisionId" component={DecisionDetail} />
         <Route path="/trades/:decisionId" component={DecisionTrades} />
         <SidePanelDisplayContainer />

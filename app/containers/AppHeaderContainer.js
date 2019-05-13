@@ -25,7 +25,8 @@ const mapStateToProps = (state, ownProps) => ({
   decision: findDecisionById(
     state.decisionMarkets,
     getDecisionRouteParams(ownProps.location.pathname).decisionId
-  )
+  ),
+  account: state.accounts[0]
 })
 
 export default withRouter(connect(
