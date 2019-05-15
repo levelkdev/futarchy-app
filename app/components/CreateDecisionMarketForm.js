@@ -1,8 +1,7 @@
 import React from 'react'
 import { Field, reduxForm } from 'redux-form'
 import { Button, Info, Text } from '@aragon/ui'
-
-
+import tokenSymbol from '../util/tokenSymbol'
 import formatBalance from '../util/formatBalance'
 import styled from 'styled-components'
 
@@ -13,34 +12,44 @@ const CreateDecisionMarketForm = createReduxForm(({
   marketFundAmount,
   handleSubmit,
   createDecision
-}) => (
-  <form onSubmit={handleSubmit(createDecision)}>
-    <StyledInfo>
-      This should be a brief explanation of the cost associated with asking a question and how the Futarchy market works.
-    </StyledInfo>
-    <StyledLabel htmlFor="question">Question</StyledLabel>
-    <StyledField
-      name="question" 
-      component="input" 
-      type="text" 
-      placeholder="Enter your question"
-    />
-    <br /><br />
-    <FundsContainer>
-      <Text>Funding required</Text>
-      <Text weight="bold">{formatBalance(marketFundAmount)} TKN</Text>
-    </FundsContainer>
-    <FundsContainer>
-      <Text>Account Balance</Text>
-      <Text color="#21D48E">{formatBalance(tokenBalance)}</Text>
-    </FundsContainer>
-    <br /><br />
-      <StyledPermissions>
-        Questions placed on the Futarchy Market resolve after 16 days.
-      </StyledPermissions>
-      <Button mode="strong" type="submit" wide>Create Decision</Button>
-  </form>
-))
+}) => {
+  const insufficientBalance = tokenBalance < marketFundAmount
+  const marketFundAmountText = `${formatBalance(marketFundAmount)} ${tokenSymbol()}`
+  const tokenBalanceText = `${formatBalance(tokenBalance)} ${tokenSymbol()}`
+  return (
+    <form onSubmit={handleSubmit(createDecision)}>
+      {
+        insufficientBalance ?
+          <StyledAlert>
+            You need at least {marketFundAmountText} to create a decision.
+          </StyledAlert> :
+          <React.Fragment>
+            <StyledInfo>
+              Creating a new decision requires {marketFundAmountText} to fund the decision markets.
+            </StyledInfo>
+            <StyledLabel htmlFor="question">Question</StyledLabel>
+            <StyledField
+              name="question" 
+              component="input" 
+              type="text" 
+              placeholder="Enter your question"
+            />
+          </React.Fragment>
+      }
+      <br /><br />
+      <FundsContainer>
+        <Text>Funding required</Text>
+        <Text weight="bold">{marketFundAmountText}</Text>
+      </FundsContainer>
+      <FundsContainer>
+        <Text>Account Balance</Text>
+        <Text color="#21D48E">{tokenBalanceText}</Text>
+      </FundsContainer>
+      <br /><br />
+      <Button mode="strong" type="submit" wide disabled={insufficientBalance}>Create Decision</Button>
+    </form>
+  )
+})
 
 const StyledField = styled(Field)`
   padding: 8px;
@@ -64,7 +73,7 @@ const StyledInfo = styled(Info.Action)`
   margin: 16px 0;
 `
 
-const StyledPermissions = styled(Info.Permissions)`
+const StyledAlert = styled(Info.Alert)`
   margin: 16px 0;
 `
 
