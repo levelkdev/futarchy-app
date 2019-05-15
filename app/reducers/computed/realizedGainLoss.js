@@ -1,6 +1,6 @@
 import sumPerformanceCalc from './sumPerformanceCalc'
 
-const currentGainLoss = (trader, performance, decisions) => {
+const realizedGainLoss = (trader, performance, decisions) => {
   let winningMarkets = decisions.reduce(
     (obj, decision) => {
       obj[decision.decisionId] = decision.passed ? 'yes' : 'no';
@@ -8,7 +8,7 @@ const currentGainLoss = (trader, performance, decisions) => {
     },
     {}
   )
-  return sumPerformanceCalc('GainLoss', trader, performance, winningMarkets)
+  return sumPerformanceCalc('RealizedGainLoss', trader, performance, winningMarkets)
 }
 
-export default currentGainLoss
+export default realizedGainLoss

@@ -1,12 +1,12 @@
 import assert from 'assert'
-import currentGainLoss from './currentGainLoss'
+import realizedGainLoss from './realizedGainLoss'
 
-const mockPerformanceData = (trader, yesGainLoss, noGainLoss) => {
+const mockPerformanceData = (trader, yesRealizedGainLoss, noRealizedGainLoss) => {
   return {
     trader,
     decisionId: 0,
-    yesGainLoss,
-    noGainLoss
+    yesRealizedGainLoss,
+    noRealizedGainLoss
   }
 }
 
@@ -17,7 +17,7 @@ const mockDecisionData = (passed) => {
   }
 }
 
-describe('currentGainLoss', () => {
+describe('realizedGainLoss', () => {
   describe('when given a trader address and performance array with data for that trader', () => {
     let performanceArray
 
@@ -30,20 +30,20 @@ describe('currentGainLoss', () => {
     })
 
     describe('when the decision has passed', () => {
-      it('should return sum of yesGainLoss for each decision total with that trader address', () => {
+      it('should return sum of yesRealizedGainLoss for each decision total with that trader address', () => {
         const decisionArray = [
           mockDecisionData(true)
         ]
-        assert.equal(currentGainLoss('trader_0', performanceArray, decisionArray), 500)
+        assert.equal(realizedGainLoss('trader_0', performanceArray, decisionArray), 500)
       })
     })
 
     describe('when the decision has failed', () => {
-      it('should return sum of noGainLoss for each decision total with that trader address', () => {
+      it('should return sum of noRealizedGainLoss for each decision total with that trader address', () => {
         const decisionArray = [
           mockDecisionData(false)
         ]
-        assert.equal(currentGainLoss('trader_0', performanceArray, decisionArray), 800)
+        assert.equal(realizedGainLoss('trader_0', performanceArray, decisionArray), 800)
       })
     })
   })
@@ -58,7 +58,7 @@ describe('currentGainLoss', () => {
         mockPerformanceData('trader_1', 100, 400),
         mockPerformanceData('trader_1', 300, 500)
       ]
-      assert.equal(currentGainLoss('trader_0', performanceArray, decisionArray), 0)
+      assert.equal(realizedGainLoss('trader_0', performanceArray, decisionArray), 0)
     })
   })
 })

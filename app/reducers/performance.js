@@ -25,22 +25,21 @@ const modifyTraderPositionsReducer = (state, action) => {
     state.push(totals)
   }
 
-  let newTotals
   switch (action.type) {
     case 'BUY_MARKET_POSITIONS_EVENT':
-      newTotals = adjustForBuyPositions(totals, action)
+      totals = adjustForBuyPositions(totals, action)
       break
     case 'SELL_MARKET_POSITIONS_EVENT':
-      newTotals = adjustForSellPositions(totals, action)
+      totals = adjustForSellPositions(totals, action)
       break
     case 'REDEEM_SCALAR_WINNINGS_EVENT':
-      newTotals = adjustForScalarWinnings(totals, action)
+      totals = adjustForScalarWinnings(totals, action)
       break
   }
 
   return state.map(t => {
     if (t.trader == trader && t.decisionId == decisionId) {
-      return newTotals
+      return totals
     } else {
       return t
     }
@@ -59,83 +58,80 @@ const adjustForBuyPositions = (totals, action) => {
     noPurchaseAmounts
   } = returnValues
 
-  let newTotals = totals
-
-  newTotals.yesCostBasis += sumTokenValueArray(yesCosts)
-  newTotals.noCostBasis += sumTokenValueArray(noCosts)
-  newTotals.currentyesCollateralRisked += sumTokenValueArray(yesCosts)
-  newTotals.currentnoCollateralRisked += sumTokenValueArray(noCosts)
-  newTotals.yesCollateralBalance += (parseInt(collateralAmount) - parseInt(yesCosts))
-  newTotals.noCollateralBalance += (parseInt(collateralAmount) - parseInt(noCosts))
-  newTotals.yesShortBalance += parseInt(yesPurchaseAmounts[0])
-  newTotals.yesLongBalance += parseInt(yesPurchaseAmounts[1])
-  newTotals.noShortBalance += parseInt(noPurchaseAmounts[0])
-  newTotals.noLongBalance += parseInt(noPurchaseAmounts[1])
+  totals.yesCostBasis += sumTokenValueArray(yesCosts)
+  totals.noCostBasis += sumTokenValueArray(noCosts)
+  totals.currentyesCollateralRisked += sumTokenValueArray(yesCosts)
+  totals.currentnoCollateralRisked += sumTokenValueArray(noCosts)
+  totals.yesCollateralBalance += (parseInt(collateralAmount) - parseInt(yesCosts))
+  totals.noCollateralBalance += (parseInt(collateralAmount) - parseInt(noCosts))
+  totals.yesShortBalance += parseInt(yesPurchaseAmounts[0])
+  totals.yesLongBalance += parseInt(yesPurchaseAmounts[1])
+  totals.noShortBalance += parseInt(noPurchaseAmounts[0])
+  totals.noLongBalance += parseInt(noPurchaseAmounts[1])
 
   if (typeof(action.yesMarketFee) != 'undefined') {
     // TODO: calc potential profits here the same way it's done in
     //       the yesNoMarketDataLoadedReducer
   }
 
-  return newTotals
+  return totals
 }
 
 const adjustForSellPositions = (totals, action) => {
   const { returnValues } = action
-  let newTotals = totals
 
-  newTotals.currentyesCollateralRisked = 0
-  newTotals.currentnoCollateralRisked = 0
-  newTotals.yesCollateralBalance += parseInt(returnValues.yesCollateralReceived)
-  newTotals.noCollateralBalance += parseInt(returnValues.noCollateralReceived)
-  newTotals.yesShortBalance = 0
-  newTotals.yesLongBalance = 0
-  newTotals.noShortBalance = 0
-  newTotals.noLongBalance = 0
-  newTotals.yesShortPotentialProfit = 0
-  newTotals.yesLongPotentialProfit = 0
-  newTotals.noShortPotentialProfit = 0
-  newTotals.noLongPotentialProfit = 0
-  newTotals.yesPotentialProfit = 0
-  newTotals.noPotentialProfit = 0
-  newTotals.yesGainLoss = 0
-  newTotals.noGainLoss = 0
-  newTotals.totalPotentialProfit = 0
-  newTotals.totalGainLoss = 0
-  newTotals.yesTotalReturns += parseInt(returnValues.yesCollateralReceived)
-  newTotals.noTotalReturns += parseInt(returnValues.noCollateralReceived)
-  newTotals.yesRealizedGainLoss = newTotals.yesTotalReturns - parseInt(totals.yesCostBasis)
-  newTotals.noRealizedGainLoss = newTotals.noTotalReturns - parseInt(totals.noCostBasis)
-  newTotals.yesRealizedGainLossPct = calcGainLossPercentage(totals.yesCostBasis, newTotals.yesTotalReturns)
-  newTotals.noRealizedGainLossPct = calcGainLossPercentage(totals.noCostBasis, newTotals.noTotalReturns)
-  return newTotals
+  totals.currentyesCollateralRisked = 0
+  totals.currentnoCollateralRisked = 0
+  totals.yesCollateralBalance += parseInt(returnValues.yesCollateralReceived)
+  totals.noCollateralBalance += parseInt(returnValues.noCollateralReceived)
+  totals.yesShortBalance = 0
+  totals.yesLongBalance = 0
+  totals.noShortBalance = 0
+  totals.noLongBalance = 0
+  totals.yesShortPotentialProfit = 0
+  totals.yesLongPotentialProfit = 0
+  totals.noShortPotentialProfit = 0
+  totals.noLongPotentialProfit = 0
+  totals.yesPotentialProfit = 0
+  totals.noPotentialProfit = 0
+  totals.yesGainLoss = 0
+  totals.noGainLoss = 0
+  totals.totalPotentialProfit = 0
+  totals.totalGainLoss = 0
+  totals.yesTotalReturns += parseInt(returnValues.yesCollateralReceived)
+  totals.noTotalReturns += parseInt(returnValues.noCollateralReceived)
+  totals.yesRealizedGainLoss = totals.yesTotalReturns - totals.yesCostBasis
+  totals.noRealizedGainLoss = totals.noTotalReturns - totals.noCostBasis
+  totals.yesRealizedGainLossPct = calcGainLossPercentage(totals.yesCostBasis, totals.yesTotalReturns)
+  totals.noRealizedGainLossPct = calcGainLossPercentage(totals.noCostBasis, totals.noTotalReturns)
+
+  return totals
 }
 
 const adjustForScalarWinnings = (totals, action) => {
-  let newTotals = totals
   let market = action.passed ? 'yes' : 'no'
   const { returnValues } = action
   const { winnings } = returnValues
 
-  newTotals[`current${market}CollateralRisked`] = 0
-  newTotals[`${market}ShortBalance`] = 0
-  newTotals[`${market}LongBalance`] = 0
-  newTotals.yesShortPotentialProfit = 0
-  newTotals.yesLongPotentialProfit = 0
-  newTotals.noShortPotentialProfit = 0
-  newTotals.noLongPotentialProfit = 0
-  newTotals.yesPotentialProfit = 0
-  newTotals.noPotentialProfit = 0
-  newTotals.yesGainLoss = 0
-  newTotals.noGainLoss = 0
-  newTotals.totalPotentialProfit = 0
-  newTotals.totalGainLoss = 0
-  newTotals[`${market}TotalReturns`] += parseInt(winnings)
-  newTotals[`${market}RealizedGainLoss`] =
-    newTotals[`${market}TotalReturns`] - totals[`${market}CostBasis`]
-  newTotals[`${market}RealizedGainLossPct`] =
-    calcGainLossPercentage(totals[`${market}CostBasis`], newTotals[`${market}TotalReturns`])
-  return newTotals
+  totals[`current${market}CollateralRisked`] = 0
+  totals[`${market}ShortBalance`] = 0
+  totals[`${market}LongBalance`] = 0
+  totals.yesShortPotentialProfit = 0
+  totals.yesLongPotentialProfit = 0
+  totals.noShortPotentialProfit = 0
+  totals.noLongPotentialProfit = 0
+  totals.yesPotentialProfit = 0
+  totals.noPotentialProfit = 0
+  totals.yesGainLoss = 0
+  totals.noGainLoss = 0
+  totals.totalPotentialProfit = 0
+  totals.totalGainLoss = 0
+  totals[`${market}TotalReturns`] += parseInt(winnings)
+  totals[`${market}RealizedGainLoss`] =
+    totals[`${market}TotalReturns`] - totals[`${market}CostBasis`]
+  totals[`${market}RealizedGainLossPct`] =
+    calcGainLossPercentage(totals[`${market}CostBasis`], totals[`${market}TotalReturns`])
+  return totals
 }
 
 const yesNoMarketDataLoadedReducer = (state, action) => {
@@ -156,8 +152,8 @@ const yesNoMarketDataLoadedReducer = (state, action) => {
       totals.noLongPotentialProfit = noLongProfit
       totals.yesPotentialProfit = yesShortProfit + yesLongProfit
       totals.noPotentialProfit = noShortProfit + noLongProfit
-      totals.yesGainLoss = totals.yesPotentialProfit - totals.yesCostBasis
-      totals.noGainLoss = totals.noPotentialProfit - totals.noCostBasis
+      totals.yesGainLoss = totals.yesPotentialProfit - totals.currentyesCollateralRisked
+      totals.noGainLoss = totals.noPotentialProfit - totals.currentnoCollateralRisked
       totals.totalPotentialProfit = totals.yesPotentialProfit + totals.noPotentialProfit
       totals.totalGainLoss =
         totals.totalPotentialProfit - (totals.yesCostBasis + totals.noCostBasis)
