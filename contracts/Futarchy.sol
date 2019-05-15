@@ -165,12 +165,6 @@ contract Futarchy is AragonApp, IForwarder {
     return this;
   }
 
-  // Workaround solution to get current blocktime. Would be better to get from
-  // Aragon client
-  function blocktime() public view returns (uint) {
-    return now;
-  }
-
   /**
   * @notice buys outcome tokens in YES/NO decision markets for the sender
   * @param decisionId unique identifier for decision

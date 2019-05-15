@@ -20,7 +20,7 @@ const mapStateToProps = (state, ownProps) => {
     decisions,
     trades,
     increment: pricePointIncrement,
-    now: state.blocktime
+    now: state.latestBlock.timestamp
   })
 
   return {

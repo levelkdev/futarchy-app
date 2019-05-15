@@ -22,9 +22,19 @@ export const accounts = async () => {
   })
 }
 
-export const blocktime = async () => {
-  const blocktime = await call('blocktime')
-  return blocktime
+export const latestBlock = async () => {
+  return new Promise((resolve, reject) => {
+    window.aragonClient.web3Eth('getBlock', 'latest').subscribe(
+      block => {
+        logDebug('latestBlock: ', block)
+        resolve(block)
+      },
+      err => {
+        logError('latestBlock: Error: ', err)
+        reject(err)
+      }
+    )
+  })
 }
 
 export const tokenContract = async () => {
@@ -193,7 +203,7 @@ export const sendTransaction = async (functionName, ...params) => {
 export default {
   accounts,
   decisions,
-  blocktime,
+  latestBlock,
   tokenContract,
   tokenBalance,
   futarchyAddress,

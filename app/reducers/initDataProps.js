@@ -4,7 +4,7 @@ export default [
     defaultValue: []
   },
   {
-    prop: 'blocktime',
+    prop: 'latestBlock',
     defaultValue: null
   },
   {
