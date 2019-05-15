@@ -1,7 +1,9 @@
 import React from 'react'
+import styled from 'styled-components'
 import { YES_COLOR, NO_COLOR } from '../constants/colorValues'
 import decisionMarketTypes from '../constants/decisionMarketTypes'
 import formatPredictedValue from '../util/formatPredictedValue'
+import { unselectable } from '@aragon/ui'
 
 const OUTER_CIRCLE_DIAMETER = 180
 const OUTER_CIRCLE_RADIUS = OUTER_CIRCLE_DIAMETER / 2
@@ -11,6 +13,12 @@ const CIRCLE_PRICE_MAX_FONT_SIZE = 21
 const MIN_FONT_SIZE = 10
 const TEXT_BOTTOM_MARGIN = 3
 const LOSER_CIRCLE_COLOR = "#DAEAEF"
+
+const Text = styled.text`
+  ${unselectable()};
+  font-family: overpass,sans-serif;
+  text-anchor: middle;
+`
 
 const MarketCircles = ({
   yesDisplayPrice,
@@ -94,23 +102,17 @@ const Circle = ({ angle, diameter, color, nameText, priceText, isYes, loser }) =
   return (
     <g>
       <circle cx={xOffset} cy={yOffset} r={radius} fill={color} />
-      <text x={xOffset} y={yOffset}
-        fontFamily="overpass,sans-serif"
+      <Text x={xOffset} y={yOffset}        
         fontSize={`${nameFontSize}px`}
-        textAnchor="middle"
-        fill={fontColor}>{nameText}</text>
+        fill={fontColor}>{nameText}</Text>
       {
         priceText ? (
-          <text x={xOffset} y={yOffset + priceTextOffset}
-            fontFamily="overpass,sans-serif"
+          <Text x={xOffset} y={yOffset + priceTextOffset}
             fontSize={`${priceFontSize}px`}
-            textAnchor="middle"
-            fill={fontColor}>{formatPredictedValue(priceText)}</text>
-        ): <text x={xOffset} y={yOffset + priceTextOffset}
-          fontFamily="overpass,sans-serif"
+            fill={fontColor}>{formatPredictedValue(priceText)}</Text>
+        ): <Text x={xOffset} y={yOffset + priceTextOffset}
           fontSize={`${priceFontSize}px`}
-          textAnchor="middle"
-          fill={fontColor}>Loading...</text>
+          fill={fontColor}>Loading...</Text>
       }
       {
         (loser && priceText) ? (
