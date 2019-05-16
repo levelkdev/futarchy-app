@@ -14,6 +14,14 @@ const appEventInterceptor = store => next => action => {
         decisionId: action.returnValues.decisionId,
         action
       })
+
+      // if this event was fired after the initial app load
+      if(state.latestBlock && action.blockNumber > state.latestBlock.number) {
+        store.dispatch(
+          fetchDecisionData(action.returnValues.decisionId)
+        )
+      }
+
       break
     case 'START_DECISION_EVENT':
       action = {
