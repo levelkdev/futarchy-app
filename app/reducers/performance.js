@@ -60,8 +60,8 @@ const adjustForBuyPositions = (totals, action) => {
 
   totals.yesCostBasis += sumTokenValueArray(yesCosts)
   totals.noCostBasis += sumTokenValueArray(noCosts)
-  totals.currentyesCollateralRisked += sumTokenValueArray(yesCosts)
-  totals.currentnoCollateralRisked += sumTokenValueArray(noCosts)
+  totals.yesCurrentCollateralRisked += sumTokenValueArray(yesCosts)
+  totals.noCurrentCollateralRisked += sumTokenValueArray(noCosts)
   totals.yesCollateralBalance += (parseInt(collateralAmount) - parseInt(yesCosts))
   totals.noCollateralBalance += (parseInt(collateralAmount) - parseInt(noCosts))
   totals.yesShortBalance += parseInt(yesPurchaseAmounts[0])
@@ -80,8 +80,8 @@ const adjustForBuyPositions = (totals, action) => {
 const adjustForSellPositions = (totals, action) => {
   const { returnValues } = action
 
-  totals.currentyesCollateralRisked = 0
-  totals.currentnoCollateralRisked = 0
+  totals.yesCurrentCollateralRisked = 0
+  totals.noCurrentCollateralRisked = 0
   totals.yesCollateralBalance += parseInt(returnValues.yesCollateralReceived)
   totals.noCollateralBalance += parseInt(returnValues.noCollateralReceived)
   totals.yesShortBalance = 0
@@ -152,8 +152,8 @@ const yesNoMarketDataLoadedReducer = (state, action) => {
       totals.noLongPotentialProfit = noLongProfit
       totals.yesPotentialProfit = yesShortProfit + yesLongProfit
       totals.noPotentialProfit = noShortProfit + noLongProfit
-      totals.yesGainLoss = totals.yesPotentialProfit - totals.currentyesCollateralRisked
-      totals.noGainLoss = totals.noPotentialProfit - totals.currentnoCollateralRisked
+      totals.yesGainLoss = totals.yesPotentialProfit - totals.yesCurrentCollateralRisked
+      totals.noGainLoss = totals.noPotentialProfit - totals.noCurrentCollateralRisked
       totals.totalPotentialProfit = totals.yesPotentialProfit + totals.noPotentialProfit
       totals.totalGainLoss =
         totals.totalPotentialProfit - (totals.yesCostBasis + totals.noCostBasis)
@@ -238,8 +238,8 @@ const initialTotals = (trader, decisionId) => ({
   decisionId,
   yesCostBasis: 0,                // aggregate TKN spent on YES purchases
   noCostBasis: 0,                 // aggregate TKN spent on NO purchases
-  currentyesCollateralRisked: 0,  // current YES collateral risked
-  currentnoCollateralRisked: 0,   // current NO collateral risked
+  yesCurrentCollateralRisked: 0,  // current YES collateral risked
+  noCurrentCollateralRisked: 0,   // current NO collateral risked
   yesCollateralBalance: 0,        // current YES token balance
   noCollateralBalance: 0,         // current NO token balance
   yesShortBalance: 0,             // current yesShort Balance
