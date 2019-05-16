@@ -191,7 +191,7 @@ export const redeemWinnings = (
 
 export const fetchAccounts = propFetchDispatcher('accounts')
 export const fetchFutarchyAddress = propFetchDispatcher('futarchyAddress')
-export const fetchBlocktime = propFetchDispatcher('blocktime')
+export const fetchLatestBlock = propFetchDispatcher('latestBlock')
 export const fetchFee = propFetchDispatcher('fee')
 export const fetchTradingPeriod = propFetchDispatcher('tradingPeriod')
 export const fetchMarketFundAmount = propFetchDispatcher('marketFundAmount')
@@ -311,7 +311,7 @@ export const fetchTraderDecisionBalances = ({ decisionId, trader }) => dispatch 
 export const fetchInitData = () => async (dispatch, getState) => {
   await Promise.all([
     dispatch(fetchAccounts()),
-    dispatch(fetchBlocktime()),
+    dispatch(fetchLatestBlock()),
     dispatch(fetchFutarchyAddress()),
     dispatch(fetchFee()),
     dispatch(fetchTradingPeriod()),

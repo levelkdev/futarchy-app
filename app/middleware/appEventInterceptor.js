@@ -18,7 +18,7 @@ const appEventInterceptor = store => next => action => {
     case 'START_DECISION_EVENT':
       action = {
         ...action,
-        blocktime: state.blocktime || null
+        blocktime: state.latestBlock.timestamp || null
       }
       store.dispatch(
         fetchDecisionData(action.returnValues.decisionId)
