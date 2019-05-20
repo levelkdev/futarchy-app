@@ -6,6 +6,7 @@ import {
 
 const appEventInterceptor = store => next => action => {
   const state = store.getState()
+  const { latestBlock } = state
   switch (action.type) {
     case 'BUY_MARKET_POSITIONS_EVENT':
     case 'REDEEM_SCALAR_WINNINGS_EVENT':
@@ -26,7 +27,7 @@ const appEventInterceptor = store => next => action => {
     case 'START_DECISION_EVENT':
       action = {
         ...action,
-        blocktime: state.latestBlock.timestamp || null
+        blocktime: latestBlock ? latestBlock.timestamp : null
       }
       store.dispatch(
         fetchDecisionData(action.returnValues.decisionId)

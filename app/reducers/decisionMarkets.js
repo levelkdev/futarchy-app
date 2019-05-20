@@ -114,10 +114,10 @@ const decisionMarkets = (state = [], action) => {
       })
       break
     case 'PROP_VALUE_LOADED':
-      if (action.prop == 'blocktime') {
+      if (action.prop == 'latestBlock') {
         returnState = state.map(decision => {
           decision.status = getStatus({
-            blocktime: action.value,
+            blocktime: action.value.timestamp,
             decisionResolutionDate: decision.decisionResolutionDate,
             priceResolutionDate: decision.priceResolutionDate
           })

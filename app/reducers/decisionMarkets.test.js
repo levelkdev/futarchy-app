@@ -417,7 +417,7 @@ describe('decisionMarkets', () => {
     })
   })
 
-  describe('when blocktime value is loaded', () => {
+  describe('when latestBlock value is loaded', () => {
     it('should update statuses for existing decisions', () => {
       const state = [
         mockDecision({
@@ -441,8 +441,8 @@ describe('decisionMarkets', () => {
       ]
       const action = {
         type: 'PROP_VALUE_LOADED',
-        prop: 'blocktime',
-        value: '750'
+        prop: 'latestBlock',
+        value: { timestamp: 750 }
       }
       const actualState = decisionMarkets(state, action)
       assert.equal(actualState[0].status, decisionStatuses.CLOSED)
