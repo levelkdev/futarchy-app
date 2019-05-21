@@ -1,14 +1,15 @@
 import React from 'react'
 import { Field, reduxForm } from 'redux-form'
 import styled from 'styled-components'
+import BigNumber from 'bignumber.js';
 import { Button, Text, Badge, DropDown } from '@aragon/ui'
 import formatBalance from '../util/formatBalance'
 import formatPredictedValue from '../util/formatPredictedValue'
 import toWei from '../util/toWei'
 import { date, time } from '../util/formatDateTime'
 import decisionStatuses from '../constants/decisionStatuses'
+import tokenSymbol from '../util/tokenSymbol'
 import positions from '../constants/positions'
-import TokenSymbolDisplay from './TokenSymbolDisplay'
 import SuccessMetricDisplay from './SuccessMetricDisplay'
 
 const choiceDisplayTextByPosition = {
@@ -36,12 +37,17 @@ const validate = values => {
 
   let error
   if (noSelectedPosition(values.yesPredictionChoiceIndex) && noSelectedPosition(values.noPredictionChoiceIndex)) {
-     error = "You must take at least one market position"
+     error = 'You must take at least one market position'
      errors._error.positions = error
   }
   if (!values.collateralAmount) {
-    error = "You must enter token amount to risk"
+    error = 'You must enter token amount to risk'
     errors._error.collateralAmount = error
+  } else if (
+    BigNumber(values.tokenBalance).isLessThan(BigNumber(toWei(values.collateralAmount)))
+  ) {
+    error = `You don't have enough ${tokenSymbol()} for this transaction`
+    errors._error.insufficientBalance = error
   }
 
   // if no errors, errors._error must be undefined
@@ -58,7 +64,6 @@ const MakePredictionForm = createReduxForm(({
   executeBuy,
   pristine,
   submitting,
-  tokenBalance,
   error,
   submitFailed
 }) => (
@@ -90,9 +95,14 @@ const MakePredictionForm = createReduxForm(({
         placeholder="Enter Amount to Risk"
       />
       <StyledAccountBalance>
-        {formatBalance(tokenBalance)} <TokenSymbolDisplay /> Available
+        <Field
+          name="tokenBalance"
+          component={field => field.input.value}
+          format={formatBalance}
+        /> {tokenSymbol()} Available
       </StyledAccountBalance>
       {submitFailed && error && error.collateralAmount && <ErrorSection error={error.collateralAmount} />}
+      {submitFailed && error && error.insufficientBalance && <ErrorSection error={error.insufficientBalance} />}
     </AllocateTokensSection>
 
 
