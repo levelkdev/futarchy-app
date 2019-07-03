@@ -2,19 +2,14 @@ pragma solidity ^0.4.24;
 
 contract TimedOracle {
 
-  uint _resolutionDate;
+  uint public resolutionDate;
 
   modifier resolutionDatePassed() {
-    require(now > _resolutionDate);
+    require(now > resolutionDate);
     _;
   }
 
-  constructor(uint resolutionDate) public {
-    _resolutionDate = resolutionDate;
+  constructor(uint _resolutionDate) public {
+    resolutionDate = _resolutionDate;
   }
-
-  function resolutionDate() public view returns (uint) {
-    return _resolutionDate;
-  }
-
 }
