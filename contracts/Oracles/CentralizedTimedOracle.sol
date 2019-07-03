@@ -1,16 +1,11 @@
 pragma solidity ^0.4.24;
 
 import './TimedOracle.sol';
-import './IScalarPriceOracle.sol';
+import './ScalarPriceOracleBase.sol';
 
-contract CentralizedTimedOracle is IScalarPriceOracle, TimedOracle {
-
-  event OutcomeAssignment(int outcome);
-
+contract CentralizedTimedOracle is ScalarPriceOracleBase, TimedOracle {
   address public owner;
   bytes public ipfsHash;
-  bool public isSet;
-  int public outcome;
 
   modifier isOwner () {
     // Only owner is allowed to proceed
@@ -33,39 +28,7 @@ contract CentralizedTimedOracle is IScalarPriceOracle, TimedOracle {
   * @dev Sets event outcome
   * @param _outcome Event outcome
   */
-  function setOutcome(int _outcome)
-    public
-    resolutionDatePassed
-    isOwner
-  {
-    // Result is not set yet
-    require(!isSet);
-    isSet = true;
-    outcome = _outcome;
-    OutcomeAssignment(_outcome);
-  }
-
-  /**
-  * @dev Returns if winning outcome is set
-  * @return Is outcome set?
-  */
-  function isOutcomeSet()
-    public
-    view
-    returns (bool)
-  {
-    return isSet;
-  }
-
-  /**
-  * @dev Returns outcome
-  * @return Outcome
-  */
-  function getOutcome()
-    public
-    view
-    returns (int)
-  {
-    return outcome;
+  function setOutcome(int _outcome) public resolutionDatePassed isOwner {
+    super.setOutcome(_outcome);
   }
 }
