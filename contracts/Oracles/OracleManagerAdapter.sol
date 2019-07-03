@@ -1,13 +1,13 @@
 pragma solidity ^0.4.24;
 
-import './IScalarPriceOracle.sol';
+import './ScalarPriceOracleBase.sol';
 import './TimedOracle.sol';
 
 /**
 * Contract that allows IScalarPriceOracle to interface with
 * Aragon's Oracle Manager App which uses tidbit oracle interface
 */
-contract OracleManagerAdapter is IScalarPriceOracle, TimedOracle {
+contract OracleManagerAdapter is ScalarPriceOracleBase, TimedOracle {
 
   address public oracleManagerApp;
   int public outcome;
@@ -27,6 +27,6 @@ contract OracleManagerAdapter is IScalarPriceOracle, TimedOracle {
     require(_outcome == 0);
     uint result;
     /* TODO: result = oracleManager.getMedianPrice(resolutionDate, 24 hours) */
-    super.setOutcome(int(result));
+    ScalarPriceOracleBase.setOutcome(int(result));
   }
 }

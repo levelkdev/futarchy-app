@@ -29,6 +29,6 @@ contract CentralizedTimedOracle is ScalarPriceOracleBase, TimedOracle {
   * @param _outcome Event outcome
   */
   function setOutcome(int _outcome) public resolutionDatePassed isOwner {
-    super.setOutcome(_outcome);
+    ScalarPriceOracleBase.setOutcome(_outcome);
   }
 }
