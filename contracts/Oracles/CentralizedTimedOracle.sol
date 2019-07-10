@@ -10,7 +10,7 @@ contract CentralizedTimedOracle is ScalarPriceOracleBase, TimedOracle {
 
   event OutcomeSubmitted(int _outcome);
 
-  modifier isOwner () {
+  modifier isOwner() {
     // Only owner is allowed to proceed
     require(msg.sender == owner);
     _;
@@ -28,10 +28,11 @@ contract CentralizedTimedOracle is ScalarPriceOracleBase, TimedOracle {
   }
 
   /**
-  * @dev Sets event outcome
+  * @dev Sets event outcome if outcome has been submitted
   */
-  function setOutcome() public resolutionDatePassed {
-    ScalarPriceOracleBase.setOutcome(outcome);
+  function setOutcome() public {
+    require(outcomeSubmitted);
+    TimedOracle.setOutcome();
   }
 
   /**

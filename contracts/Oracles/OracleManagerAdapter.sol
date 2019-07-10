@@ -21,9 +21,13 @@ contract OracleManagerAdapter is ScalarPriceOracleBase, TimedOracle {
     oracleManagerApp = _oracleManagerApp;
   }
 
+  /**
+  * @dev consults tidbit dataFeed to calculate and set outcome
+  */
   function setOutcome() public resolutionDatePassed {
     uint result;
     /* TODO: result = oracleManager.getMedianPrice(resolutionDate, 24 hours) */
-    ScalarPriceOracleBase.setOutcome(int(result));
+    outcome = int(result);
+    ScalarPriceOracleBase.setOutcome();
   }
 }

@@ -15,10 +15,8 @@ contract ScalarPriceOracleBase {
     return outcome;
   }
 
-  function setOutcome(int _outcome) public {
+  function setOutcome() public {
     require(!isSet);
     isSet = true;
-    outcome = _outcome;
-    emit OutcomeAssignment(_outcome);
   }
 }

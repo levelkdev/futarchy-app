@@ -1,6 +1,8 @@
 pragma solidity ^0.4.24;
 
-contract TimedOracle {
+import './ScalarPriceOracleBase.sol';
+
+contract TimedOracle is ScalarPriceOracleBase {
 
   uint public resolutionDate;
 
@@ -11,5 +13,12 @@ contract TimedOracle {
 
   constructor(uint _resolutionDate) public {
     resolutionDate = _resolutionDate;
+  }
+
+  /**
+  * @dev Sets event outcome if resolution date has passed
+  */
+  function setOutcome() public resolutionDatePassed {
+    ScalarPriceOracleBase.setOutcome();
   }
 }
