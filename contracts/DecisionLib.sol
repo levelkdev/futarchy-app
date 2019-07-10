@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import './Oracles/IScalarPriceOracle.sol';
+import './Oracles/CentralizedTimedOracle.sol'; /* TODO: switch to IScalarPriceOracle once we switch from centralized solution */
 import '@gnosis.pm/pm-contracts/contracts/Oracles/FutarchyOracle.sol';
 import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 
@@ -115,7 +115,7 @@ library DecisionLib {
     yesMarket.eventContract().outcomeTokens(0).approve(yesMarket, yesShortAmount);
     noMarket.eventContract().outcomeTokens(1).approve(noMarket, noLongAmount);
     noMarket.eventContract().outcomeTokens(0).approve(noMarket, noShortAmount);
-    
+
     yesSellAmounts[0] = -int(yesShortAmount);
     yesSellAmounts[1] = -int(yesLongAmount);
     noSellAmounts[0] = -int(noShortAmount);
@@ -194,7 +194,7 @@ library DecisionLib {
     Decision storage self,
     int price
   ) {
-    IScalarPriceOracle priceOracle = IScalarPriceOracle(self.futarchyOracle.markets(0).eventContract().oracle());
+    CentralizedTimedOracle priceOracle = CentralizedTimedOracle(self.futarchyOracle.markets(0).eventContract().oracle());
     priceOracle.setOutcome(price);
   }
 
