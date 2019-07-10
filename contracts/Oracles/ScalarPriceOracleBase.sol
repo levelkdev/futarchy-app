@@ -19,6 +19,6 @@ contract ScalarPriceOracleBase {
     require(!isSet);
     isSet = true;
     outcome = _outcome;
-    OutcomeAssignment(_outcome);
+    emit OutcomeAssignment(_outcome);
   }
 }

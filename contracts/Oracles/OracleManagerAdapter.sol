@@ -21,10 +21,7 @@ contract OracleManagerAdapter is ScalarPriceOracleBase, TimedOracle {
     oracleManagerApp = _oracleManagerApp;
   }
 
-  function setOutcome(int _outcome) public resolutionDatePassed {
-    // this function will pull the outcome from another contract rather than
-    // function parameters
-    require(_outcome == 0);
+  function setOutcome() public resolutionDatePassed {
     uint result;
     /* TODO: result = oracleManager.getMedianPrice(resolutionDate, 24 hours) */
     ScalarPriceOracleBase.setOutcome(int(result));

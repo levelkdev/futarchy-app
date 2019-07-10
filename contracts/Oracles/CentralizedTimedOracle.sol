@@ -6,6 +6,9 @@ import './ScalarPriceOracleBase.sol';
 contract CentralizedTimedOracle is ScalarPriceOracleBase, TimedOracle {
   address public owner;
   bytes public ipfsHash;
+  bool public outcomeSubmitted;
+
+  event OutcomeSubmitted(int _outcome);
 
   modifier isOwner () {
     // Only owner is allowed to proceed
@@ -26,9 +29,19 @@ contract CentralizedTimedOracle is ScalarPriceOracleBase, TimedOracle {
 
   /**
   * @dev Sets event outcome
+  */
+  function setOutcome() public resolutionDatePassed {
+    ScalarPriceOracleBase.setOutcome(outcome);
+  }
+
+  /**
+  * @dev Submits event outcome value
   * @param _outcome Event outcome
   */
-  function setOutcome(int _outcome) public resolutionDatePassed isOwner {
-    ScalarPriceOracleBase.setOutcome(_outcome);
+  function submitOutcome(int _outcome) public resolutionDatePassed isOwner {
+    require(!outcomeSubmitted, 'outcome already submitted');
+    outcomeSubmitted = true;
+    outcome = _outcome;
+    emit OutcomeSubmitted(outcome);
   }
 }
