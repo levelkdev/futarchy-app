@@ -8,8 +8,6 @@ contract CentralizedTimedOracle is ScalarPriceOracleBase, TimedOracle {
   bytes public ipfsHash;
   bool public outcomeSubmitted;
 
-  event OutcomeSubmitted(int _outcome);
-
   modifier isOwner() {
     // Only owner is allowed to proceed
     require(msg.sender == owner);
@@ -43,6 +41,6 @@ contract CentralizedTimedOracle is ScalarPriceOracleBase, TimedOracle {
     require(!outcomeSubmitted, 'outcome already submitted');
     outcomeSubmitted = true;
     outcome = _outcome;
-    emit OutcomeSubmitted(outcome);
+    setOutcome();
   }
 }
