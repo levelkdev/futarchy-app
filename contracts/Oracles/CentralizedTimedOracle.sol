@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import './TimedOracle.sol';
 import './ScalarPriceOracleBase.sol';
 
-contract CentralizedTimedOracle is ScalarPriceOracleBase, TimedOracle {
+contract CentralizedTimedOracle is TimedOracle {
   address public owner;
   bytes public ipfsHash;
   bool public outcomeSubmitted;
@@ -26,21 +26,9 @@ contract CentralizedTimedOracle is ScalarPriceOracleBase, TimedOracle {
   }
 
   /**
-  * @dev Sets event outcome if outcome has been submitted
+  * @dev Sets event outcome if called by owner & resolution date has passed
   */
-  function setOutcome() public {
-    require(outcomeSubmitted);
-    TimedOracle.setOutcome();
-  }
-
-  /**
-  * @dev Submits event outcome value
-  * @param _outcome Event outcome
-  */
-  function submitOutcome(int _outcome) public resolutionDatePassed isOwner {
-    require(!outcomeSubmitted, 'outcome already submitted');
-    outcomeSubmitted = true;
-    outcome = _outcome;
-    setOutcome();
+  function setOutcome(int _outcome) public resolutionDatePassed isOwner {
+    _setOutcome(_outcome);
   }
 }

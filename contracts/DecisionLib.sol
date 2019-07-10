@@ -195,8 +195,7 @@ library DecisionLib {
     int price
   ) {
     CentralizedTimedOracle priceOracle = CentralizedTimedOracle(self.futarchyOracle.markets(0).eventContract().oracle());
-    priceOracle.submitOutcome(price);
-    priceOracle.setOutcome();
+    priceOracle.setOutcome(price);
   }
 
 }

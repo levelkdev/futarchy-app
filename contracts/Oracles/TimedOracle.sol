@@ -14,11 +14,4 @@ contract TimedOracle is ScalarPriceOracleBase {
   constructor(uint _resolutionDate) public {
     resolutionDate = _resolutionDate;
   }
-
-  /**
-  * @dev Sets event outcome if resolution date has passed
-  */
-  function setOutcome() public resolutionDatePassed {
-    ScalarPriceOracleBase.setOutcome();
-  }
 }

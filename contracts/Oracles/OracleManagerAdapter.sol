@@ -27,7 +27,6 @@ contract OracleManagerAdapter is ScalarPriceOracleBase, TimedOracle {
   function setOutcome() public resolutionDatePassed {
     uint result;
     /* TODO: result = oracleManager.getMedianPrice(resolutionDate, 24 hours) */
-    outcome = int(result);
-    ScalarPriceOracleBase.setOutcome();
+    _setOutcome(int(result));
   }
 }
