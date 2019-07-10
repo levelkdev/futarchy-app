@@ -27,6 +27,7 @@ contract CentralizedTimedOracle is TimedOracle {
 
   /**
   * @dev Sets event outcome if called by owner & resolution date has passed
+  * @param _outcome outcome to be assigned
   */
   function setOutcome(int _outcome) public resolutionDatePassed isOwner {
     _setOutcome(_outcome);

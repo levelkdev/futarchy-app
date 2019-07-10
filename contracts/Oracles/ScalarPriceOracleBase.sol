@@ -7,10 +7,18 @@ contract ScalarPriceOracleBase {
   bool public isSet;
   int public outcome;
 
+  /**
+  * @dev returns whether outcome is set
+  * @returns true if outcome is set, false if outcome is not set
+  */
   function isOutcomeSet() public view returns (bool) {
     return isSet;
   }
 
+  /**
+  * @dev returns the value of the outcome
+  * @returns value of set outcome
+  */
   function getOutcome() public view returns (int) {
     return outcome;
   }
