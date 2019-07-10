@@ -8,11 +8,11 @@ contract ScalarPriceOracleBase {
   int public outcome;
 
   function isOutcomeSet() public view returns (bool) {
-      return isSet;
+    return isSet;
   }
 
   function getOutcome() public view returns (int) {
-      return outcome;
+    return outcome;
   }
 
   function setOutcome(int _outcome) public {
