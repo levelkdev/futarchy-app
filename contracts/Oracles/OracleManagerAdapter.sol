@@ -9,16 +9,19 @@ import './TimedOracle.sol';
 */
 contract OracleManagerAdapter is ScalarPriceOracleBase, TimedOracle {
 
-  address public oracleManagerApp;
+  address public medianDataFeed;
+  uint public medianTimeFrame;
   int public outcome;
   bool public isSet;
 
   constructor(
-    address _oracleManagerApp,
+    address _medianDataFeed,
+    uint _medianTimeFrame,
     uint _resolutionDate
   ) public TimedOracle(_resolutionDate)
   {
-    oracleManagerApp = _oracleManagerApp;
+    medianDataFeed = _medianDataFeed;
+    medianTimeFrame = _medianTimeFrame;
   }
 
   /**
@@ -26,7 +29,7 @@ contract OracleManagerAdapter is ScalarPriceOracleBase, TimedOracle {
   */
   function setOutcome() public resolutionDatePassed {
     uint result;
-    /* TODO: result = oracleManager.getMedianPrice(resolutionDate, 24 hours) */
+    /* TODO: result = medianDataFeed.getMedianPrice(resolutionDate, resolutionDate + medianTimeFrame) */
     _setOutcome(int(result));
   }
 }
