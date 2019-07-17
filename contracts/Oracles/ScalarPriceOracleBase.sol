@@ -24,7 +24,7 @@ contract ScalarPriceOracleBase {
   }
 
   function _setOutcome(int _outcome) internal {
-    require(!isSet);
+    require(!isSet, "oracle is already set");
     isSet = true;
     outcome = _outcome;
     emit OutcomeAssignment(outcome);

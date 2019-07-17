@@ -1,11 +1,11 @@
 pragma solidity ^0.4.24;
 
-import './OracleManagerAdapter.sol';
+import './MedianPriceOracle.sol';
 import './IScalarPriceOracleFactory.sol';
 
-contract OracleManageAdapterFactory is IScalarPriceOracleFactory {
+contract MedianPriceOracleFactory is IScalarPriceOracleFactory {
 
-    event OracleManagerAdapterCreation(address indexed creator, IScalarPriceOracle centralizedTimedOracle, bytes ipfsHash, uint resolutionDate);
+    event MedianPriceOracleCreation(address indexed creator, IScalarPriceOracle medianPriceOracle, bytes ipfsHash, uint resolutionDate);
 
     address timeMedianDataFeed;
     uint medianTimeframe;
@@ -24,11 +24,11 @@ contract OracleManageAdapterFactory is IScalarPriceOracleFactory {
     */
     function createOracle(bytes ipfsHash, uint resolutionDate)
         external
-        returns (IScalarPriceOracle oracleManagerAdapter)
+        returns (IScalarPriceOracle medianPriceOracle)
     {
-        oracleManagerAdapter = IScalarPriceOracle(
-          new OracleManagerAdapter(timeMedianDataFeed, medianTimeframe, resolutionDate)
+        medianPriceOracle = IScalarPriceOracle(
+          new MedianPriceOracle(timeMedianDataFeed, medianTimeframe, resolutionDate)
         );
-        emit OracleManagerAdapterCreation(msg.sender, oracleManagerAdapter, ipfsHash, resolutionDate);
+        emit MedianPriceOracleCreation(msg.sender, medianPriceOracle, ipfsHash, resolutionDate);
     }
 }
