@@ -27,8 +27,8 @@ contract('MedianPriceOracle', (accounts) => {
       expect(await medianPriceOracle.medianDataFeed()).to.equal(medianDataFeed.address)
     })
 
-    it('sets the correct medianTimeframe', async () => {
-      expect((await medianPriceOracle.medianTimeframe()).toNumber()).to.equal(MEDIAN_TIMEFRAME)
+    it('sets the correct medianStartDate', async () => {
+      expect((await medianPriceOracle.medianStartDate()).toNumber()).to.equal(RESOLUTION_DATE - MEDIAN_TIMEFRAME)
     })
 
     it('sets the correct resolutionDate', async () => {
@@ -144,6 +144,55 @@ contract('MedianPriceOracle', (accounts) => {
 
       await assertRevert(async () => {
         await medianPriceOracle.setOutcome(2, 4)
+      })
+    })
+
+    describe('when no results were recorded during timeframe', () => {
+      let outcome1, outcome2, futureDate1, futureDate2
+
+      beforeEach(async () => {
+        outcome1 = 10
+        outcome2 = 11
+        futureDate1 = RESOLUTION_DATE + (6 * pingInterval)
+        futureDate2 = RESOLUTION_DATE + (7 * pingInterval)
+
+        await medianDataFeed.setResult(uintToBytes32(outcome1), futureDate1)
+        await medianDataFeed.setResult(uintToBytes32(outcome2), futureDate2)
+      })
+
+      it('sets the outcome to the result recorded directly after the timeframe', async () => {
+        medianPriceOracle = await MedianPriceOracle.new(
+          medianDataFeed.address,
+          MEDIAN_TIMEFRAME,
+          RESOLUTION_DATE + (5 * pingInterval),
+        )
+
+        await medianPriceOracle.setOutcome(7, 7)
+        expect((await medianPriceOracle.getOutcome()).toNumber()).to.equal(outcome1)
+      })
+
+      it('reverts if startIndex and endIndex do not correspond to the first result recorded after timeframe', async () => {
+        medianPriceOracle = await MedianPriceOracle.new(
+          medianDataFeed.address,
+          MEDIAN_TIMEFRAME,
+          RESOLUTION_DATE + (5 * pingInterval),
+        )
+
+        await assertRevert(async () => {
+          await medianPriceOracle.setOutcome(8, 8)
+        })
+      })
+
+      it('reverts if startIndex does not equal endIndex', async () => {
+        medianPriceOracle = await MedianPriceOracle.new(
+          medianDataFeed.address,
+          MEDIAN_TIMEFRAME,
+          RESOLUTION_DATE + (5 * pingInterval),
+        )
+
+        await assertRevert(async () => {
+          await medianPriceOracle.setOutcome(7, 8)
+        })
       })
     })
   })
