@@ -6,7 +6,7 @@ import './TimedOracle.sol';
 
 /**
 * Contract that allows IScalarPriceOracle to interface with
-* Aragon's Oracle Manager App which uses tidbit oracle interface
+* tidbit price feeds via https://github.com/levelkdev/token-price-oracles
 */
 contract MedianPriceOracle is ScalarPriceOracleBase, TimedOracle {
   using SafeMath for uint;
@@ -35,31 +35,37 @@ contract MedianPriceOracle is ScalarPriceOracleBase, TimedOracle {
   */
   function setOutcome(uint startIndex, uint endIndex) public resolutionDatePassed {
     bytes32 result;
-    _requireValidStartIndex(startIndex);
-    _requireValidEndIndex(endIndex);
+    require(_isValidStartIndex(startIndex));
+    require(_isValidEndIndex(endIndex));
     result = medianDataFeed.medianizeByIndices(startIndex, endIndex);
     _setOutcome(int(result));
   }
 
   // Internal Functions
 
-  function _requireValidStartIndex(uint startIndex) internal {
+  function _isValidStartIndex(uint startIndex) internal returns (bool) {
     (, uint startDate) = medianDataFeed.resultByIndexFor(startIndex);
-    require(startDate >= resolutionDate.sub(medianTimeframe), "start date must be within medianized timeframe");
+    bool startIndexWithinTimeframe = startDate >= resolutionDate.sub(medianTimeframe);
 
+    bool firstAvailableStartIndex = true;
     if (startIndex > 1) {
       (, uint prevDate) = medianDataFeed.resultByIndexFor(startIndex.sub(1));
-      require(prevDate < resolutionDate.sub(medianTimeframe), "start date must be the first date within medianized timeframe");
+      firstAvailableStartIndex = prevDate < resolutionDate.sub(medianTimeframe);
     }
+
+    return startIndexWithinTimeframe && firstAvailableStartIndex;
   }
 
-  function _requireValidEndIndex(uint endIndex) internal {
+  function _isValidEndIndex(uint endIndex) internal returns (bool) {
     (, uint endDate) = medianDataFeed.resultByIndexFor(endIndex);
-    require(endDate <= resolutionDate, "end date must be within medianized timeframe");
+    bool endIndexWithinTimeframe = endDate <= resolutionDate;
 
+    bool lastAvailableEndIndex = true;
     if (medianDataFeed.doesIndexExistFor(endIndex.add(1))) {
       (, uint nextDate) = medianDataFeed.resultByIndexFor(endIndex.add(1));
-      require(nextDate > resolutionDate, "end date must be the last date within medianized timeframe");
+      lastAvailableEndIndex = nextDate > resolutionDate;
     }
+
+    return endIndexWithinTimeframe && lastAvailableEndIndex;
   }
 }
