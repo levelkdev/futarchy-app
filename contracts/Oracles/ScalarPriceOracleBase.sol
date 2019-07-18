@@ -9,7 +9,7 @@ contract ScalarPriceOracleBase {
 
   /**
   * @dev returns whether outcome is set
-  * @returns true if outcome is set, false if outcome is not set
+  * @return true if outcome is set, false if outcome is not set
   */
   function isOutcomeSet() public view returns (bool) {
     return isSet;
@@ -17,14 +17,14 @@ contract ScalarPriceOracleBase {
 
   /**
   * @dev returns the value of the outcome
-  * @returns value of set outcome
+  * @return value of set outcome
   */
   function getOutcome() public view returns (int) {
     return outcome;
   }
 
   function _setOutcome(int _outcome) internal {
-    require(!isSet);
+    require(!isSet, "oracle is already set");
     isSet = true;
     outcome = _outcome;
     emit OutcomeAssignment(outcome);
