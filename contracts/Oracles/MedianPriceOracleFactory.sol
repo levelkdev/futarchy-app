@@ -10,7 +10,6 @@ contract MedianPriceOracleFactory is IScalarPriceOracleFactory {
     address timeMedianDataFeed;
     uint medianTimeframe;
 
-
     constructor(address _timeMedianDataFeed, uint _medianTimeframe) public {
       timeMedianDataFeed = _timeMedianDataFeed;
       medianTimeframe = _medianTimeframe;

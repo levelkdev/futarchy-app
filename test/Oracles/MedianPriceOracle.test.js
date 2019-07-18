@@ -77,6 +77,28 @@ contract('MedianPriceOracle', (accounts) => {
       expect((await medianPriceOracle.getOutcome()).toNumber()).to.equal(7)
     })
 
+    it('sets the correct outcome if only one index is included in the median timeframe', async () => {
+      medianPriceOracle = await MedianPriceOracle.new(
+        medianDataFeed.address,
+        MEDIAN_TIMEFRAME,
+        RESOLUTION_DATE - (4 * pingInterval),
+      )
+
+      await medianPriceOracle.setOutcome(1, 1)
+      expect((await medianPriceOracle.getOutcome()).toNumber()).to.equal(5)
+    })
+
+    it('sets the correct outcome if recorded dates are not exact', async () => {
+      medianPriceOracle = await MedianPriceOracle.new(
+        medianDataFeed.address,
+        MEDIAN_TIMEFRAME,
+        RESOLUTION_DATE + (pingInterval * 0.5),
+      )
+
+      await medianPriceOracle.setOutcome(3, 5)
+      expect((await medianPriceOracle.getOutcome()).toNumber()).to.equal(7)
+    })
+
     it('reverts if the startIndex parameter comes after the correct startIndex', async () => {
       medianPriceOracle = await MedianPriceOracle.new(
         medianDataFeed.address,
