@@ -5,7 +5,6 @@ import './ScalarPriceOracleBase.sol';
 
 contract CentralizedTimedOracle is TimedOracle {
   address public owner;
-  bytes public ipfsHash;
   bool public outcomeSubmitted;
 
   modifier isOwner() {
@@ -16,13 +15,11 @@ contract CentralizedTimedOracle is TimedOracle {
 
   constructor(
     address _owner,
-    bytes _ipfsHash,
     uint _resolutionDate
   ) public
     TimedOracle(_resolutionDate)
   {
     owner = _owner;
-    ipfsHash = _ipfsHash;
   }
 
   /**

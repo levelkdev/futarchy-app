@@ -109,7 +109,7 @@ contract Futarchy is AragonApp, IForwarder {
 
     FutarchyOracle futarchyOracle = futarchyOracleFactory.createFutarchyOracle(
       ERC20Gnosis(token),
-      Oracle(priceOracleFactory.createOracle("QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz", priceResolutionDate)),
+      Oracle(priceOracleFactory.createOracle(priceResolutionDate)),
       2,
       lowerBound,
       upperBound,
