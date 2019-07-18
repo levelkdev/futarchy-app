@@ -6,18 +6,18 @@ import './IScalarPriceOracleFactory.sol';
 
 contract CentralizedTimedOracleFactory is IScalarPriceOracleFactory {
 
-    event CentralizedTimedOracleCreation(address indexed creator, IScalarPriceOracle centralizedTimedOracle, bytes ipfsHash, uint resolutionDate);
+    event CentralizedTimedOracleCreation(address indexed creator, IScalarPriceOracle centralizedTimedOracle, uint resolutionDate);
 
     /**
     * @dev Creates a new centralized & time-constrained oracle contract
-    * @param ipfsHash Hash idxentifying off chain event description
+    * @param resolutionDate date that price oracle can be resolved
     * @return Oracle contract
     */
-    function createOracle(bytes ipfsHash, uint resolutionDate)
+    function createOracle(uint resolutionDate)
         external
         returns (IScalarPriceOracle centralizedTimedOracle)
     {
-        centralizedTimedOracle = IScalarPriceOracle(new CentralizedTimedOracle(msg.sender, ipfsHash, resolutionDate));
-        emit CentralizedTimedOracleCreation(msg.sender, centralizedTimedOracle, ipfsHash, resolutionDate);
+        centralizedTimedOracle = IScalarPriceOracle(new CentralizedTimedOracle(msg.sender, resolutionDate));
+        emit CentralizedTimedOracleCreation(msg.sender, centralizedTimedOracle, resolutionDate);
     }
 }
