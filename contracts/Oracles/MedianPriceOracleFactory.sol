@@ -16,7 +16,7 @@ contract MedianPriceOracleFactory is IScalarPriceOracleFactory {
     }
 
     /**
-    * @dev Creates a new centralized & time-constrained oracle contract
+    * @dev Creates a new median price oracle contract
     * @param ipfsHash Hash idxentifying off chain event description
     * @param resolutionDate starting date for which oracle can be resolved
     * @return Oracle contract
