@@ -7,6 +7,7 @@ module.exports = async (callback) => {
   const ERC20 = artifacts.require('ERC20')
   const FutarchyOracle = artifacts.require('FutarchyOracle')
   const Market = artifacts.require('Market')
+  const Event = artifacts.require('Event')
 
   try {
     const daoAddress = process.argv[6]
@@ -24,7 +25,7 @@ module.exports = async (callback) => {
     const app = await getFutarchyContract(artifacts, daoAddress)
     const token = ERC20.at(await app.token())
     const marketFundAmount = await app.marketFundAmount()
-  
+
     const lowerBound = 0
     const upperBound = 25 * 10 ** 18
 
@@ -41,6 +42,7 @@ module.exports = async (callback) => {
         noPrediction,
         executionScript,
         metadata,
+        resolvedPrice,
       } = data
       if (typeof(decisionId) !== 'undefined') {
         const futarchyOracle = FutarchyOracle.at((await app.decisions(decisionId))[0])
@@ -104,7 +106,7 @@ module.exports = async (callback) => {
           console.log(
             `Selling market positions ` +
             `from ${seller}`
-          )   
+          )
 
           await app.sellMarketPositions(decisionId, { from: seller })
           console.log('sold positions')
@@ -114,6 +116,12 @@ module.exports = async (callback) => {
           await app.setDecision(decisionId)
           console.log(`Decision set for decision ${decisionId}`)
           break
+        case 'setScalarOutcome':
+          console.log(`setScalarOutcome: ${decisionId}, ${resolvedPrice}`)
+          let futarchyOracle = FutarchyOracle.at((await app.decisions(decisionId))[0])
+          await app.setPriceOutcome(decisionId, resolvedPrice)
+          let event = Event.at(await Market.at(await futarchyOracle.markets(await futarchyOracle.winningMarketIndex())).eventContract())
+          await event.setOutcome()
         case 'advanceTime':
           await advanceTime(web3, data.seconds)
           break
