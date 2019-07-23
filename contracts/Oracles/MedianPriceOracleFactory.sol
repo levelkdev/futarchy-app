@@ -5,7 +5,7 @@ import './IScalarPriceOracleFactory.sol';
 
 contract MedianPriceOracleFactory is IScalarPriceOracleFactory {
 
-    event MedianPriceOracleCreation(address indexed creator, IScalarPriceOracle medianPriceOracle, bytes ipfsHash, uint resolutionDate);
+    event MedianPriceOracleCreation(address indexed creator, IScalarPriceOracle medianPriceOracle, uint resolutionDate);
 
     address timeMedianDataFeed;
     uint medianTimeframe;
@@ -17,17 +17,16 @@ contract MedianPriceOracleFactory is IScalarPriceOracleFactory {
 
     /**
     * @dev Creates a new median price oracle contract
-    * @param ipfsHash Hash idxentifying off chain event description
     * @param resolutionDate starting date for which oracle can be resolved
     * @return Oracle contract
     */
-    function createOracle(bytes ipfsHash, uint resolutionDate)
+    function createOracle(uint resolutionDate)
         external
         returns (IScalarPriceOracle medianPriceOracle)
     {
         medianPriceOracle = IScalarPriceOracle(
           new MedianPriceOracle(timeMedianDataFeed, medianTimeframe, resolutionDate)
         );
-        emit MedianPriceOracleCreation(msg.sender, medianPriceOracle, ipfsHash, resolutionDate);
+        emit MedianPriceOracleCreation(msg.sender, medianPriceOracle, resolutionDate);
     }
 }
