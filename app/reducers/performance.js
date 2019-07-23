@@ -20,6 +20,7 @@ const modifyTraderPositionsReducer = (state, action) => {
   let { trader, decisionId } = returnValues
   let totals = _.find(state, { trader, decisionId })
 
+  console.log('action ', action.type)
   if (!totals) {
     totals = initialTotals(trader, decisionId)
     state.push(totals)

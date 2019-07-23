@@ -2,6 +2,9 @@ pragma solidity ^0.4.24;
 
 import './Oracles/CentralizedTimedOracle.sol'; /* TODO: switch to IScalarPriceOracle once we switch from centralized solution */
 import '@gnosis.pm/pm-contracts/contracts/Oracles/FutarchyOracle.sol';
+import '@gnosis.pm/pm-contracts/contracts/Markets/Market.sol';
+import '@gnosis.pm/pm-contracts/contracts/Markets/StandardMarketWithPriceLogger.sol';
+import '@gnosis.pm/pm-contracts/contracts/Markets/StandardMarket.sol';
 import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 
 library DecisionLib {
@@ -30,23 +33,52 @@ library DecisionLib {
     uint creatorRefund = newBalance - previousBalance;
     require(self.token.transfer(self.decisionCreator, creatorRefund));
 
-    winningMarketIndex = self.passed ? 0 : 1;
+    winningMarketIndex = self.futarchyOracle.winningMarketIndex();
     self.futarchyOracle.markets(winningMarketIndex).eventContract().redeemWinnings();
     self.futarchyOracle.categoricalEvent().redeemWinnings();
   }
 
-  function setDecision(Decision storage self) {
-    require(self.decisionResolutionDate < now);
 
-    if(!self.futarchyOracle.categoricalEvent().isOutcomeSet()) {
-      if (!self.futarchyOracle.isOutcomeSet()) {
-        self.futarchyOracle.setOutcome();
+
+  /* This function should never revert if all proper checks/conditionals are in place */
+  function setDecision(Decision storage self) public {
+    _resolveReadyDecision(self);
+    _closeReadyMarkets(self);
+  }
+
+  function _resolveReadyDecision(Decision storage self) private {
+    // Resolve unresolved decision if enough time has passed
+    if (self.decisionResolutionDate < now) {
+      FutarchyOracle futarchyOracle = self.futarchyOracle;
+
+      if(!futarchyOracle.categoricalEvent().isOutcomeSet()) {
+        if (!futarchyOracle.isOutcomeSet()) {
+          futarchyOracle.setOutcome();
+        }
+        CategoricalEvent(futarchyOracle.categoricalEvent()).setOutcome();
       }
-      CategoricalEvent(self.futarchyOracle.categoricalEvent()).setOutcome();
-    }
 
-    self.resolved = true;
-    self.passed = self.futarchyOracle.winningMarketIndex() == 0 ? true : false;
+      // Update decision struct
+      uint winningMarketIndex = futarchyOracle.winningMarketIndex();
+      self.resolved = true;
+      self.passed = futarchyOracle.winningMarketIndex() == 0 ? true : false;
+    }
+  }
+
+  function _closeReadyMarkets(Decision storage self) private {
+    FutarchyOracle futarchyOracle = self.futarchyOracle;
+    StandardMarket winningMarket = futarchyOracle.markets(futarchyOracle.winningMarketIndex());
+
+    if (
+      !(winningMarket.stage() == MarketData.Stages.MarketClosed) &&
+      self.priceResolutionDate < now &&
+      winningMarket.eventContract().oracle().isOutcomeSet()
+    ) {
+      if (!winningMarket.eventContract().isOutcomeSet()) {
+        winningMarket.eventContract().setOutcome();
+      }
+      closeDecisionMarkets(self);
+    }
   }
 
   function execute(Decision storage self) {
@@ -126,7 +158,7 @@ library DecisionLib {
     noCollateralNetCost  = noMarket.trade(noSellAmounts, 0);
   }
 
-  function redeemWinningCollateralTokens(
+  function transferWinningCollateralTokens(
     Decision storage self,
     uint yesCollateral,
     uint noCollateral
@@ -135,7 +167,6 @@ library DecisionLib {
 
     FutarchyOracle futarchyOracle = self.futarchyOracle;
 
-    setDecision(self);
     winningIndex = futarchyOracle.getOutcome();
     futarchyOracle.categoricalEvent().redeemWinnings();
 

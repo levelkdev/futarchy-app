@@ -250,7 +250,7 @@ contract Futarchy is AragonApp, IForwarder {
   function redeemWinningCollateralTokens(uint decisionId) public {
     OutcomeTokenBalances storage outcomeTokenBalances = traderDecisionBalances[keccak256(msg.sender, decisionId)];
 
-    (int winningIndex, uint winnings) = decisions[decisionId].redeemWinningCollateralTokens(
+    (int winningIndex, uint winnings) = decisions[decisionId].transferWinningCollateralTokens(
       outcomeTokenBalances.yesCollateral,
       outcomeTokenBalances.noCollateral
     );
@@ -288,6 +288,7 @@ contract Futarchy is AragonApp, IForwarder {
   }
 
   function redeemWinnings(uint decisionId) public {
+    setDecision(decisionId);
     MarketData.Stages marketStage = decisions[decisionId].marketStage();
     require(marketStage != MarketData.Stages.MarketCreated);
 
