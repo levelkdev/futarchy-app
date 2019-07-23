@@ -29,10 +29,12 @@ contract MedianPriceOracle is ScalarPriceOracleBase, TimedOracle {
   }
 
   /**
-  * @dev queries tidbit dataFeed to calculate and set outcome if resolution date has passed
-  * @param startIndex index for first date in datafeed dates array within resolution timeframe
+  * @notice Throws if resolution date has not passed.
+  * @dev    Gets a medianized result from the TimeMedianDataFeed contract and sets the outcome
+  *         with the result.
+  * @param startIndex Index for first date in datafeed dates array within resolution timeframe
   *                   or the first index after timeframe if no results recorded within timeframe
-  * @param endIndex   index of final date in datafeed dates array within resolution timeframe
+  * @param endIndex   Index of final date in datafeed dates array within resolution timeframe
   *                   or the first date after timeframe if no results recorded within timeframe
   */
   function setOutcome(uint startIndex, uint endIndex)
