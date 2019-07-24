@@ -84,8 +84,10 @@ contract MedianPriceOracle is ScalarPriceOracleBase, TimedOracle {
     bool endIndexWithinTimeframe = endDate <= resolutionDate;
     bool nextIndexAfterTimeframe = true;
 
-    (, uint nextDate) = medianDataFeed.resultByIndex(endIndex.add(1));
-    nextIndexAfterTimeframe = nextDate > resolutionDate;
+    if (medianDataFeed.indexHasResult(endIndex.add(1))) {
+      (, uint nextDate) = medianDataFeed.resultByIndex(endIndex.add(1));
+      nextIndexAfterTimeframe = nextDate > resolutionDate;
+    }
 
     return endIndexWithinTimeframe && nextIndexAfterTimeframe;
   }
