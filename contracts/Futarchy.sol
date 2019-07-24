@@ -141,8 +141,8 @@ contract Futarchy is AragonApp, IForwarder {
     decisions[decisionId].closeDecisionMarkets();
   }
 
-  function setDecision(uint decisionId) public {
-    decisions[decisionId].setDecision();
+  function transitionDecision(uint decisionId) public {
+    decisions[decisionId].transitionDecision();
   }
 
   /**
@@ -288,7 +288,7 @@ contract Futarchy is AragonApp, IForwarder {
   }
 
   function redeemWinnings(uint decisionId) public {
-    setDecision(decisionId);
+    transitionDecision(decisionId);
     MarketData.Stages marketStage = decisions[decisionId].marketStage();
     require(marketStage != MarketData.Stages.MarketCreated);
 

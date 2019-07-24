@@ -221,7 +221,7 @@ contract('Futarchy', (accounts) => {
     })
   })
 
-  describe('setDecision()', () => {
+  describe('transitionDecision()', () => {
 
     beforeEach(async () => {
       // large setup not required bc no integration with full futarchyOracle here
@@ -238,21 +238,21 @@ contract('Futarchy', (accounts) => {
       it('resolves the categoricalEvent', async () => {
         expect(await Event.at(await futarchyOracle.categoricalEvent()).isOutcomeSet()).to.equal(false)
         await timeTravel(TRADING_PERIOD + 1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
         expect(await Event.at(await futarchyOracle.categoricalEvent()).isOutcomeSet()).to.equal(true)
       })
 
       it('resolves the futarchyOracle', async () => {
         expect(await futarchyOracle.isOutcomeSet()).to.equal(false)
         await timeTravel(TRADING_PERIOD + 1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
         expect(await futarchyOracle.isOutcomeSet()).to.equal(true)
       })
 
       it('sets decision.resolved to true', async () => {
         expect((await futarchy.decisions(0))[6]).to.equal(false)
         await timeTravel(TRADING_PERIOD + 1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
         expect((await futarchy.decisions(0))[6]).to.equal(true)
       })
 
@@ -260,7 +260,7 @@ contract('Futarchy', (accounts) => {
         await futarchyOracle.mock_setWinningMarketIndex(0)
         expect((await futarchy.decisions(0))[7]).to.equal(false)
         await timeTravel(TRADING_PERIOD + 1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
         expect((await futarchy.decisions(0))[7]).to.equal(true)
       })
 
@@ -268,7 +268,7 @@ contract('Futarchy', (accounts) => {
         await futarchyOracle.mock_setWinningMarketIndex(1)
         expect((await futarchy.decisions(0))[7]).to.equal(false)
         await timeTravel(TRADING_PERIOD + 1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
         expect((await futarchy.decisions(0))[7]).to.equal(false)
       })
     })
@@ -282,7 +282,7 @@ contract('Futarchy', (accounts) => {
         expect((await futarchy.decisions(0))[7]).to.equal(false)
 
         await timeTravel(TRADING_PERIOD + 1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
 
         expect((await futarchy.decisions(0))[7]).to.equal(true)
       })
@@ -295,7 +295,7 @@ contract('Futarchy', (accounts) => {
         expect((await futarchy.decisions(0))[7]).to.equal(false)
 
         await timeTravel(TRADING_PERIOD + 1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
 
         expect((await futarchy.decisions(0))[7]).to.equal(false)
       })
@@ -308,7 +308,7 @@ contract('Futarchy', (accounts) => {
         expect((await futarchy.decisions(0))[6]).to.equal(false)
 
         await timeTravel(TRADING_PERIOD + 1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
 
         expect((await futarchy.decisions(0))[6]).to.equal(true)
       })
@@ -324,7 +324,7 @@ contract('Futarchy', (accounts) => {
         await timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
 
         expect((await winningMarket.stage()).toNumber()).to.equal(1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
         expect((await winningMarket.stage()).toNumber()).to.equal(2)
       })
 
@@ -338,7 +338,7 @@ contract('Futarchy', (accounts) => {
         await timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
 
         expect((await winningMarket.stage()).toNumber()).to.equal(1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
         expect((await winningMarket.stage()).toNumber()).to.equal(1)
       })
 
@@ -352,9 +352,9 @@ contract('Futarchy', (accounts) => {
         await OracleMock.at(await Event.at((await winningMarket.eventContract())).oracle()).mock_setIsSet(true)
         await timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
 
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
         expect((await winningMarket.stage()).toNumber()).to.equal(2)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
         expect((await winningMarket.stage()).toNumber()).to.equal(2)
       })
     })
@@ -893,7 +893,7 @@ contract('Futarchy', (accounts) => {
     describe('when scalar markets are not yet resolved', () => {
        beforeEach(async () => {
          timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
-         await futarchy.setDecision(0)
+         await futarchy.transitionDecision(0)
        })
 
       it('first calls sellMarketPositions for sender decision positions', async () => {
@@ -910,7 +910,7 @@ contract('Futarchy', (accounts) => {
     describe('when scalar markets are resolved', () => {
       beforeEach(async () => {
         timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
         await setScalarEvent(futarchy, 0, 87)
       })
 

@@ -111,9 +111,9 @@ module.exports = async (callback) => {
           await app.sellMarketPositions(decisionId, { from: seller })
           console.log('sold positions')
           break
-        case 'setDecision':
+        case 'transitionDecision':
           console.log(`Set decision for decision ${decisionId}`)
-          await app.setDecision(decisionId)
+          await app.transitionDecision(decisionId)
           console.log(`Decision set for decision ${decisionId}`)
           break
         case 'setScalarOutcome':

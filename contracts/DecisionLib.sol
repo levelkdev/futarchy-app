@@ -2,8 +2,6 @@ pragma solidity ^0.4.24;
 
 import './Oracles/CentralizedTimedOracle.sol'; /* TODO: switch to IScalarPriceOracle once we switch from centralized solution */
 import '@gnosis.pm/pm-contracts/contracts/Oracles/FutarchyOracle.sol';
-import '@gnosis.pm/pm-contracts/contracts/Markets/Market.sol';
-import '@gnosis.pm/pm-contracts/contracts/Markets/StandardMarketWithPriceLogger.sol';
 import '@gnosis.pm/pm-contracts/contracts/Markets/StandardMarket.sol';
 import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 
@@ -41,12 +39,12 @@ library DecisionLib {
 
 
   /* This function should never revert if all proper checks/conditionals are in place */
-  function setDecision(Decision storage self) public {
-    _resolveReadyDecision(self);
-    _closeReadyMarkets(self);
+  function transitionDecision(Decision storage self) public {
+    _closeResolvedDecision(self);
+    _closeResolvedMarket(self);
   }
 
-  function _resolveReadyDecision(Decision storage self) private {
+  function _closeResolvedDecision(Decision storage self) private {
     // Resolve unresolved decision if enough time has passed
     if (self.decisionResolutionDate < now) {
       FutarchyOracle futarchyOracle = self.futarchyOracle;
@@ -65,7 +63,7 @@ library DecisionLib {
     }
   }
 
-  function _closeReadyMarkets(Decision storage self) private {
+  function _closeResolvedMarket(Decision storage self) private {
     FutarchyOracle futarchyOracle = self.futarchyOracle;
     StandardMarket winningMarket = futarchyOracle.markets(futarchyOracle.winningMarketIndex());
 
@@ -83,7 +81,7 @@ library DecisionLib {
 
   function execute(Decision storage self) {
     require(self.decisionResolutionDate < now && !self.executed);
-    setDecision(self);
+    transitionDecision(self);
     require(self.resolved && self.passed);
     self.executed = true;
   }

@@ -118,7 +118,7 @@
     "seconds": 259200
   },
   {
-    "type": "setDecision",
+    "type": "transitionDecision",
     "decisionId": 0
   },
   {
@@ -208,7 +208,7 @@
     "seconds": 259200
   },
   {
-    "type": "setDecision",
+    "type": "transitionDecision",
     "decisionId": 1
   },
   {
@@ -394,7 +394,7 @@
     "seconds": 259200
   },
   {
-    "type": "setDecision",
+    "type": "transitionDecision",
     "decisionId": 2
   },
   {
