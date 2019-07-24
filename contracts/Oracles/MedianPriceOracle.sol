@@ -62,13 +62,13 @@ contract MedianPriceOracle is ScalarPriceOracleBase, TimedOracle {
     internal
     returns (bool)
   {
-    (, uint startDate) = medianDataFeed.resultByIndexFor(startIndex);
+    (, uint startDate) = medianDataFeed.resultByIndex(startIndex);
 
     bool startIndexWithinTimeframe = startDate >= medianStartDate;
     bool previousIndexBeforeTimeframe = true;
 
     if (startIndex > 1) {
-      (, uint prevDate) = medianDataFeed.resultByIndexFor(startIndex.sub(1));
+      (, uint prevDate) = medianDataFeed.resultByIndex(startIndex.sub(1));
       previousIndexBeforeTimeframe = prevDate < medianStartDate;
     }
 
@@ -79,13 +79,13 @@ contract MedianPriceOracle is ScalarPriceOracleBase, TimedOracle {
     internal
     returns (bool)
   {
-    (, uint endDate) = medianDataFeed.resultByIndexFor(endIndex);
+    (, uint endDate) = medianDataFeed.resultByIndex(endIndex);
 
     bool endIndexWithinTimeframe = endDate <= resolutionDate;
     bool nextIndexAfterTimeframe = true;
 
-    if (medianDataFeed.doesIndexExistFor(endIndex.add(1))) {
-      (, uint nextDate) = medianDataFeed.resultByIndexFor(endIndex.add(1));
+    if (medianDataFeed.indexHasResult(endIndex.add(1))) {
+      (, uint nextDate) = medianDataFeed.resultByIndex(endIndex.add(1));
       nextIndexAfterTimeframe = nextDate > resolutionDate;
     }
 
@@ -96,8 +96,8 @@ contract MedianPriceOracle is ScalarPriceOracleBase, TimedOracle {
     internal
     returns (bool)
   {
-    (, uint startDate) = medianDataFeed.resultByIndexFor(startIndex);
-    (, uint prevDate) = medianDataFeed.resultByIndexFor(startIndex.sub(1));
+    (, uint startDate) = medianDataFeed.resultByIndex(startIndex);
+    (, uint prevDate) = medianDataFeed.resultByIndex(startIndex.sub(1));
 
     bool matchingIndices = startIndex == endIndex;
     bool previousDateBeforeTimeframe = prevDate < medianStartDate;
