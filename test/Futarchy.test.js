@@ -102,7 +102,7 @@ contract('Futarchy', (accounts) => {
     })
 
     it('can only be called once on an instance of Futarchy', async () => {
-      return (async () => {
+      return assertRevert(async () => {
         await initializeFutarchy()
       })
     })

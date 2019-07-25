@@ -38,7 +38,12 @@ library DecisionLib {
 
 
 
-  /* This function should never revert if all proper checks/conditionals are in place */
+  /**
+  * @dev Checks to see if decision is ready for any transitions, then executes
+  *      appropriate transitions to Event, Market, or Oracle contracts
+  *      Guards against reverts by checking against assertions before executing any
+  *      transitions. This function should NEVER revert
+  */
   function transitionDecision(Decision storage self) public {
     _closeResolvedDecision(self);
     _closeResolvedMarket(self);
@@ -57,7 +62,6 @@ library DecisionLib {
       }
 
       // Update decision struct
-      uint winningMarketIndex = futarchyOracle.winningMarketIndex();
       self.resolved = true;
       self.passed = futarchyOracle.winningMarketIndex() == 0 ? true : false;
     }
