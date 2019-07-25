@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 import './Oracles/CentralizedTimedOracle.sol'; /* TODO: switch to IScalarPriceOracle once we switch from centralized solution */
 import '@gnosis.pm/pm-contracts/contracts/Oracles/FutarchyOracle.sol';
-import '@gnosis.pm/pm-contracts/contracts/Markets/StandardMarket.sol';
+import '@gnosis.pm/pm-contracts/contracts/Markets/Market.sol';
 import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 
 library DecisionLib {
@@ -65,7 +65,7 @@ library DecisionLib {
 
   function _closeResolvedMarket(Decision storage self) private {
     FutarchyOracle futarchyOracle = self.futarchyOracle;
-    StandardMarket winningMarket = futarchyOracle.markets(futarchyOracle.winningMarketIndex());
+    Market winningMarket = futarchyOracle.markets(futarchyOracle.winningMarketIndex());
 
     if (
       !(winningMarket.stage() == MarketData.Stages.MarketClosed) &&
@@ -94,8 +94,8 @@ library DecisionLib {
   ) returns (uint[2] yesCosts, uint[2] noCosts) {
     // set necessary contracts
     CategoricalEvent categoricalEvent = self.futarchyOracle.categoricalEvent();
-    StandardMarket yesMarket = self.futarchyOracle.markets(0);
-    StandardMarket noMarket = self.futarchyOracle.markets(1);
+    Market yesMarket = self.futarchyOracle.markets(0);
+    Market noMarket = self.futarchyOracle.markets(1);
 
     require(self.token.transferFrom(msg.sender, this, collateralAmount));
     self.token.approve(categoricalEvent, collateralAmount);
@@ -137,8 +137,8 @@ library DecisionLib {
 
     // set necessary contracts
     FutarchyOracle futarchyOracle = self.futarchyOracle;
-    StandardMarket yesMarket = futarchyOracle.markets(0);
-    StandardMarket noMarket = futarchyOracle.markets(1);
+    Market yesMarket = futarchyOracle.markets(0);
+    Market noMarket = futarchyOracle.markets(1);
 
     // approve token transfers
     yesMarket.eventContract().outcomeTokens(1).approve(yesMarket, yesLongAmount);
