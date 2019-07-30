@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 import './Oracles/CentralizedTimedOracle.sol'; /* TODO: switch to IScalarPriceOracle once we switch from centralized solution */
 import '@gnosis.pm/pm-contracts/contracts/Oracles/FutarchyOracle.sol';
+import '@gnosis.pm/pm-contracts/contracts/Markets/Market.sol';
 import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 
 library DecisionLib {
@@ -30,28 +31,61 @@ library DecisionLib {
     uint creatorRefund = newBalance - previousBalance;
     require(self.token.transfer(self.decisionCreator, creatorRefund));
 
-    winningMarketIndex = self.passed ? 0 : 1;
+    winningMarketIndex = self.futarchyOracle.winningMarketIndex();
     self.futarchyOracle.markets(winningMarketIndex).eventContract().redeemWinnings();
     self.futarchyOracle.categoricalEvent().redeemWinnings();
   }
 
-  function setDecision(Decision storage self) {
-    require(self.decisionResolutionDate < now);
 
-    if(!self.futarchyOracle.categoricalEvent().isOutcomeSet()) {
-      if (!self.futarchyOracle.isOutcomeSet()) {
-        self.futarchyOracle.setOutcome();
+
+  /**
+  * @dev Checks to see if decision is ready for any transitions, then executes
+  *      appropriate transitions to Event, Market, or Oracle contracts
+  *      Guards against reverts by checking against assertions before executing any
+  *      transitions. This function should NEVER revert
+  */
+  function transitionDecision(Decision storage self) public {
+    _closeResolvedDecision(self);
+    _closeResolvedMarket(self);
+  }
+
+  function _closeResolvedDecision(Decision storage self) private {
+    // Resolve unresolved decision if enough time has passed
+    if (self.decisionResolutionDate < now) {
+      FutarchyOracle futarchyOracle = self.futarchyOracle;
+
+      if(!futarchyOracle.categoricalEvent().isOutcomeSet()) {
+        if (!futarchyOracle.isOutcomeSet()) {
+          futarchyOracle.setOutcome();
+        }
+        CategoricalEvent(futarchyOracle.categoricalEvent()).setOutcome();
       }
-      CategoricalEvent(self.futarchyOracle.categoricalEvent()).setOutcome();
-    }
 
-    self.resolved = true;
-    self.passed = self.futarchyOracle.winningMarketIndex() == 0 ? true : false;
+      // Update decision struct
+      self.resolved = true;
+      self.passed = futarchyOracle.winningMarketIndex() == 0 ? true : false;
+    }
+  }
+
+  function _closeResolvedMarket(Decision storage self) private {
+    FutarchyOracle futarchyOracle = self.futarchyOracle;
+    Market winningMarket = futarchyOracle.markets(futarchyOracle.winningMarketIndex());
+
+    if (
+      !(winningMarket.stage() == MarketData.Stages.MarketClosed) &&
+      self.priceResolutionDate < now &&
+      winningMarket.eventContract().oracle().isOutcomeSet()
+    ) {
+      if (!winningMarket.eventContract().isOutcomeSet()) {
+        winningMarket.eventContract().setOutcome();
+      }
+      closeDecisionMarkets(self);
+    }
   }
 
   function execute(Decision storage self) {
     require(self.decisionResolutionDate < now && !self.executed);
-    setDecision(self);
+    transitionDecision(self);
     require(self.resolved && self.passed);
     self.executed = true;
   }
@@ -64,8 +98,8 @@ library DecisionLib {
   ) returns (uint[2] yesCosts, uint[2] noCosts) {
     // set necessary contracts
     CategoricalEvent categoricalEvent = self.futarchyOracle.categoricalEvent();
-    StandardMarket yesMarket = self.futarchyOracle.markets(0);
-    StandardMarket noMarket = self.futarchyOracle.markets(1);
+    Market yesMarket = self.futarchyOracle.markets(0);
+    Market noMarket = self.futarchyOracle.markets(1);
 
     require(self.token.transferFrom(msg.sender, this, collateralAmount));
     self.token.approve(categoricalEvent, collateralAmount);
@@ -107,8 +141,8 @@ library DecisionLib {
 
     // set necessary contracts
     FutarchyOracle futarchyOracle = self.futarchyOracle;
-    StandardMarket yesMarket = futarchyOracle.markets(0);
-    StandardMarket noMarket = futarchyOracle.markets(1);
+    Market yesMarket = futarchyOracle.markets(0);
+    Market noMarket = futarchyOracle.markets(1);
 
     // approve token transfers
     yesMarket.eventContract().outcomeTokens(1).approve(yesMarket, yesLongAmount);
@@ -126,7 +160,7 @@ library DecisionLib {
     noCollateralNetCost  = noMarket.trade(noSellAmounts, 0);
   }
 
-  function redeemWinningCollateralTokens(
+  function transferWinningCollateralTokens(
     Decision storage self,
     uint yesCollateral,
     uint noCollateral
@@ -135,7 +169,6 @@ library DecisionLib {
 
     FutarchyOracle futarchyOracle = self.futarchyOracle;
 
-    setDecision(self);
     winningIndex = futarchyOracle.getOutcome();
     futarchyOracle.categoricalEvent().redeemWinnings();
 

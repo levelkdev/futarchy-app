@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
+import '@gnosis.pm/pm-contracts/contracts/Markets/Market.sol';
 
 contract FutarchyOracleMock {
 
@@ -60,21 +61,54 @@ contract FutarchyOracleMock {
   function close() public {
     mock_closed = true;
     token.transfer(msg.sender, mock_refundAmount);
+    markets[uint(mock_winningMarketIndex)].close();
     emit MockFutarchyClosing();
   }
 }
 
-contract MarketMock {
+contract MarketMock is MarketData {
   MockEvent public eventContract;
+
+  event MockMarketClosed();
+  event MockSetStage(Stages _stage);
 
   constructor() public {
     eventContract = new MockEvent();
+    stage = Stages.MarketFunded;
+  }
+
+  function mock_setStage(Stages _stage) public {
+    stage = _stage;
+    emit MockSetStage(_stage);
+  }
+
+  function close() public {
+    require(stage == Stages.MarketFunded);
+    stage = Stages.MarketClosed;
+    emit MockMarketClosed();
+  }
+}
+
+contract OracleMock {
+  bool isSet;
+
+  function isOutcomeSet() public returns (bool) {
+    return isSet;
+  }
+
+  function mock_setIsSet(bool _isSet) public {
+    isSet = _isSet;
   }
 }
 
 contract MockEvent {
   bool public mock_isSet;
   int public outcome;
+  OracleMock public oracle;
+
+  constructor() {
+    oracle = new OracleMock();
+  }
 
   function redeemWinnings() public returns (uint winnings) {
     winnings = 5;

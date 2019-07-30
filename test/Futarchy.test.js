@@ -13,9 +13,12 @@ const FutarchyOracleFull = artifacts.require('FutarchyOracle.sol')
 const FutarchyOracleFactoryFull = artifacts.require('FutarchyOracleFactory.sol')
 const FutarchyOracleMock = artifacts.require('FutarchyOracleMock.sol')
 const FutarchyOracleFactoryMock = artifacts.require('FutarchyOracleFactoryMock.sol')
+const MarketMock = artifacts.require('MarketMock.sol')
+const OracleMock = artifacts.require('OracleMock.sol')
 const Fixed192x64Math = artifacts.require('Fixed192x64Math')
 
 const EventFactory = artifacts.require('EventFactory')
+const Event = artifacts.require('Event')
 const CategoricalEvent = artifacts.require('CategoricalEvent')
 const ScalarEvent = artifacts.require('ScalarEvent')
 const OutcomeToken = artifacts.require('OutcomeToken')
@@ -23,7 +26,6 @@ const StandardMarketWithPriceLogger = artifacts.require('StandardMarketWithPrice
 const StandardMarketWithPriceLoggerFactory = artifacts.require('StandardMarketWithPriceLoggerFactory')
 
 const StandardMarket = artifacts.require('StandardMarket')
-const Event = artifacts.require('Event')
 
 // local contracts
 const Futarchy = artifacts.require('Futarchy.sol')
@@ -219,11 +221,12 @@ contract('Futarchy', (accounts) => {
     })
   })
 
-  describe('setDecision()', () => {
+  describe('transitionDecision()', () => {
 
     beforeEach(async () => {
       // large setup not required bc no integration with full futarchyOracle here
       initializeFutarchy()
+      // initializeFutarchy({_futarchyOracleFactoryAddr: futarchyOracleFactoryFull.address})
       script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
       metadata = 'Give voting rights to all kitties in the world'
       await token.approve(futarchy.address, MARKET_FUND_AMOUNT +  (40 * 10 ** 18), {from: root})
@@ -232,30 +235,24 @@ contract('Futarchy', (accounts) => {
     })
 
     describe('when categoricalEvent is not yet resolved', () => {
-      it('reverts if decisionResolutionDate has not passed yet', async () => {
-        return assertRevert(async () => {
-          await futarchy.setDecision(0)
-        })
-      })
-
       it('resolves the categoricalEvent', async () => {
-        expect(await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).isOutcomeSet()).to.equal(false)
+        expect(await Event.at(await futarchyOracle.categoricalEvent()).isOutcomeSet()).to.equal(false)
         await timeTravel(TRADING_PERIOD + 1)
-        await futarchy.setDecision(0)
-        expect(await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).isOutcomeSet()).to.equal(true)
+        await futarchy.transitionDecision(0)
+        expect(await Event.at(await futarchyOracle.categoricalEvent()).isOutcomeSet()).to.equal(true)
       })
 
       it('resolves the futarchyOracle', async () => {
         expect(await futarchyOracle.isOutcomeSet()).to.equal(false)
         await timeTravel(TRADING_PERIOD + 1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
         expect(await futarchyOracle.isOutcomeSet()).to.equal(true)
       })
 
       it('sets decision.resolved to true', async () => {
         expect((await futarchy.decisions(0))[6]).to.equal(false)
         await timeTravel(TRADING_PERIOD + 1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
         expect((await futarchy.decisions(0))[6]).to.equal(true)
       })
 
@@ -263,7 +260,7 @@ contract('Futarchy', (accounts) => {
         await futarchyOracle.mock_setWinningMarketIndex(0)
         expect((await futarchy.decisions(0))[7]).to.equal(false)
         await timeTravel(TRADING_PERIOD + 1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
         expect((await futarchy.decisions(0))[7]).to.equal(true)
       })
 
@@ -271,49 +268,94 @@ contract('Futarchy', (accounts) => {
         await futarchyOracle.mock_setWinningMarketIndex(1)
         expect((await futarchy.decisions(0))[7]).to.equal(false)
         await timeTravel(TRADING_PERIOD + 1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
         expect((await futarchy.decisions(0))[7]).to.equal(false)
       })
     })
 
     describe('when categoricalEvent is already resolved', () => {
       it('sets winning decision.passed to true if it is not set already', async () => {
-        await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
+        await Event.at(await futarchyOracle.categoricalEvent()).setOutcome()
         await futarchyOracle.setOutcome();
         await futarchyOracle.mock_setWinningMarketIndex(0)
 
         expect((await futarchy.decisions(0))[7]).to.equal(false)
 
         await timeTravel(TRADING_PERIOD + 1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
 
         expect((await futarchy.decisions(0))[7]).to.equal(true)
       })
 
       it('keeps losing decision.passed false', async () => {
-        await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
+        await Event.at(await futarchyOracle.categoricalEvent()).setOutcome()
         await futarchyOracle.setOutcome();
         await futarchyOracle.mock_setWinningMarketIndex(1)
 
         expect((await futarchy.decisions(0))[7]).to.equal(false)
 
         await timeTravel(TRADING_PERIOD + 1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
 
         expect((await futarchy.decisions(0))[7]).to.equal(false)
       })
 
       it('sets resolved to true if it is not set already', async () => {
-        await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
+        await Event.at(await futarchyOracle.categoricalEvent()).setOutcome()
         await futarchyOracle.setOutcome();
         await futarchyOracle.mock_setWinningMarketIndex(0)
 
         expect((await futarchy.decisions(0))[6]).to.equal(false)
 
         await timeTravel(TRADING_PERIOD + 1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
 
         expect((await futarchy.decisions(0))[6]).to.equal(true)
+      })
+
+      it('closes markets ready to be closed', async () => {
+        let winningMarketIndex = 0
+        let winningMarket = MarketMock.at(await futarchyOracle.markets(winningMarketIndex))
+
+        await Event.at(await futarchyOracle.categoricalEvent()).setOutcome()
+        await futarchyOracle.setOutcome();
+        await futarchyOracle.mock_setWinningMarketIndex(winningMarketIndex)
+        await OracleMock.at(await Event.at((await winningMarket.eventContract())).oracle()).mock_setIsSet(true)
+        await timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
+
+        expect((await winningMarket.stage()).toNumber()).to.equal(1)
+        await futarchy.transitionDecision(0)
+        expect((await winningMarket.stage()).toNumber()).to.equal(2)
+      })
+
+      it('does not revert if market is not ready to be closed', async () => {
+        let winningMarketIndex = 0
+        let winningMarket = MarketMock.at(await futarchyOracle.markets(winningMarketIndex))
+
+        await Event.at(await futarchyOracle.categoricalEvent()).setOutcome()
+        await futarchyOracle.setOutcome();
+        await futarchyOracle.mock_setWinningMarketIndex(winningMarketIndex)
+        await timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
+
+        expect((await winningMarket.stage()).toNumber()).to.equal(1)
+        await futarchy.transitionDecision(0)
+        expect((await winningMarket.stage()).toNumber()).to.equal(1)
+      })
+
+      it('does not revert if market is already closed', async () => {
+        let winningMarketIndex = 0
+        let winningMarket = MarketMock.at(await futarchyOracle.markets(winningMarketIndex))
+
+        await Event.at(await futarchyOracle.categoricalEvent()).setOutcome()
+        await futarchyOracle.setOutcome();
+        await futarchyOracle.mock_setWinningMarketIndex(winningMarketIndex)
+        await OracleMock.at(await Event.at((await winningMarket.eventContract())).oracle()).mock_setIsSet(true)
+        await timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
+
+        await futarchy.transitionDecision(0)
+        expect((await winningMarket.stage()).toNumber()).to.equal(2)
+        await futarchy.transitionDecision(0)
+        expect((await winningMarket.stage()).toNumber()).to.equal(2)
       })
     })
   })
@@ -726,7 +768,7 @@ contract('Futarchy', (accounts) => {
         await timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
 
         await futarchyOracle.setOutcome()
-        await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
+        await Event.at(await futarchyOracle.categoricalEvent()).setOutcome()
         await futarchy.setPriceOutcome(0, 85)
         await noEvent.setOutcome()
         await futarchy.closeDecisionMarkets(0)
@@ -769,7 +811,7 @@ contract('Futarchy', (accounts) => {
       await futarchy.buyMarketPositions(0, TWENTY, [TWO, 0], [0, FIVE])
       await timeTravel(TRADING_PERIOD + 1)
       await futarchyOracle.setOutcome()
-      await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
+      await Event.at(await futarchyOracle.categoricalEvent()).setOutcome()
       const { logs } = await futarchy.redeemWinningCollateralTokens(0, {from: root})
       expect(logs[0].event).to.equal('RedeemWinningCollateralTokens')
     })
@@ -779,7 +821,7 @@ contract('Futarchy', (accounts) => {
         await futarchy.buyMarketPositions(0, TWENTY, [0, TWO], [FIVE,0])
         await timeTravel(TRADING_PERIOD + 1)
         await futarchyOracle.setOutcome()
-        await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
+        await Event.at(await futarchyOracle.categoricalEvent()).setOutcome()
       })
 
       it('transfers dao token amount matching trader yesCollateral balance', async () => {
@@ -802,7 +844,7 @@ contract('Futarchy', (accounts) => {
         await futarchy.buyMarketPositions(0, TWENTY, [TWO, 0], [0, FIVE])
         await timeTravel(TRADING_PERIOD + 1)
         await futarchyOracle.setOutcome()
-        await CategoricalEvent.at(await futarchyOracle.categoricalEvent()).setOutcome()
+        await Event.at(await futarchyOracle.categoricalEvent()).setOutcome()
       })
 
       it('transfers dao token amount matching trader noCollateral balance', async () => {
@@ -821,53 +863,11 @@ contract('Futarchy', (accounts) => {
     })
 
     describe('when futarchyOracle is not yet set', () => {
-      describe('when outcome is YES', () => {
-        beforeEach(async () => {
-          await futarchy.buyMarketPositions(0, TWENTY, [0, TWO], [FIVE,0])
-          await timeTravel(TRADING_PERIOD + 1)
-        })
-
-        it('sets the outcome on FutarchyOracle', async () => {
-          expect(await futarchyOracle.isOutcomeSet()).to.equal(false)
+      it('reverts', async () => {
+        await futarchy.buyMarketPositions(0, TWENTY, [0, TWO], [FIVE,0])
+        await timeTravel(TRADING_PERIOD + 1)
+        return assertRevert(async () => {
           await futarchy.redeemWinningCollateralTokens(0, {from: root})
-          expect(await futarchyOracle.isOutcomeSet()).to.equal(true)
-        })
-
-        it('sets resolved to true in the decision struct', async () => {
-          expect((await futarchy.decisions(0))[6]).to.equal(false)
-          await futarchy.redeemWinningCollateralTokens(0, {from: root})
-          expect((await futarchy.decisions(0))[6]).to.equal(true)
-        })
-
-        it('sets passed to true in the decision struct', async () => {
-          expect((await futarchy.decisions(0))[7]).to.equal(false)
-          await futarchy.redeemWinningCollateralTokens(0, {from: root})
-          expect((await futarchy.decisions(0))[7]).to.equal(true)
-        })
-      })
-
-      describe('when outcome is NO', () => {
-        beforeEach(async () => {
-          await futarchy.buyMarketPositions(0, TWENTY, [TWO, 0], [0,FIVE])
-          await timeTravel(TRADING_PERIOD + 1)
-        })
-
-        it('sets the outcome on FutarchyOracle', async () => {
-          expect(await futarchyOracle.isOutcomeSet()).to.equal(false)
-          await futarchy.redeemWinningCollateralTokens(0, {from: root})
-          expect(await futarchyOracle.isOutcomeSet()).to.equal(true)
-        })
-
-        it('sets resolved to true in the decision struct', async () => {
-          expect((await futarchy.decisions(0))[6]).to.equal(false)
-          await futarchy.redeemWinningCollateralTokens(0, {from: root})
-          expect((await futarchy.decisions(0))[6]).to.equal(true)
-        })
-
-        it('keeps passed as false in the decision struct', async () => {
-          expect((await futarchy.decisions(0))[7]).to.equal(false)
-          await futarchy.redeemWinningCollateralTokens(0, {from: root})
-          expect((await futarchy.decisions(0))[7]).to.equal(false)
         })
       })
     })
@@ -893,7 +893,7 @@ contract('Futarchy', (accounts) => {
     describe('when scalar markets are not yet resolved', () => {
        beforeEach(async () => {
          timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
-         await futarchy.setDecision(0)
+         await futarchy.transitionDecision(0)
        })
 
       it('first calls sellMarketPositions for sender decision positions', async () => {
@@ -910,7 +910,7 @@ contract('Futarchy', (accounts) => {
     describe('when scalar markets are resolved', () => {
       beforeEach(async () => {
         timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
-        await futarchy.setDecision(0)
+        await futarchy.transitionDecision(0)
         await setScalarEvent(futarchy, 0, 87)
       })
 
