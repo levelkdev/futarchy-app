@@ -28,7 +28,7 @@
     "redux-thunk": "2.3.0",
     "rxjs-compat": "6.4.0",
     "styled-components": "4.1.3",
-    "tidbit": "github:cwhinfrey/tidbit#57fdff80868a51a8bee52646874753026efbf67f",
+    "tidbit": "github:cwhinfrey/tidbit#f88f0ede668e6275b29607b20179ebd15e03c45b",
     "token-price-oracles": "0.1.2",
     "web3-utils": "1.0.0-beta.50"
   },
