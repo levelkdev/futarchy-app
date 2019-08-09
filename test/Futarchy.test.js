@@ -743,7 +743,6 @@ contract('Futarchy', (accounts) => {
         })
       })
     })
-
   })
 
   describe('redeemWinningCollateralTokens()', () => {

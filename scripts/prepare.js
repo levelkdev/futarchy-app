@@ -35,7 +35,7 @@ module.exports = async (
 
     const {
       miniMeTokenAddress
-    } = await deployDeps(null, { artifacts, network })
+    } = await deployDeps(null, { artifacts, network, web3 })
     console.log('')
 
     await distributeTokens(null, {

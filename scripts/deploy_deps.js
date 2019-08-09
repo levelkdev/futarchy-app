@@ -1,4 +1,5 @@
 const tryDeployToNetwork = require('./utilities/tryDeployToNetwork')
+const getAccounts = require('@aragon/os/scripts/helpers/get-accounts')
 
 const globalArtifacts = this.artifacts // Not injected unless called directly via truffle
 const NULL_ADDRESS = '0x00'
@@ -7,7 +8,8 @@ module.exports = async (
   truffleExecCallback,
   {
     artifacts = globalArtifacts,
-    network
+    network,
+    web3
   } = {}
 ) => {
   const MiniMeToken = artifacts.require('MiniMeToken')
@@ -27,15 +29,18 @@ module.exports = async (
     console.log(`Deploying dependencies for "${network}" network`)
     console.log('')
 
+    const ownerAccount = (await getAccounts(web3))[0]
+
     const miniMeToken = await tryDeploy(
-      MiniMeToken, 
+      MiniMeToken,
       'MiniMeToken',
       [ NULL_ADDRESS, NULL_ADDRESS, 0, 'TokenCoin', 0, 'TKN', true ]
     )
 
     const centralizedTimedOracleFactory = await tryDeploy(
       CentralizedTimedOracleFactory,
-      'CentralizedTimedOracleFactory'
+      'CentralizedTimedOracleFactory',
+      [ownerAccount]
     )
 
     const fixed192x64Math = await tryDeploy(
@@ -44,7 +49,7 @@ module.exports = async (
     )
 
     await LMSRMarketMaker.link('Fixed192x64Math', fixed192x64Math.address)
-  
+
     const lmsrMarketMaker = await tryDeploy(
       LMSRMarketMaker,
       'LMSRMarketMaker'

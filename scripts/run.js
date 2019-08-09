@@ -42,7 +42,7 @@ module.exports = async (
       futarchyOracleFactoryAddress,
       centralizedTimedOracleFactoryAddress,
       lmsrMarketMakerAddress
-    } = await deployDeps(null, { artifacts, network })
+    } = await deployDeps(null, { artifacts, network, web3 })
     console.log('')
 
     await distributeTokens(null, {
