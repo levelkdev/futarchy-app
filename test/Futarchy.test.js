@@ -77,7 +77,7 @@ contract('Futarchy', (accounts) => {
     futarchyBase = await Futarchy.new()
     APP_MANAGER_ROLE = await kernelBase.APP_MANAGER_ROLE()
 
-    priceOracleFactory = await CentralizedTimedOracleFactory.new()
+    priceOracleFactory = await CentralizedTimedOracleFactory.new(accounts[0])
     lmsrMarketMaker = await LMSRMarketMaker.new()
     futarchyOracleFactoryFull = await deployFutarchyMasterCopies()
     futarchyOracleFactoryMock = await FutarchyOracleFactoryMock.new()
@@ -476,42 +476,6 @@ contract('Futarchy', (accounts) => {
     })
   })
 
-  describe('setPriceOutcome()', async () => {
-    let script, metadata, returnValue, currentBlockNumber, price
-    let futarchyOracle, scalarMarket, scalarEvent, priceOracle
-    beforeEach(async () => {
-      script = 'QmWmyoMoctfbAaiEs2G46gpeUmhqFRDW6KWo64y5r581Vz'
-      metadata = 'Give voting rights to all kitties in the world'
-      price = 500
-      initializeFutarchy({_futarchyOracleFactoryAddr: futarchyOracleFactoryFull.address})
-      await token.approve(futarchy.address, MARKET_FUND_AMOUNT, {from: root})
-      currentBlockNumber = await getBlockNumber()
-      await futarchy.newDecision(script, metadata, LOWER_BOUND, UPPER_BOUND)
-
-      // Get price oracle
-      futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(0))[0])
-      scalarMarket = StandardMarket.at(await futarchyOracle.markets(0))
-      scalarEvent = Event.at(await scalarMarket.eventContract())
-      priceOracle = CentralizedTimedOracle.at(await scalarEvent.oracle())
-    })
-
-    describe('when resolutionDate has passed', () => {
-      it('sets the correct price on the price oracle', async () => {
-        await timeTravel(TIME_TO_PRICE_RESOLUTION + 1)
-        await futarchy.setPriceOutcome(0, price)
-        expect((await priceOracle.getOutcome()).toNumber()).to.equal(price)
-      })
-    })
-
-    describe('when resolutionDate has not passed', () => {
-      it('reverts', async () => {
-        return assertRevert(async () => {
-          await futarchy.setPriceOutcome(0, price)
-        })
-      })
-    })
-  })
-
   describe('buyMarketPositions()', async () => {
     let script, metadata, futarchyOracle
     let yesLongToken, yesShortToken, noLongToken, noShortToken
@@ -769,7 +733,8 @@ contract('Futarchy', (accounts) => {
 
         await futarchyOracle.setOutcome()
         await Event.at(await futarchyOracle.categoricalEvent()).setOutcome()
-        await futarchy.setPriceOutcome(0, 85)
+        const oracle = CentralizedTimedOracle.at(await Event.at(await StandardMarket.at(await futarchyOracle.markets(0)).eventContract()).oracle())
+        await oracle.setOutcome(85)
         await noEvent.setOutcome()
         await futarchy.closeDecisionMarkets(0)
 
@@ -1076,8 +1041,8 @@ contract('Futarchy', (accounts) => {
   async function setScalarEvent(futarchy, decisionId, resolvedPrice) {
     let futarchyOracle = FutarchyOracleFull.at((await futarchy.decisions(decisionId))[0])
     let winningIndex = (await futarchyOracle.winningMarketIndex()).toNumber()
-
-    await futarchy.setPriceOutcome(decisionId, resolvedPrice)
+    const oracle = CentralizedTimedOracle.at(await Event.at(await StandardMarket.at(await futarchyOracle.markets(0)).eventContract()).oracle())
+    await oracle.setOutcome(resolvedPrice)
     await Event.at(await StandardMarket.at(await futarchyOracle.markets(winningIndex)).eventContract()).setOutcome()
   }
 

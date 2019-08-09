@@ -351,21 +351,6 @@ contract Futarchy is AragonApp, IForwarder {
     balances.noLong = balances.noLong.add(noOutcomeAmounts[1]);
   }
 
-  /**
-  * @notice Sets outcome of the price oracle for a specified decision
-  * @param price Price used to set oracle outcome
-  * @param decisionId ID of price oracle's corresponding decision
-  */
-  function setPriceOutcome(
-    uint decisionId,
-    int price
-  )
-    public
-    auth(CREATE_DECISION_ROLE)
-  {
-    decisions[decisionId].setPriceOutcome(price);
-  }
-
   /* IForwarder API */
 
   /* @notice confirms Futarchy implements IForwarder */
