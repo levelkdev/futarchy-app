@@ -1,6 +1,5 @@
 pragma solidity ^0.4.24;
 
-import './Oracles/CentralizedTimedOracle.sol'; /* TODO: switch to IScalarPriceOracle once we switch from centralized solution */
 import '@gnosis.pm/pm-contracts/contracts/Oracles/FutarchyOracle.sol';
 import '@gnosis.pm/pm-contracts/contracts/Markets/Market.sol';
 import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
@@ -35,8 +34,6 @@ library DecisionLib {
     self.futarchyOracle.markets(winningMarketIndex).eventContract().redeemWinnings();
     self.futarchyOracle.categoricalEvent().redeemWinnings();
   }
-
-
 
   /**
   * @dev Checks to see if decision is ready for any transitions, then executes
@@ -222,13 +219,4 @@ library DecisionLib {
     outcomeTokensSold[0] = self.futarchyOracle.markets(marketIndex).netOutcomeTokensSold(0);
     outcomeTokensSold[1] = self.futarchyOracle.markets(marketIndex).netOutcomeTokensSold(1);
   }
-
-  function setPriceOutcome(
-    Decision storage self,
-    int price
-  ) {
-    CentralizedTimedOracle priceOracle = CentralizedTimedOracle(self.futarchyOracle.markets(0).eventContract().oracle());
-    priceOracle.setOutcome(price);
-  }
-
 }
