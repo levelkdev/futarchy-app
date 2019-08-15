@@ -1,6 +1,6 @@
 pragma solidity 0.4.24;
 
-import "../StubFutarchyApp.sol";
+import "./StubFutarchyApp.sol";
 
 import "@aragon/os/contracts/apm/APMNamehash.sol";
 import "@aragon/os/contracts/common/IsContract.sol";
