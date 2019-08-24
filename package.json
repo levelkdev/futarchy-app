@@ -76,6 +76,7 @@
     "dao:install": "aragon dao install",
     "dao:acl:create": "aragon dao acl create",
     "versions:staging": "aragon apm versions --environment staging",
+    "info:staging": "aragon apm info futarchy.open.aragonpm.eth --environment staging",
     "ipfs": "aragon ipfs",
     "ipfs:propagate": "node scripts/ipfs/propagate.js",
     "ipfs:propagate:dist": "node scripts/ipfs/propagateDist.js",
