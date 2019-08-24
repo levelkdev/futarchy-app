@@ -5,3 +5,4 @@ dist
 flattened_contracts
 ipfs_archives
 .node-xmlhttprequest-**
+secrets.json

@@ -28,7 +28,7 @@
     "redux-thunk": "2.3.0",
     "rxjs-compat": "6.4.0",
     "styled-components": "4.1.3",
-    "tidbit": "github:cwhinfrey/tidbit#f88f0ede668e6275b29607b20179ebd15e03c45b",
+    "tidbit": "github:cwhinfrey/tidbit#0b6c418a89987ec18cfaa360bb158ccf5a06195a",
     "token-price-oracles": "0.1.2",
     "web3-utils": "1.0.0-beta.50"
   },
@@ -76,6 +76,7 @@
     "dao:install": "aragon dao install",
     "dao:acl:create": "aragon dao acl create",
     "versions:staging": "aragon apm versions --environment staging",
+    "info:staging": "aragon apm info futarchy.open.aragonpm.eth --environment staging",
     "ipfs": "aragon ipfs",
     "ipfs:propagate": "node scripts/ipfs/propagate.js",
     "ipfs:propagate:dist": "node scripts/ipfs/propagateDist.js",
