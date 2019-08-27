@@ -4,6 +4,7 @@ import './DecisionLib.sol';
 import './Oracles/IScalarPriceOracleFactory.sol';
 import '@aragon/os/contracts/apps/AragonApp.sol';
 import '@aragon/os/contracts/common/IForwarder.sol';
+import "@aragon/os/contracts/lib/math/SafeMath.sol";
 import '@gnosis.pm/pm-contracts/contracts/Oracles/Oracle.sol';
 import '@gnosis.pm/pm-contracts/contracts/Oracles/FutarchyOracleFactory.sol';
 import '@gnosis.pm/pm-contracts/contracts/MarketMakers/LMSRMarketMaker.sol';
