@@ -1,5 +1,6 @@
 pragma solidity ^0.4.24;
 
+import "@aragon/os/contracts/lib/math/SafeMath.sol";
 import 'token-price-oracles/contracts/DataFeeds/TimeMedianDataFeed.sol';
 import './ScalarPriceOracleBase.sol';
 import './TimedOracle.sol';
