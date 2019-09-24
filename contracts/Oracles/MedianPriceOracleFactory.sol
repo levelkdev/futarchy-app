@@ -7,8 +7,8 @@ contract MedianPriceOracleFactory is IScalarPriceOracleFactory {
 
     event MedianPriceOracleCreation(address indexed creator, IScalarPriceOracle medianPriceOracle, uint resolutionDate);
 
-    address timeMedianDataFeed;
-    uint medianTimeframe;
+    address public timeMedianDataFeed;
+    uint public medianTimeframe;
 
     constructor(address _timeMedianDataFeed, uint _medianTimeframe) public {
       timeMedianDataFeed = _timeMedianDataFeed;
