@@ -6,6 +6,7 @@ import FutarchyOracle from './FutarchyOracle'
 import StandardMarketWithPriceLogger from './StandardMarketWithPriceLogger'
 import traderDecisionHash from '../util/traderDecisionHash'
 import toWei from '../util/toWei'
+const web3_utils = require('web3-utils')
 
 export const accounts = async () => {
   return new Promise((resolve, reject) => {
@@ -113,8 +114,8 @@ export const newDecision = async (script, question, lowerBound, upperBound) => {
     'newDecision',
     script,
     question,
-    new String(lowerBound),
-    new String(upperBound),
+    web3_utils.toBN(lowerBound).toString(),
+    web3_utils.toBN(upperBound).toString(),
     transactionOptions
   )
 }
