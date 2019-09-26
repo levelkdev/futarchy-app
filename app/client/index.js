@@ -113,8 +113,8 @@ export const newDecision = async (script, question, lowerBound, upperBound) => {
     'newDecision',
     script,
     question,
-    lowerBound,
-    upperBound,
+    new String(lowerBound),
+    new String(upperBound),
     transactionOptions
   )
 }
