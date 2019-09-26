@@ -10,6 +10,8 @@ module.exports = async (
     network
   } = {}
 ) => {
+  if (!network) network = process.argv[5]
+
   const DecisionLib = artifacts.require('DecisionLib')
   const Futarchy = artifacts.require('Futarchy')
 

@@ -46,6 +46,7 @@
     "parcel-bundler": "1.12.2"
   },
   "scripts": {
+    "deploy:lib_workaround": "rm -rf build && npm run compile && truffle exec scripts/deploy_lib.js --network rinkeby",
     "deploy:staging:prepare": "rm -rf build && npm run compile && truffle exec scripts/prepare.js --network rinkeby",
     "deploy:staging:publish:major": "node scripts/publish.js staging major",
     "deploy:staging:publish:minor": "node scripts/publish.js staging minor",
