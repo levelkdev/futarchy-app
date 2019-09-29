@@ -132,8 +132,8 @@ export const buyMarketPositions = async (
   //       transparent to the user. Also, in a fast moving market this might
   //       have to be set higher, which would be something that the user would need
   //       to know about before signing.
-  collateralAmount = parseInt(collateralAmount) + (parseInt(collateralAmount) * 0.01)
-  collateralAmount = toWei(collateralAmount.toString(), 'wei')
+  collateralAmount = parseInt(collateralAmount) + (parseInt(collateralAmount) * 0.001)
+  collateralAmount = toWei(collateralAmount.toString(), 'ether')
 
   const transactionOptions = {
     token: { address, value: collateralAmount }
