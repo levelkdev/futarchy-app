@@ -12,7 +12,7 @@ const TOKEN_DISTRIBUTION_AMOUNT = 100000000 * 10 ** 18
 const FEE = 20
 const TRADING_PERIOD = 60 * 60 * 24 * 7
 const TIME_TO_PRICE_RESOLUTION = TRADING_PERIOD * 2
-const MARKET_FUND_AMOUNT = 10 * 10 ** 18
+const MARKET_FUND_AMOUNT = "5000" + "0".repeat(18) // avoids e notation error
 
 const defaultOwner = process.env.OWNER
 
