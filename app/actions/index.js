@@ -2,6 +2,7 @@ import _ from 'lodash'
 import decisionById from '../reducers/computed/decisionById'
 import calcOutcomeTokenPurchaseAmounts from '../util/calcOutcomeTokenPurchaseAmounts'
 import client from '../client'
+import toWei from '../util/toWei'
 
 export const newDecisionTxPending = ({ question, txHash }) => ({
   type: 'NEW_DECISION_TX_PENDING',
@@ -150,20 +151,22 @@ export const buyMarketPositions = ({
   return client.buyMarketPositions(
     decisionId,
     collateralAmount,
+
     // YES market SHORT/LONG amounts
     calcOutcomeTokenPurchaseAmounts({
       outcomeTokenIndex: yesOutcomeTokenIndex,
-      collateralAmount,
+      collateralAmount: toWei(collateralAmount, 'ether'),
       outcomeTokenIndex: yesOutcomeTokenIndex,
       shortOutcomeTokensSold: decision.yesShortOutcomeTokensSold,
       longOutcomeTokensSold: decision.yesLongOutcomeTokensSold,
       funding: decision.yesMarketFunding,
       feeFactor: decision.yesMarketFee
     }),
+
     // NO market SHORT/LONG amounts
     calcOutcomeTokenPurchaseAmounts({
       outcomeTokenIndex: noOutcomeTokenIndex,
-      collateralAmount,
+      collateralAmount: toWei(collateralAmount, 'ether'),
       outcomeTokenIndex: noOutcomeTokenIndex,
       shortOutcomeTokensSold: decision.noShortOutcomeTokensSold,
       longOutcomeTokensSold: decision.noLongOutcomeTokensSold,

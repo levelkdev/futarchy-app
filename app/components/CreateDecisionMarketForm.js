@@ -13,7 +13,7 @@ const CreateDecisionMarketForm = createReduxForm(({
   handleSubmit,
   createDecision
 }) => {
-  const insufficientBalance = tokenBalance < marketFundAmount
+  const insufficientBalance = new Number(tokenBalance) < new Number(marketFundAmount)
   const marketFundAmountText = `${formatBalance(marketFundAmount)} ${tokenSymbol()}`
   const tokenBalanceText = `${formatBalance(tokenBalance)} ${tokenSymbol()}`
   return (
@@ -29,9 +29,9 @@ const CreateDecisionMarketForm = createReduxForm(({
             </StyledInfo>
             <StyledLabel htmlFor="question">Question</StyledLabel>
             <StyledField
-              name="question" 
-              component="input" 
-              type="text" 
+              name="question"
+              component="input"
+              type="text"
               placeholder="Enter your question"
             />
           </React.Fragment>

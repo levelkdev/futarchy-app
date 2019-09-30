@@ -74,7 +74,6 @@ const MakePredictionForm = createReduxForm(({
     if (typeof(values.noPredictionChoiceIndex) === 'undefined') {
       values.noPredictionChoiceIndex = dropDownDefault
     }
-    values.collateralAmount = toWei(values.collateralAmount)
     executeBuy({
       decisionId: decision.decisionId,
       ...values
