@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import formatBalance from '../util/formatBalance'
+import formatPrice from '../util/formatPrice'
 import moment from 'moment'
 
 const TradeList = ({ trades }) => (
@@ -9,13 +10,11 @@ const TradeList = ({ trades }) => (
       <tbody>
         <tr>
           <DataHeaderCell>Time</DataHeaderCell>
-          <DataHeaderCell>TKN Amount</DataHeaderCell>
-          <DataHeaderCell>YES Amount</DataHeaderCell>
-          <DataHeaderCell>YES Cost</DataHeaderCell>
-          <DataHeaderCell>YES Price</DataHeaderCell>
-          <DataHeaderCell>NO Amount</DataHeaderCell>
-          <DataHeaderCell>NO Cost</DataHeaderCell>
-          <DataHeaderCell>NO Price</DataHeaderCell>
+          <DataHeaderCell>TKN Risked</DataHeaderCell>
+          <DataHeaderCell>YES Tokens Purchased</DataHeaderCell>
+          <DataHeaderCell>YES Token Price</DataHeaderCell>
+          <DataHeaderCell>NO Tokens Purchased</DataHeaderCell>
+          <DataHeaderCell>NO Token Price</DataHeaderCell>
           <DataHeaderCell>Lower Bound</DataHeaderCell>
           <DataHeaderCell>Upper Bound</DataHeaderCell>
           <DataHeaderCell>YES-LONG Marginal Price</DataHeaderCell>
@@ -26,15 +25,13 @@ const TradeList = ({ trades }) => (
             <TradeTime timestamp={Number(trade.tradeTime) * 1000} />
             <DataCell>{formatBalance(trade.tokenAmount)}</DataCell>
             <DataCell>{formatBalance(trade.yesTokenAmount)} {trade.yesTokenName}</DataCell>
-            <DataCell>{formatBalance(trade.netYesCost)} TKN</DataCell>
-            <DataCell>{trade.yesTokenPrice} TKN</DataCell>
+            <DataCell>{formatPrice(trade.yesTokenPrice)} TKN</DataCell>
             <DataCell>{formatBalance(trade.noTokenAmount)} {trade.noTokenName}</DataCell>
-            <DataCell>{formatBalance(trade.netNoCost)} TKN</DataCell>
-            <DataCell>{trade.noTokenPrice} TKN</DataCell>
-            <DataCell>{trade.lowerBound}</DataCell>
-            <DataCell>{trade.upperBound}</DataCell>
-            <DataCell>{trade.yesLongMarginalPrice}</DataCell>
-            <DataCell>{trade.noLongMarginalPrice}</DataCell>
+            <DataCell>{formatPrice(trade.noTokenPrice)} TKN</DataCell>
+            <DataCell>{formatBalance(trade.lowerBound)}</DataCell>
+            <DataCell>{formatBalance(trade.upperBound)}</DataCell>
+            <DataCell>{formatPrice(trade.yesLongMarginalPrice)}</DataCell>
+            <DataCell>{formatPrice(trade.noLongMarginalPrice)}</DataCell>
           </tr>
         ))}
       </tbody>
