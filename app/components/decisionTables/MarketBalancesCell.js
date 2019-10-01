@@ -7,24 +7,32 @@ import MarketNameStyled from './MarketNameStyled'
 
 const MarketBalancesCell = ({
   yesBalance,
-  noBalance
+  noBalance,
+  tokenSymbol
 }) => (
   <div>
     <MarketBalance
       decisionMarketType={decisionMarketTypes.YES}
-      balance={yesBalance} />
+      balance={yesBalance}
+      tokenSymbol={tokenSymbol}
+    />
     <MarketBalance
       decisionMarketType={decisionMarketTypes.NO}
-      balance={noBalance} />
+      balance={noBalance}
+      tokenSymbol={tokenSymbol}
+    />
   </div>
 )
 
-const MarketBalance = ({ decisionMarketType, balance }) => (
+const MarketBalance = ({ decisionMarketType, balance, tokenSymbol }) => (
   <div>
     <Text size="xsmall">
       <MarketNameStyled type={decisionMarketType} />
       <BalanceStyled>
-        <SingleBalanceCell balance={balance} />
+        <SingleBalanceCell
+          balance={balance}
+          tokenSymbol={tokenSymbol}
+        />
       </BalanceStyled>
     </Text>
   </div>

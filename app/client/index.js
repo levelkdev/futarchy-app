@@ -44,10 +44,11 @@ export const tokenContract = async () => {
   return token
 }
 
-export const tokenBalance = async (account) => {
+export const tokenData = async (account) => {
   const token = await tokenContract()
   const balance = await token.balanceOf(account)
-  return balance
+  const symbol = await token.symbol()
+  return { balance, symbol }
 }
 
 export const futarchyAddress = async () => {
@@ -206,7 +207,7 @@ export default {
   decisions,
   latestBlock,
   tokenContract,
-  tokenBalance,
+  tokenData,
   futarchyAddress,
   fee,
   tradingPeriod,

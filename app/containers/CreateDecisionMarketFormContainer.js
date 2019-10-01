@@ -13,6 +13,7 @@ const UPPER_BOUND = 25 * 10 ** 18
 
 const mapStateToProps = state => ({
   tokenBalance: state.tokenBalance,
+  tokenSymbol: state.tokenSymbol,
   marketFundAmount: state.marketFundAmount
 })
 

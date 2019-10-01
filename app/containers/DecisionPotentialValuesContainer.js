@@ -11,7 +11,8 @@ const mapStateToProps = (state, ownProps) => {
   )
   return {
     yesBalance: perfTotal.yesPotentialProfit,
-    noBalance: perfTotal.noPotentialProfit
+    noBalance: perfTotal.noPotentialProfit,
+    tokenSymbol: state.tokenSymbol
   }
 }
 

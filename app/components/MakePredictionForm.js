@@ -8,9 +8,7 @@ import formatPredictedValue from '../util/formatPredictedValue'
 import toWei from '../util/toWei'
 import { date, time } from '../util/formatDateTime'
 import decisionStatuses from '../constants/decisionStatuses'
-import tokenSymbol from '../util/tokenSymbol'
 import positions from '../constants/positions'
-import SuccessMetricDisplay from './SuccessMetricDisplay'
 
 const choiceDisplayTextByPosition = {
   [positions.LONG]: 'more than',
@@ -46,7 +44,7 @@ const validate = values => {
   } else if (
     BigNumber(values.tokenBalance).isLessThan(BigNumber(toWei(values.collateralAmount)))
   ) {
-    error = `You don't have enough ${tokenSymbol()} for this transaction`
+    error = `You don't have enough ${values.tokenSymbol} for this transaction`
     errors._error.insufficientBalance = error
   }
 
@@ -84,7 +82,6 @@ const MakePredictionForm = createReduxForm(({
       <br />
     </StyledRow>
     <br />
-
     <AllocateTokensSection>
       <StyledSmallCaps>Allocate your tokens</StyledSmallCaps>
       <StyledField
@@ -98,7 +95,11 @@ const MakePredictionForm = createReduxForm(({
           name="tokenBalance"
           component={field => field.input.value}
           format={formatBalance}
-        /> {tokenSymbol()} Available
+        /> {" "}
+        <Field
+          name="tokenSymbol"
+          component={field => field.input.value}
+        /> Available
       </StyledAccountBalance>
       {submitFailed && error && error.collateralAmount && <ErrorSection error={error.collateralAmount} />}
       {submitFailed && error && error.insufficientBalance && <ErrorSection error={error.insufficientBalance} />}
@@ -107,7 +108,12 @@ const MakePredictionForm = createReduxForm(({
 
     <MetricQuestion>
       <Phrase>What will</Phrase>
-      <BoldPhrase><SuccessMetricDisplay /></BoldPhrase>
+      <BoldPhrase>
+        <Field
+          name="tokenSymbol"
+          component={field => field.input.value}
+        /> Price
+      </BoldPhrase>
       <Phrase>be on</Phrase>
       <BoldPhrase>{date(decision.priceResolutionDate)}</BoldPhrase>
       <Text size="xsmall">
@@ -189,7 +195,12 @@ const DropDownField = (field) => {
 const PositionDropDownItem = ({ predictedPrice, position }) => (
   <StyledSmallCaps>
     <Phrase>I predict</Phrase>
-    <BoldPhrase><SuccessMetricDisplay /></BoldPhrase>
+    <BoldPhrase>
+      <Field
+        name="tokenSymbol"
+        component={field => field.input.value}
+      /> Price
+    </BoldPhrase>
     <Phrase>will be</Phrase>
     <BoldPhrase>{choiceDisplayTextByPosition[position]}</BoldPhrase>
     <StyledMarketPrice>{formatPredictedValue(predictedPrice)}</StyledMarketPrice>

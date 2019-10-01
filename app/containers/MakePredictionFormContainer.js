@@ -17,7 +17,8 @@ const mapStateToProps = state => ({
     state.sidePanel.panelContext.decisionId
   ),
   initialValues: {
-    tokenBalance: state.tokenBalance
+    tokenBalance: state.tokenBalance,
+    tokenSymbol: state.tokenSymbol
   }
 })
 

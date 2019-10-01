@@ -9,6 +9,7 @@ export default (aragonClient, address) => {
   return {
     ...miniMeToken,
     balanceOf: async account => contractFn(miniMeToken, contractName, 'balanceOf', account),
+    symbol: async () => contractFn(miniMeToken, contractName, 'symbol'),
     totalSupply: async () => contractFn(miniMeToken, contractName, 'totalSupply')
   }
 }

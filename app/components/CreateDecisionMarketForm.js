@@ -1,7 +1,6 @@
 import React from 'react'
 import { Field, reduxForm } from 'redux-form'
 import { Button, Info, Text } from '@aragon/ui'
-import tokenSymbol from '../util/tokenSymbol'
 import formatBalance from '../util/formatBalance'
 import styled from 'styled-components'
 
@@ -9,13 +8,14 @@ const createReduxForm = reduxForm({ form: 'createDecisionMarket' })
 
 const CreateDecisionMarketForm = createReduxForm(({
   tokenBalance,
+  tokenSymbol,
   marketFundAmount,
   handleSubmit,
   createDecision
 }) => {
   const insufficientBalance = new Number(tokenBalance) < new Number(marketFundAmount)
-  const marketFundAmountText = `${formatBalance(marketFundAmount)} ${tokenSymbol()}`
-  const tokenBalanceText = `${formatBalance(tokenBalance)} ${tokenSymbol()}`
+  const marketFundAmountText = `${formatBalance(marketFundAmount)} ${tokenSymbol}`
+  const tokenBalanceText = `${formatBalance(tokenBalance)} ${tokenSymbol}`
   return (
     <form onSubmit={handleSubmit(createDecision)}>
       {

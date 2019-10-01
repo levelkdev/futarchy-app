@@ -9,7 +9,8 @@ const mapStateToProps = state => ({
   currentGainLoss: currentGainLoss(state.accounts[0], state.performance, state.decisionMarkets),
   realizedGainLoss: realizedGainLoss(state.accounts[0], state.performance, state.decisionMarkets),
   tokenBalance: state.tokenBalance,
-  tokenRisked: totalCostBasis(state.accounts[0], state.performance)
+  tokenRisked: totalCostBasis(state.accounts[0], state.performance),
+  tokenSymbol: state.tokenSymbol
 })
 export default connect(
   mapStateToProps

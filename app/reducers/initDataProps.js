@@ -12,6 +12,10 @@ export default [
     defaultValue: null
   },
   {
+    prop: 'tokenSymbol',
+    defaultValue: null
+  },
+  {
     prop: 'futarchyAddress',
     defaultValue: null
   },
