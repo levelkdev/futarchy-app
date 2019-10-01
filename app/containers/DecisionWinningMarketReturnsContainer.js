@@ -13,6 +13,7 @@ const mapStateToProps = (state, ownProps) => {
     state.accounts[0]
   )
   return {
+    tokenSymbol: state.tokenSymbol,
     balance: decision.winningMarket == decisionMarketTypes.YES ?
       perfTotal.yesPotentialProfit : perfTotal.noPotentialProfit
   }

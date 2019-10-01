@@ -199,9 +199,12 @@ export const fetchFee = propFetchDispatcher('fee')
 export const fetchTradingPeriod = propFetchDispatcher('tradingPeriod')
 export const fetchMarketFundAmount = propFetchDispatcher('marketFundAmount')
 
-export const fetchTokenBalance = (account) => dispatch => {
-  return client.tokenBalance(account).then(
-    tokenBalance => dispatch(propValueLoaded({ prop: 'tokenBalance', value: tokenBalance })),
+export const fetchTokenData = (account) => dispatch => {
+  return client.tokenData(account).then(
+    token => {
+      dispatch(propValueLoaded({prop: 'tokenSymbol', value: token.symbol }))
+      dispatch(propValueLoaded({ prop: 'tokenBalance', value: token.balance }))
+    },
     errorMessage => {
       console.error(errorMessage)
       return dispatch(propValueLoadingError({ prop: 'tokenBalance', errorMessage }))
@@ -320,7 +323,7 @@ export const fetchInitData = () => async (dispatch, getState) => {
     dispatch(fetchTradingPeriod()),
     dispatch(fetchMarketFundAmount())
   ])
-  await dispatch(fetchTokenBalance(getState().accounts[0]))
+  await dispatch(fetchTokenData(getState().accounts[0]))
 }
 
 function propFetchDispatcher (prop) {

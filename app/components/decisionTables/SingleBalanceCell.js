@@ -1,17 +1,16 @@
 import React from 'react'
 import styled from 'styled-components'
 import { Text } from '@aragon/ui'
-import TokenSymbolDisplay from '../TokenSymbolDisplay'
 import formatBalance from '../../util/formatBalance'
 
-const SingleBalanceCell = ({ balance }) => (
+const SingleBalanceCell = ({ balance, tokenSymbol }) => (
   <span>
     <Text size="xsmall">
       <Bold>{formatBalance(balance)}</Bold>
     </Text>
     &nbsp;
     <Text size="xxsmall">
-      <TokenSymbolDisplay />
+      {tokenSymbol}
     </Text>
   </span>
 )
