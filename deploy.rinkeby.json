@@ -1,18 +1,18 @@
 {
     "dependencyContracts": {
-        "MiniMeToken": "0x6917ca90c0670024a9f48aecefd6c3c82fc5d3e9",
-        "Fixed192x64Math": "0x68407ea068c8348ac50fcd4e3e85b9cd3a7d0e4e",
-        "LMSRMarketMaker": "0x5995f896899256ac9496d17a03125b2ea3df34a4",
-        "CategoricalEvent": "0xc1ea53b67bfcc1350b2e6b1c9d97b83666c865dd",
-        "ScalarEvent": "0xa43b87ae476711e19225e7744081730ca8ec1215",
-        "OutcomeToken": "0xedc015151f0890d2164340cfdf67b61dc92fa14e",
-        "FutarchyOracle": "0x09e04d044ca9303b94451f407c467e0dfcd1ccfa",
-        "StandardMarketWithPriceLogger": "0x260357b8e3d93180858a95f5e3d4a2eda3e6a6ad",
-        "EventFactory": "0x525cc4cc523e376a3952f31998aaf312fb9ee82d",
-        "StandardMarketWithPriceLoggerFactory": "0x64cec831d0109c40a734384beaf011b9deeebd53",
-        "FutarchyOracleFactory": "0x1fad5ae333ef73ea9810bf90846cadbaabb72a36",
-        "DecisionLib": "0xe1a3dfadc0566bef1bc067779f1088706089a277",
-        "CentralizedTimedOracleFactory": "0xf6ed9481e128bb937beceb27bff85dec87653cb2"
+        "DecisionLib": "0x8d6b00c10a496dbdc079a81dd4d1d9db698f4683",
+        "MiniMeToken": "0xa877d0ac70d05454c809c40cbc67c7b1f840f7c9",
+        "CentralizedTimedOracleFactory": "0xa9422233207949524d64dd9a2fc8d3c957fb093f",
+        "Fixed192x64Math": "0x1d03bb682e9f09e6506d768f84cd3b384f11c7fa",
+        "LMSRMarketMaker": "0xc9e30a6739329fcaa9ec55e4c712bc5c634e4ba9",
+        "CategoricalEvent": "0xd47ac3928c686f5012774ce8b1c64e027a7ef6e4",
+        "ScalarEvent": "0x890507ff15fc6cec9a520ff60d36bd8dc5373565",
+        "OutcomeToken": "0xc7de0f75bcaed25ae7b32be254d126842100c157",
+        "FutarchyOracle": "0x0091487824cc1288ff5d60b210eba878040ff7e5",
+        "StandardMarketWithPriceLogger": "0xa7fa8a746ffb07d024d6e1c695962deccc1bd3fc",
+        "EventFactory": "0x07cf0ad54401a5c14aa3657f28a22205851dad03",
+        "StandardMarketWithPriceLoggerFactory": "0x8fa93da2a58db862d5308df4910039507312684f",
+        "FutarchyOracleFactory": "0x295a3fd6d110cd26ecc8ae573577a2f43d5f2ad0"
     },
     "tokensAllocated": {
         "0x44360017c1460BC0149946b4fad97665c25586b0": "1e+26",

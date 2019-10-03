@@ -1,19 +1,35 @@
 pragma solidity ^0.4.24;
 
+import "@gnosis.pm/pm-contracts/contracts/GnosisUtilContracts/Proxy.sol";
 import './MedianPriceOracle.sol';
 import './IScalarPriceOracleFactory.sol';
 
-contract MedianPriceOracleFactory is IScalarPriceOracleFactory {
+contract MedianPriceOracleFactoryData {
 
-    event MedianPriceOracleCreation(address indexed creator, IScalarPriceOracle medianPriceOracle, uint resolutionDate);
+  event MedianPriceOracleCreation(address indexed creator, IScalarPriceOracle medianPriceOracle, uint resolutionDate);
 
-    address public timeMedianDataFeed;
-    uint public medianTimeframe;
+  address public timeMedianDataFeed;
+  uint public medianTimeframe;
 
-    constructor(address _timeMedianDataFeed, uint _medianTimeframe) public {
-      timeMedianDataFeed = _timeMedianDataFeed;
-      medianTimeframe = _medianTimeframe;
-    }
+}
+
+contract MedianPriceOracleFactoryProxy is Proxy, MedianPriceOracleFactoryData {
+
+  constructor(
+    address proxied,
+    address _timeMedianDataFeed,
+    uint _medianTimeframe
+  )
+    Proxy(proxied)
+    public
+  {
+    timeMedianDataFeed = _timeMedianDataFeed;
+    medianTimeframe = _medianTimeframe;
+  }
+
+}
+
+contract MedianPriceOracleFactory is Proxied, IScalarPriceOracleFactory, MedianPriceOracleFactoryData {
 
     /**
     * @dev Creates a new median price oracle contract
@@ -29,4 +45,5 @@ contract MedianPriceOracleFactory is IScalarPriceOracleFactory {
         );
         emit MedianPriceOracleCreation(msg.sender, medianPriceOracle, resolutionDate);
     }
+
 }

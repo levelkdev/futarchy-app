@@ -2,6 +2,8 @@ const tryDeployToNetwork = require('./utilities/tryDeployToNetwork')
 const getAccounts = require('@aragon/os/scripts/helpers/get-accounts')
 
 const globalArtifacts = this.artifacts // Not injected unless called directly via truffle
+const globalWeb3 = this.web3
+
 const NULL_ADDRESS = '0x00'
 
 module.exports = async (
@@ -9,7 +11,7 @@ module.exports = async (
   {
     artifacts = globalArtifacts,
     network,
-    web3
+    web3 = globalWeb3
   } = {}
 ) => {
   const MiniMeToken = artifacts.require('MiniMeToken')
@@ -26,6 +28,8 @@ module.exports = async (
   const FutarchyOracleFactory = artifacts.require('FutarchyOracleFactory')
 
   try {
+    if (!network) network = process.argv[5]
+
     console.log(`Deploying dependencies for "${network}" network`)
     console.log('')
 
