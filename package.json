@@ -52,6 +52,7 @@
     "deploy:staging:publish:major": "node scripts/publish.js staging major",
     "deploy:staging:publish:minor": "node scripts/publish.js staging minor",
     "deploy:staging:newFutarchyDAO": "truffle exec scripts/newFutarchyDAO.js --network rinkeby --environment staging",
+    "deploy:local:deps": "truffle exec scripts/deploy_deps.js --network rpc",
     "start:aragon": "truffle exec scripts/run.js --network rpc",
     "start:aragon:http": "aragon run --http localhost:8001 --http-served-from ./dist",
     "start:app:debug": "DEBUG=true npm run start:app",
