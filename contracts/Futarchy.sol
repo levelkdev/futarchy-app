@@ -2,11 +2,11 @@ pragma solidity ^0.4.24;
 
 import './DecisionLib.sol';
 import './Oracles/IScalarPriceOracleFactory.sol';
+import './DecisionMarkets/IDecisionMarketsFactory.sol';
 import '@aragon/os/contracts/apps/AragonApp.sol';
 import '@aragon/os/contracts/common/IForwarder.sol';
 import "@aragon/os/contracts/lib/math/SafeMath.sol";
 import '@gnosis.pm/pm-contracts/contracts/Oracles/Oracle.sol';
-import '@gnosis.pm/pm-contracts/contracts/Oracles/FutarchyOracleFactory.sol';
 import '@gnosis.pm/pm-contracts/contracts/MarketMakers/LMSRMarketMaker.sol';
 import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 
@@ -14,7 +14,7 @@ contract Futarchy is AragonApp, IForwarder {
   using SafeMath for uint;
   using DecisionLib for DecisionLib.Decision;
 
-  event StartDecision(uint indexed decisionId, address indexed creator, string metadata, FutarchyOracle futarchyOracle, int marketLowerBound, int marketUpperBound, uint startDate, uint decisionResolutionDate, uint priceResolutionDate);
+  event StartDecision(uint indexed decisionId, address indexed creator, string metadata, IDecisionMarkets decisionMarkets, int marketLowerBound, int marketUpperBound, uint startDate, uint decisionResolutionDate, uint priceResolutionDate);
   event ExecuteDecision(uint decisionId);
   event BuyMarketPositions(address trader, uint decisionId, uint tradeTime, uint collateralAmount, uint[2] yesPurchaseAmounts, uint[2] noPurchaseAmounts, uint[2] yesCosts, uint[2] noCosts, uint[4] marginalPrices);
   event SellMarketPositions(address trader, uint decisionId, uint tradeTime, int[] yesMarketPositions, int[] noMarketPositions, uint yesCollateralReceived, uint noCollateralReceived, uint[4] marginalPrices);
@@ -23,7 +23,7 @@ contract Futarchy is AragonApp, IForwarder {
 
   bytes32 public constant CREATE_DECISION_ROLE = keccak256("CREATE_DECISION_ROLE");
 
-  FutarchyOracleFactory public futarchyOracleFactory;
+  IDecisionMarketsFactory public decisionMarketsFactory;
   ERC20Gnosis public token;
   IScalarPriceOracleFactory public priceOracleFactory;
   LMSRMarketMaker public lmsrMarketMaker;
@@ -57,11 +57,9 @@ contract Futarchy is AragonApp, IForwarder {
   * @param _tradingPeriod trading period before decision can be determined
   * @param _timeToPriceResolution Duration from start of prediction markets until date of final price resolution
   * @param _token token used to participate in prediction markets
-  * @param _futarchyOracleFactory creates FutarchyOracle to begin new decision
-  *         https://github.com/gnosis/pm-contracts/blob/v1.0.0/contracts/Oracles/FutarchyOracleFactory.sol
+  * @param _decisionMarketsFactory creates IDecisionMarkets contract to run markets for decision
   * @param _priceOracleFactory oracle factory used to create oracles that resolve price after all trading is closed
   * @param _lmsrMarketMaker market maker library that calculates prediction market outomce token prices
-  * FutarchyOracleFactory comes from Gnosis https://github.com/gnosis/pm-contracts/blob/v1.0.0/contracts/Oracles/FutarchyOracleFactory.sol
   **/
   function initialize(
     uint24 _fee,
@@ -69,7 +67,7 @@ contract Futarchy is AragonApp, IForwarder {
     uint _timeToPriceResolution,
     uint _marketFundAmount,
     ERC20Gnosis _token,
-    FutarchyOracleFactory _futarchyOracleFactory,
+    IDecisionMarketsFactory _decisionMarketsFactory,
     IScalarPriceOracleFactory _priceOracleFactory,
     LMSRMarketMaker _lmsrMarketMaker
   )
@@ -82,14 +80,14 @@ contract Futarchy is AragonApp, IForwarder {
     timeToPriceResolution = _timeToPriceResolution;
     marketFundAmount = _marketFundAmount;
     token = _token;
-    futarchyOracleFactory = _futarchyOracleFactory;
+    decisionMarketsFactory = _decisionMarketsFactory;
     priceOracleFactory = _priceOracleFactory;
     lmsrMarketMaker = _lmsrMarketMaker;
   }
 
 
   /**
-  * @notice creates a new futarchy decision market related to `metadata`
+  * @notice creates a new decision market related to `metadata`
   * @param executionScript EVM script to be executed on approval
   * @param metadata Decision metadata
   **/
@@ -108,7 +106,7 @@ contract Futarchy is AragonApp, IForwarder {
     uint startDate = now;
     uint priceResolutionDate = startDate.add(timeToPriceResolution);
 
-    FutarchyOracle futarchyOracle = futarchyOracleFactory.createFutarchyOracle(
+    IDecisionMarkets decisionMarkets = decisionMarketsFactory.createDecisionMarkets(
       ERC20Gnosis(token),
       Oracle(priceOracleFactory.createOracle(priceResolutionDate)),
       2,
@@ -120,7 +118,7 @@ contract Futarchy is AragonApp, IForwarder {
       startDate
     );
 
-    decisions[decisionId].futarchyOracle = futarchyOracle;
+    decisions[decisionId].decisionMarkets = decisionMarkets;
     decisions[decisionId].startDate = startDate;
     decisions[decisionId].decisionResolutionDate = startDate.add(tradingPeriod);
     decisions[decisionId].priceResolutionDate = startDate.add(timeToPriceResolution);
@@ -132,10 +130,10 @@ contract Futarchy is AragonApp, IForwarder {
     decisions[decisionId].token = token;
 
     require(token.transferFrom(msg.sender, this, marketFundAmount));
-    require(token.approve(futarchyOracle, marketFundAmount));
-    futarchyOracle.fund(marketFundAmount);
+    require(token.approve(decisionMarkets, marketFundAmount));
+    decisionMarkets.fund(marketFundAmount);
 
-    emit StartDecision(decisionId, msg.sender, metadata, futarchyOracle, lowerBound, upperBound, startDate, decisions[decisionId].decisionResolutionDate, decisions[decisionId].priceResolutionDate);
+    emit StartDecision(decisionId, msg.sender, metadata, decisionMarkets, lowerBound, upperBound, startDate, decisions[decisionId].decisionResolutionDate, decisions[decisionId].priceResolutionDate);
   }
 
   function closeDecisionMarkets(uint decisionId) public {
@@ -282,7 +280,7 @@ contract Futarchy is AragonApp, IForwarder {
     for(uint8 i = 0; i < 4; i++) {
       uint8 yesOrNo = i < 2 ? 0 : 1;
       marginalPrices[i] = lmsrMarketMaker.calcMarginalPrice(
-        decisions[decisionId].futarchyOracle.markets(yesOrNo),
+        decisions[decisionId].decisionMarkets.getMarketByIndex(yesOrNo),
         i % 2
       );
     }

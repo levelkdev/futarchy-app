@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 import '@gnosis.pm/pm-contracts/contracts/Markets/Market.sol';
 
-contract FutarchyOracleMock {
+contract FutarchyDecisionMarketsMock {
 
   event MockFutarchyFunding(uint funding);
   event MockFutarchyClosing();
@@ -63,6 +63,18 @@ contract FutarchyOracleMock {
     token.transfer(msg.sender, mock_refundAmount);
     markets[uint(mock_winningMarketIndex)].close();
     emit MockFutarchyClosing();
+  }
+
+  function getMarketByIndex(uint index) public view returns (MarketMock market) {
+    market = markets[index];
+  }
+
+  function outcomeCanBeSet() public view returns (bool) {
+    return true;
+  }
+
+  function getCategoricalEvent() public view returns (MockEvent) {
+    return categoricalEvent;
   }
 }
 

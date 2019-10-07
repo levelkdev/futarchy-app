@@ -1,10 +1,10 @@
 pragma solidity ^0.4.24;
 
-import './FutarchyOracleMock.sol';
+import './FutarchyDecisionMarketsMock.sol';
 
-contract FutarchyOracleFactoryMock {
+contract FutarchyDecisionMarketsFactoryMock {
 
-    function createFutarchyOracle(
+    function createDecisionMarkets(
         address collateralToken,
         address oracle,
         uint8 outcomeCount,
@@ -16,8 +16,8 @@ contract FutarchyOracleFactoryMock {
         uint startDate
     )
         public
-        returns (FutarchyOracleMock futarchyOracle)
+        returns (FutarchyDecisionMarketsMock futarchyDecisionMarkets)
     {
-        futarchyOracle = new FutarchyOracleMock(collateralToken);
+        futarchyDecisionMarkets = new FutarchyDecisionMarketsMock(collateralToken);
     }
 }

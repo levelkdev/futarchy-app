@@ -1,13 +1,14 @@
 pragma solidity ^0.4.24;
 
-import '@gnosis.pm/pm-contracts/contracts/Oracles/FutarchyOracle.sol';
+import './DecisionMarkets/IDecisionMarkets.sol';
+import '@gnosis.pm/pm-contracts/contracts/Events/ScalarEvent.sol';
 import '@gnosis.pm/pm-contracts/contracts/Markets/Market.sol';
 import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 
 library DecisionLib {
 
   struct Decision {
-    FutarchyOracle futarchyOracle;
+    IDecisionMarkets decisionMarkets;
     uint startDate;
     uint decisionResolutionDate;
     uint priceResolutionDate;
@@ -24,15 +25,15 @@ library DecisionLib {
 
   function closeDecisionMarkets(Decision storage self) returns (uint winningMarketIndex) {
     uint previousBalance = self.token.balanceOf(this);
-    self.futarchyOracle.close();
+    self.decisionMarkets.close();
     uint newBalance = self.token.balanceOf(this);
 
     uint creatorRefund = newBalance - previousBalance;
     require(self.token.transfer(self.decisionCreator, creatorRefund));
 
-    winningMarketIndex = self.futarchyOracle.winningMarketIndex();
-    self.futarchyOracle.markets(winningMarketIndex).eventContract().redeemWinnings();
-    self.futarchyOracle.categoricalEvent().redeemWinnings();
+    winningMarketIndex = uint(self.decisionMarkets.getOutcome());
+    self.decisionMarkets.getMarketByIndex(winningMarketIndex).eventContract().redeemWinnings();
+    self.decisionMarkets.getCategoricalEvent().redeemWinnings();
   }
 
   /**
@@ -42,31 +43,33 @@ library DecisionLib {
   *      transitions. This function should NEVER revert
   */
   function transitionDecision(Decision storage self) public {
-    _closeResolvedDecision(self);
-    _closeResolvedMarket(self);
+    if (self.decisionMarkets.outcomeCanBeSet()) {
+      _closeResolvedDecision(self);
+      _closeResolvedMarket(self);
+    }
   }
 
   function _closeResolvedDecision(Decision storage self) private {
     // Resolve unresolved decision if enough time has passed
     if (self.decisionResolutionDate < now) {
-      FutarchyOracle futarchyOracle = self.futarchyOracle;
+      IDecisionMarkets decisionMarkets = self.decisionMarkets;
 
-      if(!futarchyOracle.categoricalEvent().isOutcomeSet()) {
-        if (!futarchyOracle.isOutcomeSet()) {
-          futarchyOracle.setOutcome();
+      if(!decisionMarkets.getCategoricalEvent().isOutcomeSet()) {
+        if (!decisionMarkets.isOutcomeSet()) {
+          decisionMarkets.setOutcome();
         }
-        CategoricalEvent(futarchyOracle.categoricalEvent()).setOutcome();
+        CategoricalEvent(decisionMarkets.getCategoricalEvent()).setOutcome();
       }
 
       // Update decision struct
       self.resolved = true;
-      self.passed = futarchyOracle.winningMarketIndex() == 0 ? true : false;
+      self.passed = decisionMarkets.getOutcome() == 0 ? true : false;
     }
   }
 
   function _closeResolvedMarket(Decision storage self) private {
-    FutarchyOracle futarchyOracle = self.futarchyOracle;
-    Market winningMarket = futarchyOracle.markets(futarchyOracle.winningMarketIndex());
+    IDecisionMarkets decisionMarkets = self.decisionMarkets;
+    Market winningMarket = decisionMarkets.getMarketByIndex(uint(decisionMarkets.getOutcome()));
 
     if (
       !(winningMarket.stage() == MarketData.Stages.MarketClosed) &&
@@ -94,9 +97,9 @@ library DecisionLib {
     uint[2] noPurchaseAmounts
   ) returns (uint[2] yesCosts, uint[2] noCosts) {
     // set necessary contracts
-    CategoricalEvent categoricalEvent = self.futarchyOracle.categoricalEvent();
-    Market yesMarket = self.futarchyOracle.markets(0);
-    Market noMarket = self.futarchyOracle.markets(1);
+    CategoricalEvent categoricalEvent = self.decisionMarkets.getCategoricalEvent();
+    Market yesMarket = self.decisionMarkets.getMarketByIndex(0);
+    Market noMarket = self.decisionMarkets.getMarketByIndex(1);
 
     require(self.token.transferFrom(msg.sender, this, collateralAmount));
     self.token.approve(categoricalEvent, collateralAmount);
@@ -137,9 +140,9 @@ library DecisionLib {
     int[] memory noSellAmounts = new int[](2);
 
     // set necessary contracts
-    FutarchyOracle futarchyOracle = self.futarchyOracle;
-    Market yesMarket = futarchyOracle.markets(0);
-    Market noMarket = futarchyOracle.markets(1);
+    IDecisionMarkets decisionMarkets = self.decisionMarkets;
+    Market yesMarket = decisionMarkets.getMarketByIndex(0);
+    Market noMarket = decisionMarkets.getMarketByIndex(1);
 
     // approve token transfers
     yesMarket.eventContract().outcomeTokens(1).approve(yesMarket, yesLongAmount);
@@ -164,10 +167,10 @@ library DecisionLib {
   ) returns (int winningIndex, uint winnings) {
     require(self.decisionResolutionDate < now);
 
-    FutarchyOracle futarchyOracle = self.futarchyOracle;
+    IDecisionMarkets decisionMarkets = self.decisionMarkets;
 
-    winningIndex = futarchyOracle.getOutcome();
-    futarchyOracle.categoricalEvent().redeemWinnings();
+    winningIndex = decisionMarkets.getOutcome();
+    decisionMarkets.getCategoricalEvent().redeemWinnings();
 
     if (winningIndex == 0) {
       winnings = yesCollateral;
@@ -188,7 +191,7 @@ library DecisionLib {
     decisionPassed = self.passed;
     uint winningMarketIndex = decisionPassed ? 0 : 1;
 
-    ScalarEvent scalarEvent = ScalarEvent(self.futarchyOracle.markets(winningMarketIndex).eventContract());
+    ScalarEvent scalarEvent = ScalarEvent(self.decisionMarkets.getMarketByIndex(winningMarketIndex).eventContract());
     scalarEvent.redeemWinnings();
 
     uint shortOutcomeTokenCount;
@@ -207,7 +210,7 @@ library DecisionLib {
 
   function marketStage(Decision storage self) returns (MarketData.Stages) {
     uint winningMarketIndex = self.passed ? 0 : 1;
-    MarketData.Stages marketStage = self.futarchyOracle.markets(winningMarketIndex).stage();
+    MarketData.Stages marketStage = self.decisionMarkets.getMarketByIndex(winningMarketIndex).stage();
     return marketStage;
   }
 
@@ -216,7 +219,7 @@ library DecisionLib {
     uint marketIndex
   ) returns (int[2] outcomeTokensSold) {
     // For markets, 0 is yes, and 1 is no; and for those markets' outcome tokens, 0 is short, and 1 long
-    outcomeTokensSold[0] = self.futarchyOracle.markets(marketIndex).netOutcomeTokensSold(0);
-    outcomeTokensSold[1] = self.futarchyOracle.markets(marketIndex).netOutcomeTokensSold(1);
+    outcomeTokensSold[0] = self.decisionMarkets.getMarketByIndex(marketIndex).netOutcomeTokensSold(0);
+    outcomeTokensSold[1] = self.decisionMarkets.getMarketByIndex(marketIndex).netOutcomeTokensSold(1);
   }
 }
