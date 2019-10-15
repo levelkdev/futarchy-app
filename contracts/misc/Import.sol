@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import '../../test/mocks/FutarchyDecisionMarketsFactoryMock.sol';
-import '../../test/mocks/FutarchyDecisionMarketsMock.sol';
+import '../../test/mocks/DecisionMarketsFactoryMock.sol';
+import '../../test/mocks/DecisionMarketsMock.sol';
 
 import '@aragon/os/contracts/acl/ACL.sol';
 import '@aragon/os/contracts/apm/APMRegistry.sol';

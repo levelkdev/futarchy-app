@@ -111,13 +111,13 @@
         "type": "uint256"
       }
     ],
-    "name": "FutarchyFunding",
+    "name": "MarketsFunded",
     "type": "event"
   },
   {
     "anonymous": false,
     "inputs": [],
-    "name": "FutarchyClosing",
+    "name": "MarketsClosed",
     "type": "event"
   },
   {

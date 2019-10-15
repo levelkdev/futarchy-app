@@ -107,6 +107,7 @@ contract Futarchy is AragonApp, IForwarder {
     uint priceResolutionDate = startDate.add(timeToPriceResolution);
 
     IDecisionMarkets decisionMarkets = decisionMarketsFactory.createDecisionMarkets(
+      msg.sender,
       ERC20Gnosis(token),
       Oracle(priceOracleFactory.createOracle(priceResolutionDate)),
       2,

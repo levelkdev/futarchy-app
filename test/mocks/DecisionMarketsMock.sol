@@ -1,12 +1,15 @@
 pragma solidity ^0.4.24;
 
+import '../../contracts/DecisionMarkets/IDecisionMarkets.sol';
+import '../../contracts/DecisionMarkets/DecisionMarketsBase.sol';
 import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 import '@gnosis.pm/pm-contracts/contracts/Markets/Market.sol';
+import '@gnosis.pm/pm-contracts/contracts/GnosisUtilContracts/Proxy.sol';
 
-contract FutarchyDecisionMarketsMock {
+contract DecisionMarketsMock {
 
-  event MockFutarchyFunding(uint funding);
-  event MockFutarchyClosing();
+  event MockMarketsFunded(uint funding);
+  event MockMarketsClosed();
 
   bool public mock_isSet;
   int public mock_winningMarketIndex;
@@ -51,7 +54,7 @@ contract FutarchyDecisionMarketsMock {
   function fund(uint _funding) public {
     token.transferFrom(msg.sender, this,  _funding);
     mock_setRefundAmount(_funding);
-    emit MockFutarchyFunding(_funding);
+    emit MockMarketsFunded(_funding);
   }
 
   function winningMarketIndex() public view returns(int) {
@@ -62,7 +65,7 @@ contract FutarchyDecisionMarketsMock {
     mock_closed = true;
     token.transfer(msg.sender, mock_refundAmount);
     markets[uint(mock_winningMarketIndex)].close();
-    emit MockFutarchyClosing();
+    emit MockMarketsClosed();
   }
 
   function getMarketByIndex(uint index) public view returns (MarketMock market) {
@@ -138,5 +141,21 @@ contract MockEvent {
 
   function isOutcomeSet() public view returns (bool) {
     return mock_isSet;
+  }
+}
+
+contract DecisionMarketsMasterMock is IDecisionMarkets, Proxied, DecisionMarketsBase {
+  function setOutcome()
+    public
+  {
+
+  }
+
+  function outcomeCanBeSet()
+    public
+    view
+    returns (bool)
+  {
+
   }
 }

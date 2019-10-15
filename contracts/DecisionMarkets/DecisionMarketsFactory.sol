@@ -1,17 +1,19 @@
 pragma solidity ^0.4.24;
 
+import "./IDecisionMarkets.sol";
 import "./IDecisionMarketsFactory.sol";
-import "./FutarchyDecisionMarkets.sol";
+import "./DecisionMarketsBase.sol";
 
 /// @title Futarchy decision markets factory contract - creates futarchy decision markets
-contract FutarchyDecisionMarketsFactory is IDecisionMarketsFactory {
+contract DecisionMarketsFactory is IDecisionMarketsFactory {
 
   /*
    *  Events
    */
-  event FutarchyDecisionMarketsCreation(
+  event DecisionMarketsCreation(
+    address decisionCreator,
     address indexed creator,
-    FutarchyDecisionMarkets futarchyDecisionMarkets,
+    IDecisionMarkets decisionMarkets,
     ERC20Gnosis collateralToken,
     Oracle oracle,
     uint8 outcomeCount,
@@ -26,9 +28,9 @@ contract FutarchyDecisionMarketsFactory is IDecisionMarketsFactory {
   /*
    *  Storage
    */
-  EventFactory eventFactory;
-  StandardMarketWithPriceLoggerFactory marketFactory;
-  FutarchyDecisionMarkets public futarchyDecisionMarketsMasterCopy;
+  EventFactory public eventFactory;
+  StandardMarketWithPriceLoggerFactory public marketFactory;
+  IDecisionMarkets public decisionMarketsMasterCopy;
 
   /*
    *  Public functions
@@ -36,16 +38,17 @@ contract FutarchyDecisionMarketsFactory is IDecisionMarketsFactory {
   /// @dev Constructor sets event factory contract
   /// @param _eventFactory Event factory contract
   /// @param _marketFactory Market factory contract
-  constructor(FutarchyDecisionMarkets _futarchyDecisionMarketsMasterCopy, EventFactory _eventFactory, StandardMarketWithPriceLoggerFactory _marketFactory)
+  constructor(IDecisionMarkets _decisionMarketsMasterCopy, EventFactory _eventFactory, StandardMarketWithPriceLoggerFactory _marketFactory)
     public
   {
     require(address(_eventFactory) != 0 && address(_marketFactory) != 0);
-    futarchyDecisionMarketsMasterCopy = _futarchyDecisionMarketsMasterCopy;
+    decisionMarketsMasterCopy = _decisionMarketsMasterCopy;
     eventFactory = _eventFactory;
     marketFactory = _marketFactory;
   }
 
   /// @dev Creates a new Futarchy oracle contract
+  /// @param decisionCreator Address that initiated decision market creation
   /// @param collateralToken Tokens used as collateral in exchange for outcome tokens
   /// @param oracle Oracle contract used to resolve the event
   /// @param outcomeCount Number of event outcomes
@@ -55,8 +58,9 @@ contract FutarchyDecisionMarketsFactory is IDecisionMarketsFactory {
   /// @param fee Market fee
   /// @param tradingPeriod Trading period before decision can be determined
   /// @param startDate Start date for price logging
-  /// @return Oracle contract
+  /// @return IDecisionMarkets futarchy decision markets contract
   function createDecisionMarkets(
+    address decisionCreator,
     ERC20Gnosis collateralToken,
     Oracle oracle,
     uint8 outcomeCount,
@@ -68,10 +72,11 @@ contract FutarchyDecisionMarketsFactory is IDecisionMarketsFactory {
     uint startDate
   )
     public
-    returns (IDecisionMarkets futarchyDecisionMarkets)
+    returns (IDecisionMarkets decisionMarkets)
   {
-    futarchyDecisionMarkets = IDecisionMarkets(new FutarchyDecisionMarketsProxy(
-      futarchyDecisionMarketsMasterCopy,
+    decisionMarkets = IDecisionMarkets(new DecisionMarketsProxy(
+      decisionMarketsMasterCopy,
+      decisionCreator,
       msg.sender,
       eventFactory,
       collateralToken,
@@ -85,9 +90,10 @@ contract FutarchyDecisionMarketsFactory is IDecisionMarketsFactory {
       tradingPeriod,
       startDate
     ));
-    emit FutarchyDecisionMarketsCreation(
+    emit DecisionMarketsCreation(
+      decisionCreator,
       msg.sender,
-      FutarchyDecisionMarkets(futarchyDecisionMarkets),
+      decisionMarkets,
       collateralToken,
       oracle,
       outcomeCount,
