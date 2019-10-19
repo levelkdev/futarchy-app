@@ -4,12 +4,12 @@ const getFutarchyContract = require('../utilities/getFutarchyContract')
 const calcOutcomeTokenCount = require('../utilities/calcOutcomeTokenCount')
 
 module.exports = async (callback) => {
-  const ERC20 = artifacts.require('ERC20')
-  const FutarchyOracle = artifacts.require('FutarchyOracle')
-  const Market = artifacts.require('Market')
-  const Event = artifacts.require('Event')
-
   try {
+    const ERC20 = artifacts.require('ERC20')
+    const IDecisionMarkets = artifacts.require('IDecisionMarkets')
+    const Market = artifacts.require('Market')
+    const Event = artifacts.require('Event')
+
     const daoAddress = process.argv[6]
     const dataFileId = process.argv[7] || 0
 
@@ -45,9 +45,9 @@ module.exports = async (callback) => {
         resolvedPrice,
       } = data
       if (typeof(decisionId) !== 'undefined') {
-        const futarchyOracle = FutarchyOracle.at((await app.decisions(decisionId))[0])
-        yesMarket = Market.at(await futarchyOracle.markets(0))
-        noMarket = Market.at(await futarchyOracle.markets(1))
+        const decisionMarkets = IDecisionMarkets.at((await app.decisions(decisionId))[0])
+        yesMarket = Market.at(await decisionMarkets.getMarketByIndex(0))
+        noMarket = Market.at(await decisionMarkets.getMarketByIndex(1))
       }
       switch(data.type) {
         case 'newDecision':
@@ -117,11 +117,12 @@ module.exports = async (callback) => {
           console.log(`Decision set for decision ${decisionId}`)
           break
         case 'setScalarOutcome':
-          console.log(`setScalarOutcome: ${decisionId}, ${resolvedPrice}`)
-          let futarchyOracle = FutarchyOracle.at((await app.decisions(decisionId))[0])
-          await app.setPriceOutcome(decisionId, resolvedPrice)
-          let event = Event.at(await Market.at(await futarchyOracle.markets(await futarchyOracle.winningMarketIndex())).eventContract())
-          await event.setOutcome()
+        //   console.log(`setScalarOutcome: ${decisionId}, ${resolvedPrice}`)
+        //   let futarchyOracle = FutarchyOracle.at((await app.decisions(decisionId))[0])
+        //   await app.setPriceOutcome(decisionId, resolvedPrice)
+        //   let event = Event.at(await Market.at(await futarchyOracle.markets(await futarchyOracle.winningMarketIndex())).eventContract())
+        //   await event.setOutcome()
+         break
         case 'advanceTime':
           await advanceTime(web3, data.seconds)
           break
