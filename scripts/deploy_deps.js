@@ -21,11 +21,11 @@ module.exports = async (
   const CategoricalEvent = artifacts.require('CategoricalEvent')
   const ScalarEvent = artifacts.require('ScalarEvent')
   const OutcomeToken = artifacts.require('OutcomeToken')
-  const FutarchyOracle = artifacts.require('FutarchyOracle')
+  const SettableDecisionMarkets = artifacts.require('SettableDecisionMarkets')
   const StandardMarketWithPriceLogger = artifacts.require('StandardMarketWithPriceLogger')
   const EventFactory = artifacts.require('EventFactory')
   const StandardMarketWithPriceLoggerFactory = artifacts.require('StandardMarketWithPriceLoggerFactory')
-  const FutarchyOracleFactory = artifacts.require('FutarchyOracleFactory')
+  const DecisionMarketsFactory = artifacts.require('DecisionMarketsFactory')
 
   try {
     if (!network) network = process.argv[5]
@@ -74,9 +74,9 @@ module.exports = async (
       'OutcomeToken'
     )
 
-    const futarchyOracleMaster = await tryDeploy(
-      FutarchyOracle,
-      'FutarchyOracle'
+    const settableDecisionMarketsMaster = await tryDeploy(
+      SettableDecisionMarkets,
+      'SettableDecisionMarkets'
     )
 
     const standardMarketWithPriceLoggerMaster = await tryDeploy(
@@ -102,11 +102,11 @@ module.exports = async (
       ]
     )
 
-    const futarchyOracleFactory = await tryDeploy(
-      FutarchyOracleFactory,
-      'FutarchyOracleFactory',
+    const decisionMarketsFactory = await tryDeploy(
+      DecisionMarketsFactory,
+      'DecisionMarketsFactory',
       [
-        futarchyOracleMaster.address,
+        settableDecisionMarketsMaster.address,
         eventFactory.address,
         standardMarketWithPriceLoggerFactory.address
       ]
@@ -121,7 +121,7 @@ module.exports = async (
         lmsrMarketMakerAddress: lmsrMarketMaker.address,
         eventFactoryAddress: eventFactory.address,
         standardMarketWithPriceLoggerFactoryAddress: standardMarketWithPriceLoggerFactory.address,
-        futarchyOracleFactoryAddress: futarchyOracleFactory.address
+        decisionMarketsFactoryAddress: decisionMarketsFactory.address
       }
     }
   } catch (err) {

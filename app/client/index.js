@@ -2,7 +2,7 @@ import { logDebug, logError } from '../util/logger'
 import contractCall from './contractCall'
 import contractFn from './contractFn'
 import MiniMeToken from './MiniMeToken'
-import FutarchyOracle from './FutarchyOracle'
+import IDecisionMarkets from './IDecisionMarkets'
 import StandardMarketWithPriceLogger from './StandardMarketWithPriceLogger'
 import traderDecisionHash from '../util/traderDecisionHash'
 import toWei from '../util/toWei'
@@ -161,9 +161,9 @@ export const redeemWinnings = async (decisionId) => {
   )
 }
 
-export const yesNoMarketData = async (futarchyOracleAddress) => {
-  const futarchyOracle = FutarchyOracle(window.aragonClient, futarchyOracleAddress)
-  const markets = await futarchyOracle.markets()
+export const yesNoMarketData = async (decisionMarketsAddress) => {
+  const decisionMarkets = IDecisionMarkets(window.aragonClient, decisionMarketsAddress)
+  const markets = await decisionMarkets.markets()
 
   const yesMarket = StandardMarketWithPriceLogger(window.aragonClient, markets[0])
   const noMarket = StandardMarketWithPriceLogger(window.aragonClient, markets[1])

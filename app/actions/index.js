@@ -212,8 +212,8 @@ export const fetchTokenData = (account) => dispatch => {
   )
 }
 
-export const fetchYesNoMarketData = ({ decisionId, futarchyOracleAddress }) => dispatch => {
-  return client.yesNoMarketData(futarchyOracleAddress).then(marketData => {
+export const fetchYesNoMarketData = ({ decisionId, decisionMarketsAddress }) => dispatch => {
+  return client.yesNoMarketData(decisionMarketsAddress).then(marketData => {
     const {
       yesMarketFee,
       noMarketFee,
@@ -272,7 +272,7 @@ export const fetchDecisionData = (decisionId) => dispatch => {
     decisionData => {
       dispatch(fetchYesNoMarketData({
         decisionId,
-        futarchyOracleAddress: decisionData.futarchyOracle
+        decisionMarketsAddress: decisionData.decisionMarkets
       }))
       dispatch(fetchMarginalPrices({
         decisionId
