@@ -145,6 +145,7 @@ const decisionMarkets = (state = [], action) => {
 function addComputedProps(decisionArray) {
   return decisionArray.map(decision => {
     const winningMarket = getWinningMarket(decision)
+    console.log(`WINNING MARKET ${decision.decisionId}: `, winningMarket)
     if (typeof(winningMarket) !== 'undefined') decision.winningMarket = winningMarket
     return decision
   })
