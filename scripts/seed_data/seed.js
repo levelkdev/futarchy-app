@@ -7,6 +7,7 @@ module.exports = async (callback) => {
   try {
     const ERC20 = artifacts.require('ERC20')
     const IDecisionMarkets = artifacts.require('IDecisionMarkets')
+    const SettableDecisionMarkets = artifacts.require('SettableDecisionMarkets')
     const Market = artifacts.require('Market')
     const Event = artifacts.require('Event')
 
@@ -30,7 +31,7 @@ module.exports = async (callback) => {
     const upperBound = 25 * 10 ** 18
 
     const tradesData = require('./data/data_' + dataFileId + '.json')
-    let yesMarket, noMarket
+    let settableDecisionMarkets, yesMarket, noMarket
 
     for (var j = 0; j < tradesData.length; j++) {
       const data = tradesData[j]
@@ -43,9 +44,12 @@ module.exports = async (callback) => {
         executionScript,
         metadata,
         resolvedPrice,
+        outcome
       } = data
       if (typeof(decisionId) !== 'undefined') {
-        const decisionMarkets = IDecisionMarkets.at((await app.decisions(decisionId))[0])
+        const decisionMarketsAddress = (await app.decisions(decisionId))[0]
+        const decisionMarkets = IDecisionMarkets.at(decisionMarketsAddress)
+        settableDecisionMarkets = SettableDecisionMarkets.at(decisionMarketsAddress)
         yesMarket = Market.at(await decisionMarkets.getMarketByIndex(0))
         noMarket = Market.at(await decisionMarkets.getMarketByIndex(1))
       }
@@ -111,10 +115,11 @@ module.exports = async (callback) => {
           await app.sellMarketPositions(decisionId, { from: seller })
           console.log('sold positions')
           break
-        case 'transitionDecision':
-          console.log(`Set decision for decision ${decisionId}`)
+        case 'setDecision':
+          console.log(`Set external outcome to ${outcome} for decision ${decisionId}`)
+          await settableDecisionMarkets.setExternalOutcome(outcome)
+          console.log(`Call transitionDecision to set winning outcome to ${outcome}`)
           await app.transitionDecision(decisionId)
-          console.log(`Decision set for decision ${decisionId}`)
           break
         case 'setScalarOutcome':
         //   console.log(`setScalarOutcome: ${decisionId}, ${resolvedPrice}`)

@@ -118,7 +118,8 @@
     "seconds": 259200
   },
   {
-    "type": "transitionDecision",
+    "type": "setDecision",
+    "outcome": 0,
     "decisionId": 0
   },
   {
@@ -208,7 +209,8 @@
     "seconds": 259200
   },
   {
-    "type": "transitionDecision",
+    "type": "setDecision",
+    "outcome": 0,
     "decisionId": 1
   },
   {
@@ -394,8 +396,14 @@
     "seconds": 259200
   },
   {
-    "type": "transitionDecision",
+    "type": "setDecision",
+    "outcome": 1,
     "decisionId": 2
+  },
+  {
+    "type": "setDecision",
+    "outcome": 1,
+    "decisionId": 3
   },
   {
     "type": "setScalarOutcome",
