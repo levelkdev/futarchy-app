@@ -48,7 +48,9 @@ export const yesNoMarketDataLoaded = ({
   yesShortOutcomeTokensSold,
   yesLongOutcomeTokensSold,
   noShortOutcomeTokensSold,
-  noLongOutcomeTokensSold
+  noLongOutcomeTokensSold,
+  winningMarket,
+  winningMarketOutcome
 }) => ({
   type: 'YES_NO_MARKET_DATA_LOADED',
   decisionId,
@@ -59,7 +61,9 @@ export const yesNoMarketDataLoaded = ({
   yesShortOutcomeTokensSold,
   yesLongOutcomeTokensSold,
   noShortOutcomeTokensSold,
-  noLongOutcomeTokensSold
+  noLongOutcomeTokensSold,
+  winningMarket,
+  winningMarketOutcome
 })
 
 export const decisionDataLoaded = ({ decisionId, decisionData }) => ({
@@ -224,7 +228,9 @@ export const fetchYesNoMarketData = ({ decisionId, decisionMarketsAddress }) => 
       yesShortOutcomeTokensSold,
       yesLongOutcomeTokensSold,
       noShortOutcomeTokensSold,
-      noLongOutcomeTokensSold
+      noLongOutcomeTokensSold,
+      winningMarket,
+      winningMarketOutcome
     } = marketData
     // TODO: these don't really need to be separate actions, but tests are already in
     //       place and avgDecisionMarketPricesLoaded works to correctly render the values
@@ -243,7 +249,9 @@ export const fetchYesNoMarketData = ({ decisionId, decisionMarketsAddress }) => 
       yesShortOutcomeTokensSold,
       yesLongOutcomeTokensSold,
       noShortOutcomeTokensSold,
-      noLongOutcomeTokensSold
+      noLongOutcomeTokensSold,
+      winningMarket,
+      winningMarketOutcome
     }))
   },
   errorMessage => {

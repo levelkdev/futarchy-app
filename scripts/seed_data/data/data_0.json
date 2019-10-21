@@ -406,13 +406,8 @@
     "decisionId": 3
   },
   {
-    "type": "setScalarOutcome",
+    "type": "setPrice",
     "decisionId": 0,
     "resolvedPrice": 15000000000000000000
-  },
-  {
-    "type": "setScalarOutcome",
-    "decisionId": 1,
-    "resolvedPrice": 10000000000000000000
   }
 ]

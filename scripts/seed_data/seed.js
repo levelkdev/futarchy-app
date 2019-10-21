@@ -8,6 +8,7 @@ module.exports = async (callback) => {
     const ERC20 = artifacts.require('ERC20')
     const IDecisionMarkets = artifacts.require('IDecisionMarkets')
     const SettableDecisionMarkets = artifacts.require('SettableDecisionMarkets')
+    const CentralizedTimedOracle = artifacts.require('CentralizedTimedOracle')
     const Market = artifacts.require('Market')
     const Event = artifacts.require('Event')
 
@@ -31,7 +32,7 @@ module.exports = async (callback) => {
     const upperBound = 25 * 10 ** 18
 
     const tradesData = require('./data/data_' + dataFileId + '.json')
-    let settableDecisionMarkets, yesMarket, noMarket
+    let settableDecisionMarkets, decisionMarkets, yesMarket, noMarket
 
     for (var j = 0; j < tradesData.length; j++) {
       const data = tradesData[j]
@@ -48,7 +49,7 @@ module.exports = async (callback) => {
       } = data
       if (typeof(decisionId) !== 'undefined') {
         const decisionMarketsAddress = (await app.decisions(decisionId))[0]
-        const decisionMarkets = IDecisionMarkets.at(decisionMarketsAddress)
+        decisionMarkets = IDecisionMarkets.at(decisionMarketsAddress)
         settableDecisionMarkets = SettableDecisionMarkets.at(decisionMarketsAddress)
         yesMarket = Market.at(await decisionMarkets.getMarketByIndex(0))
         noMarket = Market.at(await decisionMarkets.getMarketByIndex(1))
@@ -121,12 +122,16 @@ module.exports = async (callback) => {
           console.log(`Call transitionDecision to set winning outcome to ${outcome}`)
           await app.transitionDecision(decisionId)
           break
-        case 'setScalarOutcome':
+        case 'setPrice':
         //   console.log(`setScalarOutcome: ${decisionId}, ${resolvedPrice}`)
         //   let futarchyOracle = FutarchyOracle.at((await app.decisions(decisionId))[0])
         //   await app.setPriceOutcome(decisionId, resolvedPrice)
-        //   let event = Event.at(await Market.at(await futarchyOracle.markets(await futarchyOracle.winningMarketIndex())).eventContract())
-        //   await event.setOutcome()
+          let winningEvent = Event.at(await Market.at(await decisionMarkets.getMarketByIndex(await decisionMarkets.getOutcome())).eventContract())
+          let priceOracle = CentralizedTimedOracle.at((await winningEvent.oracle()))
+          console.log(`Setting price to ${resolvedPrice/10**18} for decision ${decisionId}`)
+          await priceOracle.setOutcome(resolvedPrice)
+          console.log(`Setting outcome to resolve winning market for decision ${decisionId}`)
+          await winningEvent.setOutcome()
          break
         case 'advanceTime':
           await advanceTime(web3, data.seconds)

@@ -11,6 +11,7 @@ export default (aragonClient, address) => {
     fee: async () => contractFn(standardMarketWithPriceLogger, contractName, 'fee'),
     funding: async () => contractFn(standardMarketWithPriceLogger, contractName, 'funding'),
     averagePrice: async () => contractFn(standardMarketWithPriceLogger, contractName, 'getAvgPrice'),
+    event: async () => contractFn(standardMarketWithPriceLogger, contractName, 'eventContract'),
     netOutcomeTokensSold: async () => Promise.all([
       contractFn(standardMarketWithPriceLogger, contractName, 'netOutcomeTokensSold', 0),
       contractFn(standardMarketWithPriceLogger, contractName, 'netOutcomeTokensSold', 1)

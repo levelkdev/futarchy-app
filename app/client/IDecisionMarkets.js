@@ -8,6 +8,8 @@ export default (aragonClient, address) => {
 
   return {
     ...decisionMarkets,
+    isOutcomeSet: async () => contractFn(decisionMarkets, contractName, 'isOutcomeSet'),
+    outcome: async () => contractFn(decisionMarkets, contractName, 'getOutcome'),
     markets: async () => {
       return Promise.all([
         contractFn(decisionMarkets, contractName, 'getMarketByIndex', 0),

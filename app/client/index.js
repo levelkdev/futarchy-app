@@ -4,8 +4,10 @@ import contractFn from './contractFn'
 import MiniMeToken from './MiniMeToken'
 import IDecisionMarkets from './IDecisionMarkets'
 import StandardMarketWithPriceLogger from './StandardMarketWithPriceLogger'
+import Event from './Event'
 import traderDecisionHash from '../util/traderDecisionHash'
 import toWei from '../util/toWei'
+import decisionMarketTypes from '../constants/decisionMarketTypes'
 const web3_utils = require('web3-utils')
 
 export const accounts = async () => {
@@ -163,10 +165,22 @@ export const redeemWinnings = async (decisionId) => {
 
 export const yesNoMarketData = async (decisionMarketsAddress) => {
   const decisionMarkets = IDecisionMarkets(window.aragonClient, decisionMarketsAddress)
-  const markets = await decisionMarkets.markets()
+  const isOutcomeSet = await decisionMarkets.isOutcomeSet()
 
+  const markets = await decisionMarkets.markets()
   const yesMarket = StandardMarketWithPriceLogger(window.aragonClient, markets[0])
   const noMarket = StandardMarketWithPriceLogger(window.aragonClient, markets[1])
+
+  let winningMarket, winningMarketOutcome
+  if (isOutcomeSet) {
+    winningMarket = (await decisionMarkets.outcome()) == 0 ? decisionMarketTypes.YES : decisionMarketTypes.NO
+    const winningMarketContract = winningMarket == decisionMarketTypes.YES ? yesMarket : noMarket
+    const eventAddr = await winningMarketContract.event()
+    const event = Event(window.aragonClient, eventAddr)
+    if (await event.isOutcomeSet()) {
+      winningMarketOutcome = await event.outcome()
+    }
+  }
 
   const yesMarketFee = await yesMarket.fee()
   const noMarketFee = await noMarket.fee()
@@ -190,7 +204,9 @@ export const yesNoMarketData = async (decisionMarketsAddress) => {
     yesShortOutcomeTokensSold: yesNetOutcomeTokensSold[0],
     yesLongOutcomeTokensSold: yesNetOutcomeTokensSold[1],
     noShortOutcomeTokensSold: noNetOutcomeTokensSold[0],
-    noLongOutcomeTokensSold: noNetOutcomeTokensSold[1]
+    noLongOutcomeTokensSold: noNetOutcomeTokensSold[1],
+    winningMarket,
+    winningMarketOutcome
   }
 }
 
