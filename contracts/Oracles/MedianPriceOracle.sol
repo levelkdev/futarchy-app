@@ -43,24 +43,24 @@ contract MedianPriceOracle is ScalarPriceOracleBase, TimedOracle {
     resolutionDatePassed
   {
     bytes32 result;
-    require(_isValidRange(startIndex, endIndex));
+    require(isValidRange(startIndex, endIndex));
     result = medianDataFeed.medianizeByIndices(startIndex, endIndex);
 
     _setOutcome(int(result));
   }
 
-  // Internal Functions
-
-  function _isValidRange(uint startIndex, uint endIndex)
-    internal
+  function isValidRange(uint startIndex, uint endIndex)
+    public
+    view
     returns (bool)
   {
-    return (_isValidStartIndex(startIndex) && _isValidEndIndex(endIndex)) ||
-      _validForNoResultsDuringTimeframe(startIndex, endIndex);
+    return (isValidStartIndex(startIndex) && isValidEndIndex(endIndex)) ||
+      validForNoResultsDuringTimeframe(startIndex, endIndex);
   }
 
-  function _isValidStartIndex(uint startIndex)
-    internal
+  function isValidStartIndex(uint startIndex)
+    public
+    view
     returns (bool)
   {
     (, uint startDate) = medianDataFeed.resultByIndex(startIndex);
@@ -76,8 +76,9 @@ contract MedianPriceOracle is ScalarPriceOracleBase, TimedOracle {
     return startIndexWithinTimeframe && previousIndexBeforeTimeframe;
   }
 
-  function _isValidEndIndex(uint endIndex)
-    internal
+  function isValidEndIndex(uint endIndex)
+    public
+    view
     returns (bool)
   {
     (, uint endDate) = medianDataFeed.resultByIndex(endIndex);
@@ -93,8 +94,9 @@ contract MedianPriceOracle is ScalarPriceOracleBase, TimedOracle {
     return endIndexWithinTimeframe && nextIndexAfterTimeframe;
   }
 
-  function _validForNoResultsDuringTimeframe(uint startIndex, uint endIndex)
-    internal
+  function validForNoResultsDuringTimeframe(uint startIndex, uint endIndex)
+    public
+    view
     returns (bool)
   {
     (, uint startDate) = medianDataFeed.resultByIndex(startIndex);
