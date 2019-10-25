@@ -36,27 +36,19 @@ const decisionMarkets = (state = [], action) => {
           startDate: returnValues.startDate,
           decisionResolutionDate: returnValues.decisionResolutionDate,
           priceResolutionDate: returnValues.priceResolutionDate,
-
-          // TODO: get the actual status based on time until the trading period is over.
-          //       and the oracle's resolution date. We need to add the resolution period
-          //       in addition to the trading period to the Futarchy.sol contract
-          status: getStatus({
-            blocktime,
-            decisionResolutionDate: returnValues.decisionResolutionDate,
-            priceResolutionDate: returnValues.priceResolutionDate
-          })
+          status: decisionStatuses.OPEN
         }
       ], decision => decision.startDate ? parseInt(decision.startDate) * -1 : 0)
       break
     case 'DECISION_DATA_LOADED':
       const { decisionId, decisionData } = action
       returnState = state.map(decision => {
-          if  (decision.decisionId == decisionId) {
-            decision.passed = decisionData.passed
-            decision.resolved = decisionData.resolved
-            decision.decisionResolutionDate = decisionData.decisionResolutionDate
-          }
-          return decision
+        if (decision.decisionId == decisionId) {
+          decision.passed = decisionData.passed
+          decision.resolved = decisionData.resolved
+          decision.decisionResolutionDate = decisionData.decisionResolutionDate
+        }
+        return decision
       })
       break
     case 'AVG_DECISION_MARKET_PRICES_LOADED':
@@ -108,22 +100,13 @@ const decisionMarkets = (state = [], action) => {
           decision.yesShortOutcomeTokensSold = action.yesShortOutcomeTokensSold,
           decision.yesLongOutcomeTokensSold = action.yesLongOutcomeTokensSold,
           decision.noShortOutcomeTokensSold = action.noShortOutcomeTokensSold,
-          decision.noLongOutcomeTokensSold = action.noLongOutcomeTokensSold
+          decision.noLongOutcomeTokensSold = action.noLongOutcomeTokensSold,
+          decision.winningMarket = action.winningMarket
+          decision.winningMarketOutcome = action.winningMarketOutcome
+          decision.status = getStatus(decision)
         }
         return decision
       })
-      break
-    case 'PROP_VALUE_LOADED':
-      if (action.prop == 'latestBlock') {
-        returnState = state.map(decision => {
-          decision.status = getStatus({
-            blocktime: action.value.timestamp,
-            decisionResolutionDate: decision.decisionResolutionDate,
-            priceResolutionDate: decision.priceResolutionDate
-          })
-          return decision
-        })
-      }
       break
     case 'NET_OUTCOME_TOKENS_SOLD_FOR_DECISION_LOADED':
       returnState = state.map(decision => {
@@ -150,26 +133,14 @@ function addComputedProps(decisionArray) {
   })
 }
 
-function getStatus ({
-  blocktime,
-  decisionResolutionDate,
-  priceResolutionDate
-}) {
-  if (!blocktime) {
-    return null
-  }
-  const blocktimeInt = parseInt(blocktime)
-  const decisionResolutionDateInt = parseInt(decisionResolutionDate)
-  const priceResolutionDateInt = parseInt(priceResolutionDate)
-  if (blocktimeInt < decisionResolutionDateInt)
-  {
-    return decisionStatuses.OPEN
-  } else if (blocktimeInt >= decisionResolutionDateInt &&
-             blocktimeInt < priceResolutionDateInt)
-  {
-    return decisionStatuses.RESOLVED
-  } else if (blocktimeInt >= priceResolutionDate) {
+function getStatus (decision) {
+  const { resolved, winningMarketOutcome } = decision
+  if (resolved && typeof(winningMarketOutcome) !== 'undefined') {
     return decisionStatuses.CLOSED
+  } else if (resolved) {
+    return decisionStatuses.RESOLVED
+  } else {
+    return decisionStatuses.OPEN
   }
 }
 

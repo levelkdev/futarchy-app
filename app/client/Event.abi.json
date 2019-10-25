@@ -2,11 +2,11 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "LONG",
+    "name": "outcome",
     "outputs": [
       {
         "name": "",
-        "type": "uint8"
+        "type": "int256"
       }
     ],
     "payable": false,
@@ -16,21 +16,7 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "winningMarketIndex",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "masterCopy",
+    "name": "oracle",
     "outputs": [
       {
         "name": "",
@@ -49,7 +35,7 @@
         "type": "uint256"
       }
     ],
-    "name": "markets",
+    "name": "outcomeTokens",
     "outputs": [
       {
         "name": "",
@@ -63,7 +49,7 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "categoricalEvent",
+    "name": "collateralToken",
     "outputs": [
       {
         "name": "",
@@ -72,96 +58,6 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "isSet",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "tradingPeriod",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "name": "funding",
-        "type": "uint256"
-      }
-    ],
-    "name": "MarketsFunded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [],
-    "name": "MarketsClosed",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "name": "winningMarketIndex",
-        "type": "uint256"
-      }
-    ],
-    "name": "OutcomeAssignment",
-    "type": "event"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "funding",
-        "type": "uint256"
-      }
-    ],
-    "name": "fund",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [],
-    "name": "close",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [],
-    "name": "setOutcome",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -179,17 +75,195 @@
     "type": "function"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "outcomeToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "index",
+        "type": "uint8"
+      }
+    ],
+    "name": "OutcomeTokenCreation",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "buyer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "collateralTokenCount",
+        "type": "uint256"
+      }
+    ],
+    "name": "OutcomeTokenSetIssuance",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "seller",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "outcomeTokenCount",
+        "type": "uint256"
+      }
+    ],
+    "name": "OutcomeTokenSetRevocation",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "outcome",
+        "type": "int256"
+      }
+    ],
+    "name": "OutcomeAssignment",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "receiver",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "winnings",
+        "type": "uint256"
+      }
+    ],
+    "name": "WinningsRedemption",
+    "type": "event"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "collateralTokenCount",
+        "type": "uint256"
+      }
+    ],
+    "name": "buyAllOutcomes",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "outcomeTokenCount",
+        "type": "uint256"
+      }
+    ],
+    "name": "sellAllOutcomes",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "setOutcome",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "constant": true,
     "inputs": [],
-    "name": "getOutcome",
+    "name": "getOutcomeCount",
     "outputs": [
       {
         "name": "",
-        "type": "int256"
+        "type": "uint8"
       }
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getOutcomeTokens",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "getOutcomeTokenDistribution",
+    "outputs": [
+      {
+        "name": "outcomeTokenDistribution",
+        "type": "uint256[]"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getEventHash",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "redeemWinnings",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]

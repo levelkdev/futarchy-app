@@ -48,7 +48,9 @@ export const yesNoMarketDataLoaded = ({
   yesShortOutcomeTokensSold,
   yesLongOutcomeTokensSold,
   noShortOutcomeTokensSold,
-  noLongOutcomeTokensSold
+  noLongOutcomeTokensSold,
+  winningMarket,
+  winningMarketOutcome
 }) => ({
   type: 'YES_NO_MARKET_DATA_LOADED',
   decisionId,
@@ -59,7 +61,9 @@ export const yesNoMarketDataLoaded = ({
   yesShortOutcomeTokensSold,
   yesLongOutcomeTokensSold,
   noShortOutcomeTokensSold,
-  noLongOutcomeTokensSold
+  noLongOutcomeTokensSold,
+  winningMarket,
+  winningMarketOutcome
 })
 
 export const decisionDataLoaded = ({ decisionId, decisionData }) => ({
@@ -212,8 +216,8 @@ export const fetchTokenData = (account) => dispatch => {
   )
 }
 
-export const fetchYesNoMarketData = ({ decisionId, futarchyOracleAddress }) => dispatch => {
-  return client.yesNoMarketData(futarchyOracleAddress).then(marketData => {
+export const fetchYesNoMarketData = ({ decisionId, decisionMarketsAddress }) => dispatch => {
+  return client.yesNoMarketData(decisionMarketsAddress).then(marketData => {
     const {
       yesMarketFee,
       noMarketFee,
@@ -224,7 +228,9 @@ export const fetchYesNoMarketData = ({ decisionId, futarchyOracleAddress }) => d
       yesShortOutcomeTokensSold,
       yesLongOutcomeTokensSold,
       noShortOutcomeTokensSold,
-      noLongOutcomeTokensSold
+      noLongOutcomeTokensSold,
+      winningMarket,
+      winningMarketOutcome
     } = marketData
     // TODO: these don't really need to be separate actions, but tests are already in
     //       place and avgDecisionMarketPricesLoaded works to correctly render the values
@@ -243,7 +249,9 @@ export const fetchYesNoMarketData = ({ decisionId, futarchyOracleAddress }) => d
       yesShortOutcomeTokensSold,
       yesLongOutcomeTokensSold,
       noShortOutcomeTokensSold,
-      noLongOutcomeTokensSold
+      noLongOutcomeTokensSold,
+      winningMarket,
+      winningMarketOutcome
     }))
   },
   errorMessage => {
@@ -272,7 +280,7 @@ export const fetchDecisionData = (decisionId) => dispatch => {
     decisionData => {
       dispatch(fetchYesNoMarketData({
         decisionId,
-        futarchyOracleAddress: decisionData.futarchyOracle
+        decisionMarketsAddress: decisionData.decisionMarkets
       }))
       dispatch(fetchMarginalPrices({
         decisionId

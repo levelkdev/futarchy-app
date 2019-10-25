@@ -6,26 +6,6 @@ import mockDecision from '../../test/mockDecision'
 describe('getWinningMarket()', () => {
   [
     {
-      when: 'when resolve is `false`, status is not OPEN, and `yes` price is highest',
-      should: 'should set winningMarket to YES',
-      input: mockDecision({
-        yesMarketAveragePricePercentage: 0.2,
-        noMarketAveragePricePercentage: 0.1
-      }),
-      output: decisionMarketTypes.YES
-    },
-    {
-      when: 'when resolve is `false`, status is not OPEN, and `NO` market price is highest',
-      should: 'should set winningMarket to NO',
-      input: mockDecision({
-        yesMarketAveragePricePercentage: 0.1,
-        noMarketAveragePricePercentage: 0.2,
-        resolved: false,
-        passed: false
-      }),
-      output: decisionMarketTypes.NO
-    },
-    {
       when: 'when resolve=`true` and passed=`true`, but `NO` market price is highest',
       should: 'should set winningMarket to YES',
       input: mockDecision({

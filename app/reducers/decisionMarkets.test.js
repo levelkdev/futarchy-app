@@ -131,12 +131,12 @@ describe('decisionMarkets', () => {
         ]
       },
       {
-        when: 'when the decision action blocktime is less than decisionResolutionDate',
-        should: 'should set status to OPEN',
+        when: 'when executed',
+        should: 'should set status to OPEN by default',
         state: [],
         action: { 
           type: 'START_DECISION_EVENT',
-          blocktime: '1500000001',
+          blocktime: '1500000022',
           returnValues: {
             decisionId: '123',
             startDate: '150000000',
@@ -146,60 +146,6 @@ describe('decisionMarkets', () => {
         },
         expected: [
           { index: 0, props: { status: decisionStatuses.OPEN } }
-        ]
-      },
-      {
-        when: 'when the decision action blocktime is greater than decisionResolutionDate but less than priceResolutionDate',
-        should: 'should set status to RESOLVED',
-        state: [],
-        action: { 
-          type: 'START_DECISION_EVENT',
-          blocktime: '1500000003',
-          returnValues: {
-            decisionId: '123',
-            startDate: '150000000',
-            decisionResolutionDate: '1500000002',
-            priceResolutionDate: '1500000004'
-          }
-        },
-        expected: [
-          { index: 0, props: { status: decisionStatuses.RESOLVED } }
-        ]
-      },
-      {
-        when: 'when the decision action blocktime is greater than priceResolutionDate',
-        should: 'should set status to CLOSED',
-        state: [],
-        action: { 
-          type: 'START_DECISION_EVENT',
-          blocktime: '1500000006',
-          returnValues: {
-            decisionId: '123',
-            startDate: '150000000',
-            decisionResolutionDate: '1500000002',
-            priceResolutionDate: '1500000004'
-          }
-        },
-        expected: [
-          { index: 0, props: { status: decisionStatuses.CLOSED } }
-        ]
-      },
-      {
-        when: 'when the decision action blocktime is null',
-        should: 'should set status to null',
-        state: [],
-        action: { 
-          type: 'START_DECISION_EVENT',
-          blocktime: null,
-          returnValues: {
-            decisionId: '123',
-            startDate: '150000000',
-            decisionResolutionDate: '1500000002',
-            priceResolutionDate: '1500000004'
-          }
-        },
-        expected: [
-          { index: 0, props: { status: null } }
         ]
       },
       {
@@ -350,6 +296,48 @@ describe('decisionMarkets', () => {
           noShortOutcomeTokensSold: '7',
           noLongOutcomeTokensSold: '8'
         }
+      },
+      {
+        when: 'when resolved is false and winningMarketOutcome is undefined',
+        should: 'should return state with OPEN status',
+        state: [mockDecision({ decisionId: 0 }), mockDecision({ decisionId: 123 })],
+        action: yesNoMarketDataLoaded({
+          decisionId: 'mock_decision_id_123',
+          winningMarket: 'YES',
+          winningMarketOutcome: undefined
+        }),
+        marketIndex: 1,
+        expectedProps: {
+          status: decisionStatuses.OPEN
+        }
+      },
+      {
+        when: 'when resolved is true and winningMarketOutcome is undefined',
+        should: 'should return state with RESOLVED status',
+        state: [mockDecision({ decisionId: 0 }), mockDecision({ decisionId: 123, resolved: true })],
+        action: yesNoMarketDataLoaded({
+          decisionId: 'mock_decision_id_123',
+          winningMarket: 'YES',
+          winningMarketOutcome: undefined
+        }),
+        marketIndex: 1,
+        expectedProps: {
+          status: decisionStatuses.RESOLVED
+        }
+      },
+      {
+        when: 'when resolved is true and winningMarketOutcome is defined',
+        should: 'should return state with CLOSED status',
+        state: [mockDecision({ decisionId: 0 }), mockDecision({ decisionId: 123, resolved: true })],
+        action: yesNoMarketDataLoaded({
+          decisionId: 'mock_decision_id_123',
+          winningMarket: 'YES',
+          winningMarketOutcome: 1234567
+        }),
+        marketIndex: 1,
+        expectedProps: {
+          status: decisionStatuses.CLOSED
+        }
       }
     ].forEach(({ when, should, state, action, marketIndex, expectedProps }) => {
       describe(when, () => {
@@ -414,40 +402,6 @@ describe('decisionMarkets', () => {
           }
         })
       })
-    })
-  })
-
-  describe('when latestBlock value is loaded', () => {
-    it('should update statuses for existing decisions', () => {
-      const state = [
-        mockDecision({
-          decisionId: 0,
-          pending: false,
-          decisionResolutionDate: '500',
-          priceResolutionDate: '600'
-        }),
-        mockDecision({
-          decisionId: 1,
-          pending: false,
-          decisionResolutionDate: '700',
-          priceResolutionDate: '800'
-        }),
-        mockDecision({
-          decisionId: 1,
-          pending: false,
-          decisionResolutionDate: '900',
-          priceResolutionDate: '1000'
-        })
-      ]
-      const action = {
-        type: 'PROP_VALUE_LOADED',
-        prop: 'latestBlock',
-        value: { timestamp: 750 }
-      }
-      const actualState = decisionMarkets(state, action)
-      assert.equal(actualState[0].status, decisionStatuses.CLOSED)
-      assert.equal(actualState[1].status, decisionStatuses.RESOLVED)
-      assert.equal(actualState[2].status, decisionStatuses.OPEN)
     })
   })
 })

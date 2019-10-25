@@ -118,7 +118,8 @@
     "seconds": 259200
   },
   {
-    "type": "transitionDecision",
+    "type": "setDecision",
+    "outcome": 0,
     "decisionId": 0
   },
   {
@@ -208,7 +209,8 @@
     "seconds": 259200
   },
   {
-    "type": "transitionDecision",
+    "type": "setDecision",
+    "outcome": 0,
     "decisionId": 1
   },
   {
@@ -394,17 +396,18 @@
     "seconds": 259200
   },
   {
-    "type": "transitionDecision",
+    "type": "setDecision",
+    "outcome": 1,
     "decisionId": 2
   },
   {
-    "type": "setScalarOutcome",
-    "decisionId": 0,
-    "resolvedPrice": 15000000000000000000
+    "type": "setDecision",
+    "outcome": 1,
+    "decisionId": 3
   },
   {
-    "type": "setScalarOutcome",
-    "decisionId": 1,
-    "resolvedPrice": 10000000000000000000
+    "type": "setPrice",
+    "decisionId": 0,
+    "resolvedPrice": 15000000000000000000
   }
 ]

@@ -4,12 +4,14 @@ const getFutarchyContract = require('../utilities/getFutarchyContract')
 const calcOutcomeTokenCount = require('../utilities/calcOutcomeTokenCount')
 
 module.exports = async (callback) => {
-  const ERC20 = artifacts.require('ERC20')
-  const FutarchyOracle = artifacts.require('FutarchyOracle')
-  const Market = artifacts.require('Market')
-  const Event = artifacts.require('Event')
-
   try {
+    const ERC20 = artifacts.require('ERC20')
+    const IDecisionMarkets = artifacts.require('IDecisionMarkets')
+    const SettableDecisionMarkets = artifacts.require('SettableDecisionMarkets')
+    const CentralizedTimedOracle = artifacts.require('CentralizedTimedOracle')
+    const Market = artifacts.require('Market')
+    const Event = artifacts.require('Event')
+
     const daoAddress = process.argv[6]
     const dataFileId = process.argv[7] || 0
 
@@ -30,7 +32,7 @@ module.exports = async (callback) => {
     const upperBound = 25 * 10 ** 18
 
     const tradesData = require('./data/data_' + dataFileId + '.json')
-    let yesMarket, noMarket
+    let settableDecisionMarkets, decisionMarkets, yesMarket, noMarket
 
     for (var j = 0; j < tradesData.length; j++) {
       const data = tradesData[j]
@@ -43,11 +45,14 @@ module.exports = async (callback) => {
         executionScript,
         metadata,
         resolvedPrice,
+        outcome
       } = data
       if (typeof(decisionId) !== 'undefined') {
-        const futarchyOracle = FutarchyOracle.at((await app.decisions(decisionId))[0])
-        yesMarket = Market.at(await futarchyOracle.markets(0))
-        noMarket = Market.at(await futarchyOracle.markets(1))
+        const decisionMarketsAddress = (await app.decisions(decisionId))[0]
+        decisionMarkets = IDecisionMarkets.at(decisionMarketsAddress)
+        settableDecisionMarkets = SettableDecisionMarkets.at(decisionMarketsAddress)
+        yesMarket = Market.at(await decisionMarkets.getMarketByIndex(0))
+        noMarket = Market.at(await decisionMarkets.getMarketByIndex(1))
       }
       switch(data.type) {
         case 'newDecision':
@@ -111,17 +116,23 @@ module.exports = async (callback) => {
           await app.sellMarketPositions(decisionId, { from: seller })
           console.log('sold positions')
           break
-        case 'transitionDecision':
-          console.log(`Set decision for decision ${decisionId}`)
+        case 'setDecision':
+          console.log(`Set external outcome to ${outcome} for decision ${decisionId}`)
+          await settableDecisionMarkets.setExternalOutcome(outcome)
+          console.log(`Call transitionDecision to set winning outcome to ${outcome}`)
           await app.transitionDecision(decisionId)
-          console.log(`Decision set for decision ${decisionId}`)
           break
-        case 'setScalarOutcome':
-          console.log(`setScalarOutcome: ${decisionId}, ${resolvedPrice}`)
-          let futarchyOracle = FutarchyOracle.at((await app.decisions(decisionId))[0])
-          await app.setPriceOutcome(decisionId, resolvedPrice)
-          let event = Event.at(await Market.at(await futarchyOracle.markets(await futarchyOracle.winningMarketIndex())).eventContract())
-          await event.setOutcome()
+        case 'setPrice':
+        //   console.log(`setScalarOutcome: ${decisionId}, ${resolvedPrice}`)
+        //   let futarchyOracle = FutarchyOracle.at((await app.decisions(decisionId))[0])
+        //   await app.setPriceOutcome(decisionId, resolvedPrice)
+          let winningEvent = Event.at(await Market.at(await decisionMarkets.getMarketByIndex(await decisionMarkets.getOutcome())).eventContract())
+          let priceOracle = CentralizedTimedOracle.at((await winningEvent.oracle()))
+          console.log(`Setting price to ${resolvedPrice/10**18} for decision ${decisionId}`)
+          await priceOracle.setOutcome(resolvedPrice)
+          console.log(`Setting outcome to resolve winning market for decision ${decisionId}`)
+          await winningEvent.setOutcome()
+         break
         case 'advanceTime':
           await advanceTime(web3, data.seconds)
           break

@@ -39,7 +39,7 @@ module.exports = async (
 
     const {
       miniMeTokenAddress,
-      futarchyOracleFactoryAddress,
+      decisionMarketsFactoryAddress,
       centralizedTimedOracleFactoryAddress,
       lmsrMarketMakerAddress
     } = await deployDeps(null, { artifacts, network, web3 })
@@ -64,7 +64,7 @@ module.exports = async (
       TIME_TO_PRICE_RESOLUTION,
       MARKET_FUND_AMOUNT,
       miniMeTokenAddress,
-      futarchyOracleFactoryAddress,
+      decisionMarketsFactoryAddress,
       centralizedTimedOracleFactoryAddress,
       lmsrMarketMakerAddress
     ]

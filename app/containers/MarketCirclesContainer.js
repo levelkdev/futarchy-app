@@ -16,7 +16,7 @@ const mapStateToProps = (state, ownProps) => {
     noDisplayPrice: decision && decision.noMarketAveragePricePredicted,
     yesPercentage: decision && decision.yesMarketAveragePricePercentage,
     noPercentage: decision && decision.noMarketAveragePricePercentage,
-    marketWinner: decision && decision.status !== decisionStatuses.OPEN && decision.winningMarket
+    marketWinner: decision && decision.winningMarket
   }
 }
 
