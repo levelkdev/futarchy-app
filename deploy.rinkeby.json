@@ -1,6 +1,6 @@
 {
     "dependencyContracts": {
-        "DecisionLib": "0x8d6b00c10a496dbdc079a81dd4d1d9db698f4683",
+        "DecisionLib": "0xe58ec3c9be47c1c25d8b1f0bcd80c9c16795f198",
         "MiniMeToken": "0xa877d0ac70d05454c809c40cbc67c7b1f840f7c9",
         "CentralizedTimedOracleFactory": "0xa9422233207949524d64dd9a2fc8d3c957fb093f",
         "Fixed192x64Math": "0x1d03bb682e9f09e6506d768f84cd3b384f11c7fa",
