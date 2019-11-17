@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Aragon app for futarchy decisions",
   "dependencies": {
-    "@aragon/api": "1.1.0",
+    "@aragon/api": "2.0.0-beta.8",
     "@aragon/apps-shared-minime": "1.0.0",
     "@aragon/kits-base": "1.0.0",
     "@aragon/os": "4.2.0",
