@@ -109,10 +109,7 @@ const MakePredictionForm = createReduxForm(({
     <MetricQuestion>
       <Phrase>What will</Phrase>
       <BoldPhrase>
-        <Field
-          name="tokenSymbol"
-          component={field => field.input.value}
-        /> Price
+        ANT Price
       </BoldPhrase>
       <Phrase>be on</Phrase>
       <BoldPhrase>{date(decision.priceResolutionDate)}</BoldPhrase>
