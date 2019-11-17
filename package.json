@@ -26,8 +26,8 @@
     "redux-thunk": "2.3.0",
     "rxjs-compat": "6.4.0",
     "styled-components": "4.1.3",
-    "tidbit": "github:cwhinfrey/tidbit#2995f86f2bb10e667c730ed0807c0e066748e760",
-    "token-price-oracles": "github:levelkdev/token-price-oracles#4ec91d01178b62ffe680cc37fbfd5edbe4d8205c",
+    "tidbit": "github:cwhinfrey/tidbit#e4ce37aa7edee86b89a64ac81a645bf3d82bf555",
+    "token-price-oracles": "github:levelkdev/token-price-oracles#bf18979de30fc9156cbde177a89e2240abfd4516",
     "web3-utils": "1.0.0-beta.50"
   },
   "devDependencies": {
