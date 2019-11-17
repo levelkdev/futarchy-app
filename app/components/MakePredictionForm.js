@@ -196,10 +196,7 @@ const PositionDropDownItem = ({ predictedPrice, position }) => (
   <StyledSmallCaps>
     <Phrase>I predict</Phrase>
     <BoldPhrase>
-      <Field
-        name="tokenSymbol"
-        component={field => field.input.value}
-      /> Price
+      ANT Price
     </BoldPhrase>
     <Phrase>will be</Phrase>
     <BoldPhrase>{choiceDisplayTextByPosition[position]}</BoldPhrase>

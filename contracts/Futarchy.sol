@@ -11,15 +11,15 @@ import '@gnosis.pm/pm-contracts/contracts/MarketMakers/LMSRMarketMaker.sol';
 import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 
 contract Futarchy is AragonApp, IForwarder {
-  using SafeMath for uint;
+  using SafeMath for uint256;
   using DecisionLib for DecisionLib.Decision;
 
-  event StartDecision(uint indexed decisionId, address indexed creator, string metadata, IDecisionMarkets decisionMarkets, int marketLowerBound, int marketUpperBound, uint startDate, uint decisionResolutionDate, uint priceResolutionDate);
-  event ExecuteDecision(uint decisionId);
-  event BuyMarketPositions(address trader, uint decisionId, uint tradeTime, uint collateralAmount, uint[2] yesPurchaseAmounts, uint[2] noPurchaseAmounts, uint[2] yesCosts, uint[2] noCosts, uint[4] marginalPrices);
-  event SellMarketPositions(address trader, uint decisionId, uint tradeTime, int[] yesMarketPositions, int[] noMarketPositions, uint yesCollateralReceived, uint noCollateralReceived, uint[4] marginalPrices);
-  event RedeemWinningCollateralTokens(address trader, uint decisionId, int winningIndex, uint winningsAmount);
-  event RedeemScalarWinnings(uint decisionId, address trader, uint winnings);
+  event StartDecision(uint256 indexed decisionId, address indexed creator, string metadata, IDecisionMarkets decisionMarkets, int marketLowerBound, int marketUpperBound, uint256 startDate, uint256 decisionResolutionDate, uint256 priceResolutionDate);
+  event ExecuteDecision(uint256 decisionId);
+  event BuyMarketPositions(address trader, uint256 decisionId, uint256 tradeTime, uint256 collateralAmount, uint256[2] yesPurchaseAmounts, uint256[2] noPurchaseAmounts, uint256[2] yesCosts, uint256[2] noCosts, uint256[4] marginalPrices);
+  event SellMarketPositions(address trader, uint256 decisionId, uint256 tradeTime, int[] yesMarketPositions, int[] noMarketPositions, uint256 yesCollateralReceived, uint256 noCollateralReceived, uint256[4] marginalPrices);
+  event RedeemWinningCollateralTokens(address trader, uint256 decisionId, int winningIndex, uint256 winningsAmount);
+  event RedeemScalarWinnings(uint256 decisionId, address trader, uint256 winnings);
 
   bytes32 public constant CREATE_DECISION_ROLE = keccak256("CREATE_DECISION_ROLE");
 
@@ -28,21 +28,21 @@ contract Futarchy is AragonApp, IForwarder {
   IScalarPriceOracleFactory public priceOracleFactory;
   LMSRMarketMaker public lmsrMarketMaker;
   uint24 public fee;
-  uint public tradingPeriod;
-  uint public timeToPriceResolution;
-  uint public marketFundAmount;
+  uint256 public tradingPeriod;
+  uint256 public timeToPriceResolution;
+  uint256 public marketFundAmount;
 
   struct OutcomeTokenBalances {
-    uint yesCollateral;
-    uint noCollateral;
-    uint yesShort;
-    uint yesLong;
-    uint noShort;
-    uint noLong;
+    uint256 yesCollateral;
+    uint256 noCollateral;
+    uint256 yesShort;
+    uint256 yesLong;
+    uint256 noShort;
+    uint256 noLong;
   }
 
   mapping(uint256 => DecisionLib.Decision) public decisions;
-  uint public decisionLength;
+  uint256 public decisionLength;
 
   mapping(bytes32 => OutcomeTokenBalances) public traderDecisionBalances;
 
@@ -63,9 +63,9 @@ contract Futarchy is AragonApp, IForwarder {
   **/
   function initialize(
     uint24 _fee,
-    uint _tradingPeriod,
-    uint _timeToPriceResolution,
-    uint _marketFundAmount,
+    uint256 _tradingPeriod,
+    uint256 _timeToPriceResolution,
+    uint256 _marketFundAmount,
     ERC20Gnosis _token,
     IDecisionMarketsFactory _decisionMarketsFactory,
     IScalarPriceOracleFactory _priceOracleFactory,
@@ -99,12 +99,12 @@ contract Futarchy is AragonApp, IForwarder {
   )
     public
     auth(CREATE_DECISION_ROLE)
-    returns (uint decisionId)
+    returns (uint256 decisionId)
   {
     decisionId = decisionLength++;
 
-    uint startDate = now;
-    uint priceResolutionDate = startDate.add(timeToPriceResolution);
+    uint256 startDate = now;
+    uint256 priceResolutionDate = startDate.add(timeToPriceResolution);
 
     IDecisionMarkets decisionMarkets = decisionMarketsFactory.createDecisionMarkets(
       msg.sender,
@@ -137,11 +137,11 @@ contract Futarchy is AragonApp, IForwarder {
     emit StartDecision(decisionId, msg.sender, metadata, decisionMarkets, lowerBound, upperBound, startDate, decisions[decisionId].decisionResolutionDate, decisions[decisionId].priceResolutionDate);
   }
 
-  function closeDecisionMarkets(uint decisionId) public {
+  function closeDecisionMarkets(uint256 decisionId) public {
     decisions[decisionId].closeDecisionMarkets();
   }
 
-  function transitionDecision(uint decisionId) public {
+  function transitionDecision(uint256 decisionId) public {
     decisions[decisionId].transitionDecision();
   }
 
@@ -150,7 +150,7 @@ contract Futarchy is AragonApp, IForwarder {
   * @notice execute decision if final decision is ready and equals YES; otherwise Revert
   * @param decisionId decision unique identifier
   */
-  function executeDecision(uint decisionId) public {
+  function executeDecision(uint256 decisionId) public {
     decisions[decisionId].execute();
 
     bytes memory input = new bytes(0); // TODO: (aragon comment) Consider including input for decision scripts
@@ -174,13 +174,13 @@ contract Futarchy is AragonApp, IForwarder {
   * @return yesCosts and noCosts arrays of outcome token cost in collateral token
   */
   function buyMarketPositions(
-    uint decisionId,
-    uint collateralAmount,
-    uint[2] yesPurchaseAmounts,
-    uint[2] noPurchaseAmounts
+    uint256 decisionId,
+    uint256 collateralAmount,
+    uint256[2] yesPurchaseAmounts,
+    uint256[2] noPurchaseAmounts
   )
     public
-    returns (uint[2] yesCosts, uint[2] noCosts)
+    returns (uint256[2] yesCosts, uint256[2] noCosts)
   {
     (yesCosts, noCosts) = decisions[decisionId].buyMarketPositions(collateralAmount, yesPurchaseAmounts, noPurchaseAmounts);
 
@@ -194,7 +194,7 @@ contract Futarchy is AragonApp, IForwarder {
       noPurchaseAmounts
     );
 
-    uint[4] memory marginalPrices = calcMarginalPrices(decisionId);
+    uint256[4] memory marginalPrices = calcMarginalPrices(decisionId);
 
     emit BuyMarketPositions(msg.sender, decisionId, now, collateralAmount, yesPurchaseAmounts, noPurchaseAmounts, yesCosts, noCosts, marginalPrices);
   }
@@ -204,7 +204,7 @@ contract Futarchy is AragonApp, IForwarder {
    *         yesCollateral and noCollateral balances
    * @param decisionId unique identifier for the decision
    */
-  function sellMarketPositions(uint decisionId) {
+  function sellMarketPositions(uint256 decisionId) {
     OutcomeTokenBalances storage outcomeTokenBalances = traderDecisionBalances[keccak256(msg.sender, decisionId)];
 
     int yesCollateralNetCost;
@@ -220,9 +220,9 @@ contract Futarchy is AragonApp, IForwarder {
       outcomeTokenBalances.noShort
     );
 
-    // translate int netCost into uint collateral received (netCost will be a negative number)
-    uint yesCollateralReceived = uint(-yesCollateralNetCost);
-    uint noCollateralReceived = uint(-noCollateralNetCost);
+    // translate int netCost into uint256 collateral received (netCost will be a negative number)
+    uint256 yesCollateralReceived = uint256(-yesCollateralNetCost);
+    uint256 noCollateralReceived = uint256(-noCollateralNetCost);
 
     // store sell positions to log in SellMarketPositions event, before they are set to 0
     yesSellPositions[0] = -int(outcomeTokenBalances.yesShort);
@@ -238,7 +238,7 @@ contract Futarchy is AragonApp, IForwarder {
     outcomeTokenBalances.noLong = 0;
     outcomeTokenBalances.noShort = 0;
 
-    uint[4] memory marginalPrices = calcMarginalPrices(decisionId);
+    uint256[4] memory marginalPrices = calcMarginalPrices(decisionId);
 
     emit SellMarketPositions(msg.sender, decisionId, now, yesSellPositions, noSellPositions, yesCollateralReceived, noCollateralReceived, marginalPrices);
   }
@@ -247,10 +247,10 @@ contract Futarchy is AragonApp, IForwarder {
    * @notice allocates token back to the sender based on their balance of the winning outcome collateralToken
    * @param decisionId unique identifier for the decision
    */
-  function redeemWinningCollateralTokens(uint decisionId) public {
+  function redeemWinningCollateralTokens(uint256 decisionId) public {
     OutcomeTokenBalances storage outcomeTokenBalances = traderDecisionBalances[keccak256(msg.sender, decisionId)];
 
-    (int winningIndex, uint winnings) = decisions[decisionId].transferWinningCollateralTokens(
+    (int winningIndex, uint256 winnings) = decisions[decisionId].transferWinningCollateralTokens(
       outcomeTokenBalances.yesCollateral,
       outcomeTokenBalances.noCollateral
     );
@@ -272,11 +272,11 @@ contract Futarchy is AragonApp, IForwarder {
   *         3: NO-LONG outcomes
   */
   function calcMarginalPrices(
-    uint decisionId
+    uint256 decisionId
   )
     public
     view
-    returns (uint[4] marginalPrices)
+    returns (uint256[4] marginalPrices)
   {
     for(uint8 i = 0; i < 4; i++) {
       uint8 yesOrNo = i < 2 ? 0 : 1;
@@ -287,7 +287,7 @@ contract Futarchy is AragonApp, IForwarder {
     }
   }
 
-  function redeemWinnings(uint decisionId) public {
+  function redeemWinnings(uint256 decisionId) public {
     transitionDecision(decisionId);
     MarketData.Stages marketStage = decisions[decisionId].marketStage();
     require(marketStage != MarketData.Stages.MarketCreated);
@@ -298,7 +298,7 @@ contract Futarchy is AragonApp, IForwarder {
       // redeem scalar winnings
       OutcomeTokenBalances storage balances = traderDecisionBalances[keccak256(msg.sender, decisionId)];
 
-      (bool decisionPassed, uint winnings) = decisions[decisionId].redeemWinnings(
+      (bool decisionPassed, uint256 winnings) = decisions[decisionId].redeemWinnings(
         balances.yesShort,
         balances.yesLong,
         balances.noShort,
@@ -323,11 +323,11 @@ contract Futarchy is AragonApp, IForwarder {
   * @notice gets net outcome tokens sold for one of a decision's markets
   * @param decisionId decision to get results for
   * @param marketIndex market to get net outcome tokens sold for
-  * @return uint array with net outcome tokens sold
+  * @return uint256 array with net outcome tokens sold
   */
   function getNetOutcomeTokensSoldForDecision(
-    uint decisionId,
-    uint marketIndex
+    uint256 decisionId,
+    uint256 marketIndex
   )
     public
     view
@@ -337,10 +337,10 @@ contract Futarchy is AragonApp, IForwarder {
   }
 
   function _addToTraderDecisionBalances(
-    uint decisionId,
-    uint[2] collateralAmounts,
-    uint[2] yesOutcomeAmounts,
-    uint[2] noOutcomeAmounts
+    uint256 decisionId,
+    uint256[2] collateralAmounts,
+    uint256[2] yesOutcomeAmounts,
+    uint256[2] noOutcomeAmounts
   ) internal {
     OutcomeTokenBalances storage balances = traderDecisionBalances[keccak256(msg.sender, decisionId)];
     balances.yesCollateral = balances.yesCollateral.add(collateralAmounts[0]);
