@@ -23,6 +23,12 @@
       "appName": "futarchy.open.aragonpm.eth",
       "wsRPC": "wss://rinkeby.eth.aragon.network/ws",
       "network": "rinkeby"
+    },
+    "mainnet": {
+      "registry": "0x314159265dd8dbb310642f98f50c066173c1259b",
+      "appName": "futarchy.open.aragonpm.eth",
+      "wsRPC": "wss://mainnet.eth.aragon.network/ws",
+      "network": "mainnet"
     }
   }
 }
