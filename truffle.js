@@ -36,7 +36,7 @@ module.exports = {
       },
       network_id: '1',
       gas: 6000000,
-      gasPrice: 10 * 10 ** 9,
+      gasPrice: 15 * 10 ** 9,
     },
     rinkeby: {
       provider: function () {
