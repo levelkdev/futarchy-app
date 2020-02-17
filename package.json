@@ -73,7 +73,6 @@
     "build:app": "parcel build app/index.html -d dist/ --public-url '.' --no-cache",
     "build:script": "parcel build app/script.js -d dist/ --no-cache",
     "build": "npm run sync-assets && npm run build:app && npm run build:script",
-    "publish": "aragon apm publish",
     "dao:new": "aragon dao new",
     "dao:install": "aragon dao install",
     "dao:acl:create": "aragon dao acl create",
