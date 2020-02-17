@@ -2,9 +2,9 @@ pragma solidity ^0.4.24;
 
 import '../../contracts/DecisionMarkets/IDecisionMarkets.sol';
 import '../../contracts/DecisionMarkets/DecisionMarketsBase.sol';
-import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
-import '@gnosis.pm/pm-contracts/contracts/Markets/Market.sol';
-import '@gnosis.pm/pm-contracts/contracts/GnosisUtilContracts/Proxy.sol';
+import '@levelk/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
+import '@levelk/pm-contracts/contracts/Markets/Market.sol';
+import '@levelk/pm-contracts/contracts/GnosisUtilContracts/Proxy.sol';
 
 contract DecisionMarketsMock {
 

@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "@gnosis.pm/pm-contracts/contracts/GnosisUtilContracts/Proxy.sol";
+import "@levelk/pm-contracts/contracts/GnosisUtilContracts/Proxy.sol";
 import './MedianPriceOracle.sol';
 import './IScalarPriceOracleFactory.sol';
 

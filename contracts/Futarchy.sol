@@ -6,9 +6,9 @@ import './DecisionMarkets/IDecisionMarketsFactory.sol';
 import '@aragon/os/contracts/apps/AragonApp.sol';
 import '@aragon/os/contracts/common/IForwarder.sol';
 import "@aragon/os/contracts/lib/math/SafeMath.sol";
-import '@gnosis.pm/pm-contracts/contracts/Oracles/Oracle.sol';
-import '@gnosis.pm/pm-contracts/contracts/MarketMakers/LMSRMarketMaker.sol';
-import '@gnosis.pm/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
+import '@levelk/pm-contracts/contracts/Oracles/Oracle.sol';
+import '@levelk/pm-contracts/contracts/MarketMakers/LMSRMarketMaker.sol';
+import '@levelk/pm-contracts/contracts/Tokens/ERC20Gnosis.sol';
 
 contract Futarchy is AragonApp, IForwarder {
   using SafeMath for uint256;

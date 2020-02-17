@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import '@gnosis.pm/pm-contracts/contracts/Markets/Market.sol';
-import '@gnosis.pm/pm-contracts/contracts/Events/CategoricalEvent.sol';
+import '@levelk/pm-contracts/contracts/Markets/Market.sol';
+import '@levelk/pm-contracts/contracts/Events/CategoricalEvent.sol';
 
 contract IDecisionMarkets {
   function fund(uint funding) public;

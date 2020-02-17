@@ -8,7 +8,9 @@
     "@aragon/kits-base": "1.0.0",
     "@aragon/os": "4.2.0",
     "@aragon/ui": "0.35.1",
-    "@gnosis.pm/pm-contracts": "github:levelkdev/pm-contracts#ed52be8e59065d5bc8ecc4b1c380a78cbb8fb146",
+    "@levelk/pm-contracts": "1.2.0",
+    "@levelk/token-price-oracles": "0.1.5",
+    "@levelk/tidbit": "0.1.1",
     "bignumber.js": "8.1.1",
     "chart.js": "2.8.0",
     "decimal.js": "10.1.1",
@@ -26,8 +28,6 @@
     "redux-thunk": "2.3.0",
     "rxjs-compat": "6.4.0",
     "styled-components": "4.1.3",
-    "tidbit": "github:cwhinfrey/tidbit#e4ce37aa7edee86b89a64ac81a645bf3d82bf555",
-    "@levelk/token-price-oracles": "0.1.3",
     "web3-utils": "1.0.0-beta.50"
   },
   "devDependencies": {

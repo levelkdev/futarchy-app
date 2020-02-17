@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "./IDecisionMarkets.sol";
-import "@gnosis.pm/pm-contracts/contracts/MarketMakers/MarketMaker.sol";
+import "@levelk/pm-contracts/contracts/MarketMakers/MarketMaker.sol";
 
 contract IDecisionMarketsFactory {
   /// @dev Creates a new IDecisionMarkets contract

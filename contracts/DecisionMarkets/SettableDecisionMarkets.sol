@@ -2,10 +2,10 @@ pragma solidity ^0.4.24;
 
 import "./IDecisionMarkets.sol";
 import "./DecisionMarketsBase.sol";
-import "@gnosis.pm/pm-contracts/contracts/Oracles/Oracle.sol";
-import "@gnosis.pm/pm-contracts/contracts/Events/EventFactory.sol";
-import "@gnosis.pm/pm-contracts/contracts/Markets/StandardMarketWithPriceLoggerFactory.sol";
-import "@gnosis.pm/pm-contracts/contracts/GnosisUtilContracts/Proxy.sol";
+import "@levelk/pm-contracts/contracts/Oracles/Oracle.sol";
+import "@levelk/pm-contracts/contracts/Events/EventFactory.sol";
+import "@levelk/pm-contracts/contracts/Markets/StandardMarketWithPriceLoggerFactory.sol";
+import "@levelk/pm-contracts/contracts/GnosisUtilContracts/Proxy.sol";
 
 contract SettableDecisionMarketsData {
 
