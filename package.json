@@ -1,5 +1,5 @@
 {
-  "name": "futarchy-app",
+  "name": "@levelk/futarchy-app",
   "version": "0.1.0",
   "description": "Aragon app for futarchy decisions",
   "dependencies": {
@@ -86,5 +86,21 @@
     "set:price": "truffle exec scripts/set_data/price.js --network rpc",
     "compile:truffle": "truffle compile"
   },
-  "keywords": []
+  "keywords": [],
+  "main": "truffle.js",
+  "files": [
+    "build",
+    "contracts",
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/levelkdev/futarchy-app.git"
+  },
+  "author": "@mikec",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/levelkdev/futarchy-app/issues"
+  },
+  "homepage": "https://github.com/levelkdev/futarchy-app#readme"
 }
