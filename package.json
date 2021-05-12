@@ -12,7 +12,7 @@
     "@levelk/token-price-oracles": "0.1.5",
     "@levelk/tidbit": "0.1.1",
     "bignumber.js": "8.1.1",
-    "chart.js": "2.8.0",
+    "chart.js": "2.9.4",
     "decimal.js": "10.1.1",
     "ganache-core": "2.2.1",
     "lodash": "4.17.13",
